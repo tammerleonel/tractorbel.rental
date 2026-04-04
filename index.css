@@ -56,6 +56,7 @@ justify-content: center
 footer a{
     margin: 20px;
     text-align: center;
+   text-decoration: underline;
     
 }
 .container{ /* limita o texto com base nas extreminadas */
