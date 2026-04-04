@@ -21,6 +21,21 @@ header{
     font-weight:bold;
 }
 
+.barra-pesquisa{
+    padding:20px;
+    text-align:center;
+    background:#ffffff;
+}
+
+.barra-pesquisa input{
+    width:80%;
+    max-width:400px;
+    padding:12px;
+    border-radius:8px;
+    border:1px solid #ccc;
+    font-size:16px;
+}
+
 .galeria{
     display:grid;
     grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
@@ -60,10 +75,18 @@ header{
 
 <header>
 DOCUMENTAÇÃO RENTAL
-
 </header>
 
-<div class="galeria">
+<div class="barra-pesquisa">
+<input 
+type="text" 
+id="pesquisa" 
+placeholder="🔎 Buscar documento..." 
+onkeyup="filtrarDocumentos()"
+>
+</div>
+
+<div class="galeria" id="galeria">
 
 <div class="card">
 <div class="icone">📄</div>
@@ -143,6 +166,23 @@ SISMETRO Procedimento equipamentos vendidos
 </div>
 
 </div>
+
+<script>
+function filtrarDocumentos() {
+    const input = document.getElementById('pesquisa').value.toLowerCase();
+    const cards = document.querySelectorAll('.card');
+
+    cards.forEach(card => {
+        const texto = card.innerText.toLowerCase();
+
+        if (texto.includes(input)) {
+            card.style.display = "block";
+        } else {
+            card.style.display = "none";
+        }
+    });
+}
+</script>
 
 </body>
 </html>
