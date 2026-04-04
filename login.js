@@ -1,13 +1,17 @@
+document.addEventListener("DOMContentLoaded", function(){
+
 const usuarios = [
-    { user: "programacao", pass: "tammer" },
-    { user: "rental", pass: "mauricio" }
+    { user: "admin", pass: "1234" },
+    { user: "tractorbel", pass: "2026" }
 ];
 
-function login() {
-    const usuario = document.getElementById("usuario").value;
-    const senha = document.getElementById("senha").value;
+window.login = function() {
+    const usuario = document.getElementById("usuario").value.trim().toLowerCase();
+    const senha = document.getElementById("senha").value.trim();
 
-    const valido = usuarios.find(u => u.user === usuario && u.pass === senha);
+    const valido = usuarios.find(
+        u => u.user.toLowerCase() === usuario && u.pass === senha
+    );
 
     if(valido){
         localStorage.setItem("logado","sim");
@@ -22,8 +26,8 @@ function mostrarConteudo(){
     document.getElementById("conteudo").style.display = "block";
 }
 
-window.onload = function(){
-    if(localStorage.getItem("logado") === "sim"){
-        mostrarConteudo();
-    }
+if(localStorage.getItem("logado") === "sim"){
+    mostrarConteudo();
 }
+
+});
