@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Minha Página - Fotos, Vídeos e Blog</title>
+<style>
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    background: #f4f4f4;
+}
+
+header {
+    background: #1e88e5;
+    color: white;
+    padding: 15px;
+    text-align: center;
+}
+
+.tabs {
+    display: flex;
+    background: #333;
+}
+
+.tabs button {
+    flex: 1;
+    padding: 14px;
+    border: none;
+    background: #333;
+    color: white;
+    cursor: pointer;
+    font-size: 16px;
+}
+
+.tabs button:hover {
+    background: #555;
+}
+
+.tabs button.active {
+    background: #1e88e5;
+}
+
+.tab-content {
+    display: none;
+    padding: 20px;
+}
+
+.active-content {
+    display: block;
+}
+
+.card {
+    background: white;
+    padding: 15px;
+    margin-bottom: 15px;
+    border-radius: 8px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+
+img, video {
+    max-width: 100%;
+    border-radius: 6px;
+}
+
+button.action {
+    background: #1e88e5;
+    color: white;
+    border: none;
+    padding: 10px 15px;
+    border-radius: 5px;
+    cursor: pointer;
+    margin-top: 10px;
+}
+
+textarea {
+    width: 100%;
+    height: 80px;
+    margin-top: 10px;
+}
+</style>
+</head>
+<body>
+
+<header>
+<h2>Painel Pessoal</h2>
+</header>
+
+<div class="tabs">
+<button onclick="openTab('fotos')" class="active">Fotos</button>
+<button onclick="openTab('videos')">Vídeos</button>
+<button onclick="openTab('blog')">Blog Pessoal</button>
+</div>
+
+<div id="fotos" class="tab-content active-content">
+<h3>Postar Foto</h3>
+<input type="file" id="fotoInput" accept="image/*">
+<button class="action" onclick="salvarFoto()">Postar Foto</button>
+<div id="listaFotos"></div>
+</div>
+
+<div id="videos" class="tab-content">
+<h3>Postar Vídeo</h3>
+<input type="file" id="videoInput" accept="video/*">
+<button class="action" onclick="salvarVideo()">Postar Vídeo</button>
+<div id="listaVideos"></div>
+</div>
+
+<div id="blog" class="tab-content">
+<h3>Blog Pessoal</h3>
+<input type="text" id="tituloBlog" placeholder="Título" style="width:100%; padding:8px;">
+<textarea id="textoBlog" placeholder="Escreva seu texto..."></textarea>
+<button class="action" onclick="salvarBlog()">Publicar</button>
+<div id="listaBlog"></div>
+</div>
+
+<script>
+function openTab(tab) {
+    document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active-content'));
+    document.querySelectorAll('.tabs button').forEach(el => el.classList.remove('active'));
+
+    document.getElementById(tab).classList.add('active-content');
+    event.target.classList.add('active');
+}
+
+function salvarFoto() {
+    const file = document.getElementById('fotoInput').files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = function(e) {
+        let fotos = JSON.parse(localStorage.getItem('fotos') || '[]');
+        fotos.push(e.target.result);
+        localStorage.setItem('fotos', JSON.stringify(fotos));
+        carregarFotos();
+    }
+    reader.readAsDataURL(file);
+}
+
+function salvarVideo() {
+    const file = document.getElementById('videoInput').files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = function(e) {
+        let videos = JSON.parse(localStorage.getItem('videos') || '[]');
+        videos.push(e.target.result);
+        localStorage.setItem('videos', JSON.stringify(videos));
+        carregarVideos();
+    }
+    reader.readAsDataURL(file);
+}
+
+function salvarBlog() {
+    const titulo = document.getElementById('tituloBlog').value;
+    const texto = document.getElementById('textoBlog').value;
+
+    let blogs = JSON.parse(localStorage.getItem('blogs') || '[]');
+    blogs.push({titulo, texto});
+    localStorage.setItem('blogs', JSON.stringify(blogs));
+
+    carregarBlog();
+}
+
+function carregarFotos() {
+    const lista = document.getElementById('listaFotos');
+    lista.innerHTML = '';
+    let fotos = JSON.parse(localStorage.getItem('fotos') || '[]');
+
+    fotos.forEach(f => {
+        lista.innerHTML += `<div class="card"><img src="${f}"></div>`;
+    });
+}
+
+function carregarVideos() {
+    const lista = document.getElementById('listaVideos');
+    lista.innerHTML = '';
+    let videos = JSON.parse(localStorage.getItem('videos') || '[]');
+
+    videos.forEach(v => {
+        lista.innerHTML += `<div class="card"><video controls src="${v}"></video></div>`;
+    });
+}
+
+function carregarBlog() {
+    const lista = document.getElementById('listaBlog');
+    lista.innerHTML = '';
+    let blogs = JSON.parse(localStorage.getItem('blogs') || '[]');
+
+    blogs.forEach(b => {
+        lista.innerHTML += `
+        <div class="card">
+        <h4>${b.titulo}</h4>
+        <p>${b.texto}</p>
+        </div>`;
+    });
+}
+
+carregarFotos();
+carregarVideos();
+carregarBlog();
+</script>
+
+</body>
+</html>

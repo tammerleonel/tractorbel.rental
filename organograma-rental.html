@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Procedimentos Operacionais</title>
+
+<style>
+body{
+    font-family: Arial, sans-serif;
+    margin:0;
+    background:#f4f6f8;
+}
+
+header{
+    background:green;
+    color:white;
+    text-align:center;
+    padding:20px;
+    font-size:24px;
+    font-weight:bold;
+}
+
+.galeria{
+    display:grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap:30px;
+    padding:30px;
+}
+
+.card{
+    background:white;
+    padding:25px;
+    border-radius:10px;
+    box-shadow:0 2px 6px rgba(0,0,0,0.1);
+    text-align:center;
+    transition:0.2s;
+}
+
+.card:hover{
+    transform:translateY(-5px);
+}
+
+.card a{
+    text-decoration:none;
+    color:#0b7a3e;
+    font-weight:bold;
+    display:block;
+}
+
+.icone{
+    font-size:40px;
+    margin-bottom:10px;
+}
+
+</style>
+</head>
+
+<body>
+
+<header>
+ORGANOGRAMA RENTAL
+
+</header>
+
+<div class="galeria">
+
+<div class="card">
+<div class="icone">📄</div>
+<a href="procedimentos/ORGANOGRAMA RENTAL SERRA - ES.pdf" target="_blank">
+Serra - ES
+</a>
+</div>
+
+<div class="card">
+<div class="icone">📄</div>
+<a href="procedimentos/ORGANOGRAMA RENTAL CONTAGEM - MG.pdf" target="_blank">
+Contagem - MG
+</a>
+</div>
+
+<div class="card">
+<div class="icone">📄</div>
+<a href="procedimentos/ORGANOGRAMA RENTAL DUQUE DE CAXIAS - RJ.pdf" target="_blank">
+Duque de Caxias - RJ
+</a>
+</div>
+
+<div class="card">
+<div class="icone">📄</div>
+<a href="procedimentos/ORGANOGRAMA RENTAL POUSO ALEGRE - PA.pdf" target="_blank">
+Pouso Alegre - PA
+</a>
+</div>
+
+</div>
+
+</body>
+</html>
