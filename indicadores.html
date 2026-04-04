@@ -135,10 +135,14 @@ function calcularTotais(dados){
         totaisTecnico[tecnico]++;
 
         // Datas
-        const dataFim = linha["DATA DA ALTERAÇÃO DA SS"];
-        if(dataFim){
-            datas.push(new Date(dataFim));
+        const dataAlteracao = linha["DATA DE ALTERAÇÃO DA SS"];
+
+        if(dataAlteracao){
+          const data = new Date(dataAlteracao);
+          if(!isNaN(data)){
+        datas.push(data);
         }
+}
 
     });
 
