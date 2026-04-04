@@ -132,10 +132,20 @@ function calcularTotais(dados){
         }
         totaisTecnico[tecnico]++;
 
-        // Datas - ALTERADO PARA DATA DE ALTERAÇÃO DA SS
+        // DATA DE ALTERAÇÃO DA SS (tratando data + hora Excel)
         const dataAlteracao = linha["DATA DE ALTERAÇÃO DA SS"];
+
         if(dataAlteracao){
-            const data = new Date(dataAlteracao);
+
+            let data;
+
+            if(typeof dataAlteracao === "number"){
+                // converte número serial Excel
+                data = new Date((dataAlteracao - 25569) * 86400 * 1000);
+            }else{
+                data = new Date(dataAlteracao);
+            }
+
             if(!isNaN(data)){
                 datas.push(data);
             }
@@ -156,13 +166,19 @@ function calcularTotais(dados){
         `;
     }
 
-    // Datas min e max
+    // Datas min e max com hora
     if(datas.length > 0){
-        const min = new Date(Math.min(...datas));
-        const max = new Date(Math.max(...datas));
 
-        document.getElementById("dataMin").innerText = min.toLocaleDateString();
-        document.getElementById("dataMax").innerText = max.toLocaleDateString();
+        datas.sort((a,b) => a - b);
+
+        const min = datas[0];
+        const max = datas[datas.length - 1];
+
+        document.getElementById("dataMin").innerText =
+            min.toLocaleDateString() + " " + min.toLocaleTimeString();
+
+        document.getElementById("dataMax").innerText =
+            max.toLocaleDateString() + " " + max.toLocaleTimeString();
     }
 
     // Gráfico técnico
