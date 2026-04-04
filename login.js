@@ -1,6 +1,6 @@
 const usuarios = [
-    { user: "admin", pass: "tammerl" },
-    { user: "tractorbel", pass: "mauricio" }
+    { user: "programacao", pass: "tammer" },
+    { user: "rental", pass: "mauricio" }
 ];
 
 function login() {
