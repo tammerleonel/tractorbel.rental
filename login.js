@@ -2,7 +2,7 @@ document.addEventListener("DOMContentLoaded", function(){
 
 const usuarios = [
     { user: "tammer", pass: "159357" },
-    { user: "mauricio", pass: "2026" }
+    { user: "mauricio", pass: "2026" },
     { user: "tractorbel", pass: "2026" }
 ];
 
