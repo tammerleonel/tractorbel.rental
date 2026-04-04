@@ -43,6 +43,12 @@ th{
     background:green;
     color:white;
 }
+
+select{
+    padding:10px;
+    border-radius:6px;
+    border:1px solid #ccc;
+}
 </style>
 
 </head>
@@ -52,6 +58,13 @@ th{
 <h2>Análise de Atendimento SS</h2>
 
 <input type="file" id="upload" accept=".xls,.xlsx">
+
+<br><br>
+
+<label><b>Filtrar por Técnico:</b></label>
+<select id="filtroTecnico">
+<option value="">Todos</option>
+</select>
 
 <div class="card">
 <h3>Total de atendimento</h3>
@@ -69,9 +82,14 @@ th{
 <canvas id="graficoTecnico"></canvas>
 </div>
 
+<div class="card"><h3>Total de Horas x Horas Úteis</h3><canvas id="graficoTotalHoras"></canvas></div>
+<div class="card"><h3>Horas Trabalhadas</h3><canvas id="graficoTrabalhadas"></canvas></div>
+<div class="card"><h3>Horas Aguardando</h3><canvas id="graficoAguardando"></canvas></div>
+<div class="card"><h3>Horas Deslocamento</h3><canvas id="graficoDeslocamento"></canvas></div>
+<div class="card"><h3>Total Máquina Parada</h3><canvas id="graficoMaquina"></canvas></div>
+
 <div class="card">
 <h3>Total de atendimento por tipo</h3>
-
 <table>
 <thead>
 <tr>
@@ -81,10 +99,12 @@ th{
 </thead>
 <tbody id="tabelaModelos"></tbody>
 </table>
-
 </div>
 
 <script>
+
+let dadosGlobais = [];
+let grafico, g1, g2, g3, g4, g5;
 
 document.getElementById('upload').addEventListener('change', function(e){
 
@@ -94,114 +114,189 @@ document.getElementById('upload').addEventListener('change', function(e){
     reader.onload = function(event){
 
         const data = new Uint8Array(event.target.result);
-        const workbook = XLSX.read(data, {type:'array'});
+        const workbook = XLSX.read(data, {type:'array', cellDates:true});
         const sheet = workbook.Sheets[workbook.SheetNames[0]];
         const json = XLSX.utils.sheet_to_json(sheet);
 
+        dadosGlobais = json;
+        popularFiltro(json);
         calcularTotais(json);
     };
 
     reader.readAsArrayBuffer(file);
 });
 
-let grafico;
+document.getElementById("filtroTecnico").addEventListener("change", function(){
+
+    const tecnico = this.value;
+
+    if(!tecnico){
+        calcularTotais(dadosGlobais);
+        return;
+    }
+
+    const filtrado = dadosGlobais.filter(linha =>
+        (linha["TÉCNICO DESIGNADO"] || "Não informado") === tecnico
+    );
+
+    calcularTotais(filtrado);
+});
+
+function popularFiltro(dados){
+
+    const select = document.getElementById("filtroTecnico");
+    select.innerHTML = '<option value="">Todos</option>';
+
+    const tecnicos = [...new Set(dados.map(l => l["TÉCNICO DESIGNADO"] || "Não informado"))];
+
+    tecnicos.forEach(t => {
+        select.innerHTML += `<option value="${t}">${t}</option>`;
+    });
+}
+
+function toHoras(valor){
+    if(valor === undefined || valor === null || valor === "") return 0;
+
+    if(typeof valor === "number"){
+        return valor * 24;
+    }
+
+    if(typeof valor === "string" && valor.includes(":")){
+        const partes = valor.split(":");
+        const h = parseFloat(partes[0]) || 0;
+        const m = parseFloat(partes[1]) || 0;
+        return h + (m/60);
+    }
+
+    return Number(valor.toString().replace(",", ".")) || 0;
+}
+
+function excelDateToJS(valor){
+    if(!valor) return null;
+
+    if(valor instanceof Date) return valor;
+
+    if(typeof valor === "number"){
+        return new Date((valor - 25569) * 86400 * 1000);
+    }
+
+    const d = new Date(valor);
+    return isNaN(d) ? null : d;
+}
+
+function calcularDiasUteis(dataInicio, dataFim){
+
+    let dias = 0;
+    let atual = new Date(dataInicio);
+
+    while(atual <= dataFim){
+        const dia = atual.getDay();
+        if(dia !== 0 && dia !== 6){
+            dias++;
+        }
+        atual.setDate(atual.getDate() + 1);
+    }
+
+    return dias;
+}
 
 function calcularTotais(dados){
 
-    // Total geral
-    const total = dados.length;
-    document.getElementById("totalAtendimento").innerText = total;
+    document.getElementById("totalAtendimento").innerText = dados.length;
 
     const totaisTipo = {};
     const totaisTecnico = {};
+
+    let totalHoras = 0;
+    let horasTrab = 0;
+    let horasAguard = 0;
+    let horasDesloc = 0;
+    let maquinaParada = 0;
+
     let datas = [];
 
     dados.forEach(linha => {
 
-        // Tipo
         const tipo = linha["TIPO DA SS"];
-        if(!totaisTipo[tipo]){
-            totaisTipo[tipo] = 0;
-        }
-        totaisTipo[tipo]++;
+        totaisTipo[tipo] = (totaisTipo[tipo] || 0) + 1;
 
-        // Técnico
         const tecnico = linha["TÉCNICO DESIGNADO"] || "Não informado";
-        if(!totaisTecnico[tecnico]){
-            totaisTecnico[tecnico] = 0;
-        }
-        totaisTecnico[tecnico]++;
+        totaisTecnico[tecnico] = (totaisTecnico[tecnico] || 0) + 1;
 
-        // DATA DE ALTERAÇÃO DA SS (tratando data + hora Excel)
-        const dataAlteracao = linha["DATA DE ALTERAÇÃO DA SS"];
+        totalHoras += toHoras(linha["TOTAL DE HORAS"]);
+        horasTrab += toHoras(linha["HORAS TRABALHADAS"]);
+        horasAguard += toHoras(linha["HORAS AGUARDANDO"]);
+        horasDesloc += toHoras(linha["HORAS DESLOCAMENTO"]);
+        maquinaParada += toHoras(linha["TOTAL DE MÁQUINA PARADA"]);
 
-        if(dataAlteracao){
-
-            let data;
-
-            if(typeof dataAlteracao === "number"){
-                // converte número serial Excel
-                data = new Date((dataAlteracao - 25569) * 86400 * 1000);
-            }else{
-                data = new Date(dataAlteracao);
-            }
-
-            if(!isNaN(data)){
-                datas.push(data);
-            }
-        }
-
+        const data = excelDateToJS(linha["DATA DE ALTERAÇÃO DA SS"]);
+        if(data) datas.push(data);
     });
 
-    // Tabela tipos
     const tbody = document.getElementById("tabelaModelos");
     tbody.innerHTML = "";
-
     for(const tipo in totaisTipo){
-        tbody.innerHTML += `
-        <tr>
-            <td>${tipo}</td>
-            <td>${totaisTipo[tipo]}</td>
-        </tr>
-        `;
+        tbody.innerHTML += `<tr><td>${tipo}</td><td>${totaisTipo[tipo]}</td></tr>`;
     }
 
-    // Datas min e max com hora
-    if(datas.length > 0){
+    let horasUteis = 0;
 
-        datas.sort((a,b) => a - b);
+    if(datas.length){
 
-        const min = datas[0];
-        const max = datas[datas.length - 1];
+        datas.sort((a,b)=>a-b);
+
+        const dataMin = datas[0];
+        const dataMax = datas[datas.length-1];
 
         document.getElementById("dataMin").innerText =
-            min.toLocaleDateString() + " " + min.toLocaleTimeString();
+        dataMin.toLocaleDateString()+" "+dataMin.toLocaleTimeString();
 
         document.getElementById("dataMax").innerText =
-            max.toLocaleDateString() + " " + max.toLocaleTimeString();
+        dataMax.toLocaleDateString()+" "+dataMax.toLocaleTimeString();
+
+        const diasUteis = calcularDiasUteis(dataMin, dataMax);
+
+        horasUteis = diasUteis * 8.8; // 8h48 = 8.8
     }
 
-    // Gráfico técnico
-    const labels = Object.keys(totaisTecnico);
-    const valores = Object.values(totaisTecnico);
+    criarGrafico("graficoTecnico","Atendimentos",Object.keys(totaisTecnico),Object.values(totaisTecnico),grafico,v=>grafico=v);
 
-    if(grafico){
-        grafico.destroy();
+    criarGrafico("graficoTotalHoras","Horas",
+        ["Trabalhadas","Horas Úteis"],
+        [horasTrab, horasUteis],
+        g1,v=>g1=v
+    );
+
+    criarGrafico("graficoTrabalhadas","Horas Trabalhadas",["Total"],[horasTrab],g2,v=>g2=v);
+    criarGrafico("graficoAguardando","Horas Aguardando",["Total"],[horasAguard],g3,v=>g3=v);
+    criarGrafico("graficoDeslocamento","Horas Deslocamento",["Total"],[horasDesloc],g4,v=>g4=v);
+    criarGrafico("graficoMaquina","Máquina Parada",["Total"],[maquinaParada],g5,v=>g5=v);
+}
+
+function criarGrafico(id,label,labels,data,graficoAtual,salvar){
+
+    if(graficoAtual){
+        graficoAtual.destroy();
     }
 
-    const ctx = document.getElementById('graficoTecnico');
-
-    grafico = new Chart(ctx, {
-        type: 'bar',
-        data: {
-            labels: labels,
-            datasets: [{
-                label: 'Atendimentos por Técnico',
-                data: valores
+    const novo = new Chart(document.getElementById(id),{
+        type:'bar',
+        data:{
+            labels:labels,
+            datasets:[{
+                label:label,
+                data:data
             }]
+        },
+        options:{
+            responsive:true,
+            plugins:{
+                legend:{display:false}
+            }
         }
     });
 
+    salvar(novo);
 }
 
 </script>
