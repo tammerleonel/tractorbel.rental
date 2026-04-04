@@ -1,7 +1,6 @@
-// usuarios permitidos
 const usuarios = [
-    { user: "admin", pass: "1234" },
-    { user: "tammer", pass: "empresa2026" }
+    { user: "admin", pass: "tammerl" },
+    { user: "tractorbel", pass: "mauricio" }
 ];
 
 function login() {
@@ -11,7 +10,7 @@ function login() {
     const valido = usuarios.find(u => u.user === usuario && u.pass === senha);
 
     if(valido){
-        localStorage.setItem("logado", "sim");
+        localStorage.setItem("logado","sim");
         mostrarConteudo();
     }else{
         alert("Usuário ou senha incorretos");
@@ -23,12 +22,6 @@ function mostrarConteudo(){
     document.getElementById("conteudo").style.display = "block";
 }
 
-function logout(){
-    localStorage.removeItem("logado");
-    location.reload();
-}
-
-// verifica se já está logado
 window.onload = function(){
     if(localStorage.getItem("logado") === "sim"){
         mostrarConteudo();
