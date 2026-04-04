@@ -1,132 +1,65 @@
-<!DOCTYPE html>
+<!DOCTYPE html> <!-- modelo padrão do documento -->
 <html lang="pt-BR">
 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>documentacao-de-apoio-rental</title>
-    <link rel="stylesheet" href="index.css">
-
-<style>
-/* LOGIN */
-#login{
-    position: fixed;
-    top:0;
-    left:0;
-    width:100%;
-    height:100%;
-    background:#f4f6f8;
-    display:flex;
-    justify-content:center;
-    align-items:center;
-    z-index:999;
-}
-
-.login-box{
-    background:white;
-    padding:30px;
-    border-radius:10px;
-    box-shadow:0 0 15px rgba(0,0,0,0.1);
-    text-align:center;
-}
-
-.login-box input{
-    display:block;
-    width:250px;
-    padding:10px;
-    margin:10px 0;
-}
-
-.login-box button{
-    width:100%;
-    padding:10px;
-    background:#0b5ed7;
-    color:white;
-    border:none;
-    cursor:pointer;
-}
-</style>
-
+    <title>documentacao-de-apoio-rental</title> <!-- Nome do documento -->
+    <link rel="stylesheet" href="index.css"> <!-- folha de stylo e referencia do arquivo css -->
 </head>
 
 <body>
-
-<!-- LOGIN -->
-<div id="login">
-    <div class="login-box">
-        <h2>Acesso Restrito</h2>
-        <input type="text" id="usuario" placeholder="Usuário">
-        <input type="password" id="senha" placeholder="Senha">
-        <button onclick="login()">Entrar</button>
-    </div>
-</div>
-
-<!-- CONTEÚDO PROTEGIDO -->
-<div id="conteudo" style="display:none;">
-
 <div class="container" >
 <nav>
        <ul>
             <li>
                 <a href="Documento.html">DOCUMENTAÇÃO</a>
-            </li>
-            <li>
+                                        <li>
                 <a href="indicadores.html">INDICADORES</a>
             </li> 
+           
+            </li>    
+      
         </ul>       
-</nav>
+    </nav>
 
-<header>
+    <header> <!-- header é a parte de introdução serve para agrupar e stylizar seguimentos da pagina -->
+        
 <div class="center">
         <img src="logo.png" alt="">
-</div>
+        </div>
 </header>
 
-<main>
-    <div class="texto-apresentacao">
-📄 Esta página é destinada à organização dos documentos do repartamento de RENTAL da Tractorbel, disponibilizados de forma clara e padronizada.
-
-📂 Aqui você encontrará documentos como:
-
-🏢 Organogramas
-🔄 Fluxogramas de processos
-📋 Procedimentos operacionais
-📊 Indicadores de desempenho do atendimento técnico
-
-📈 Também está disponível uma área para análise de indicadores de atendimento técnico, permitindo o upload de planilhas em formato Excel (.xls e .xlsx) exportadas do período desejado.
-⚙️ O sistema realiza automaticamente a apresentação dos totais, gráficos e o período analisado para acompanhamento dos resultados.
-
-🎯 O objetivo é centralizar as informações do departamento e garantir clareza nas responsabilidades, promover a padronização dos processos e apoiar os colaboradores na execução correta dos procedimentos.
-    </div>
+<main> <!-- main é 2ª parte pode ser seguimentada e inserida varias coisas serve para agrupar e stylizar  -->
+<h3>
+<p>Esta página é destinada à organização dos procedimentos operacionais da Tractorbel, estruturados por área.</p>
+<p>Aqui você encontrará os fluxos de trabalho e o passo a passo de cada processo, facilitando a compreensão, padronização e execução das atividades no dia a dia.</p>
+<p>O objetivo é centralizar as informações, garantir clareza nas responsabilidades e apoiar os colaboradores na realização correta dos procedimentos.</p>
+</h3>
 </main>
 
 <footer>
 
-<a href="https://br.linkedin.com/company/tractorbel-equipamentos" target="_blank">
+<a href="https://br.linkedin.com/company/tractorbel-equipamentos" target="_blank" rel="noopener noreferrer"> 
     <img src="logo-linkedin.png" alt=""> 
     <p>Linkedin</p>
 </a>
 
-<a href="https://api.whatsapp.com/send/?phone=558008801422" target="_blank">
+<a href="https://api.whatsapp.com/send/?phone=558008801422&text&type=phone_number&app_absent=0" target="_blank" rel="noopener noreferrer"> 
     <img src="logo-whatsapp.png" alt=""> 
     <p>Whatsapp</p>
 </a>
 
-<a href="https://www.instagram.com/tractorbelequip/" target="_blank">
+<a href="https://www.instagram.com/tractorbelequip/" target="_blank" rel="noopener noreferrer"> 
     <img src="logo-instagram.png" alt=""> 
     <p>Instagram</p>
 </a>
 
 </footer>
-
-<p style="text-align:center;">
-Copyright © Tractorbel Equipamentos - Todos os direitos reservados - Tâmmer Leonel
-</p>
+<a>   <p>Copyright © Tractorbel Equipamentos - Todos os direitos reservados  - Tâmmer Leonel</p> </a>
 
 </div>
-</div>
-
-<script src="login.js"></script>
-
+    
 </body>
+
 </html>
