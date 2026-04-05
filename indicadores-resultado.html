@@ -101,12 +101,25 @@ select, button{
 
 <div id="graficosClientes"></div>
 
-<script>
+<script type="module">
 
 let dadosGlobais = [];
 let graficos = [];
 
-function carregarDados(){
+function converterNumero(valor){
+
+    if(valor === null || valor === undefined || valor === "") return 0;
+
+    if(typeof valor === "number") return valor;
+
+    return parseFloat(
+        valor.toString()
+             .replace(/\./g,'')
+             .replace(',','.')
+    ) || 0;
+}
+
+window.carregarDados = function(){
 
     const file = document.getElementById('upload').files[0];
     if(!file) return alert("Selecione um arquivo");
@@ -132,7 +145,7 @@ document.querySelectorAll("select").forEach(s=>{
     });
 });
 
-function gerarGraficos(){
+window.gerarGraficos = function(){
     const filtrado = filtrarDados();
     calcularTotais(filtrado);
 }
@@ -193,7 +206,7 @@ function calcularTotais(dados){
 
     dados.forEach(linha => {
 
-        const total = Number(linha["Total"]) || 0;
+        const total = converterNumero(linha["Total"]);
 
         if(total > 0){
 
@@ -264,6 +277,29 @@ function criarGraficosClientes(dados){
         graficos.push(grafico);
     }
 }
+
+
+/* FIREBASE */
+
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-app.js";
+import { 
+  getAuth, 
+  signInWithEmailAndPassword,
+  onAuthStateChanged,
+  signOut
+} from "https://www.gstatic.com/firebasejs/12.11.0/firebase-auth.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyAAF5FLl8xawkivYCcjQGJyb2jo1_A1V7g",
+  authDomain: "tractorbel-8ceb8.firebaseapp.com",
+  projectId: "tractorbel-8ceb8",
+  storageBucket: "tractorbel-8ceb8.firebasestorage.app",
+  messagingSenderId: "720471893475",
+  appId: "1:720471893475:web:e6eb1d64cae5f7aa27ecd6"
+};
+
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
 
 </script>
 
