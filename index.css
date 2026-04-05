@@ -81,7 +81,7 @@ color: black;
 
 /* ===== RESPONSIVO INTELIGENTE ===== */
 
-@media (max-width: 480px){
+@media (max-width: 300px){
 
 .menu-toggle{
 display:block;
