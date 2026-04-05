@@ -88,6 +88,7 @@ display:block;
 }
 
 .navbar ul{
+    text-align: center;
 display:none;
 flex-direction: column;
 background: green;
