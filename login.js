@@ -1,34 +1,47 @@
-document.addEventListener("DOMContentLoaded", function(){
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-app.js";
+import { 
+  getAuth, 
+  signInWithEmailAndPassword,
+  onAuthStateChanged,
+  signOut
+} from "https://www.gstatic.com/firebasejs/12.11.0/firebase-auth.js";
 
-const usuarios = [
-    { user: "tammer", pass: "2536" },
-    { user: "mauricio", pass: "2026" },
-    { user: "tractorbel", pass: "2026" }
-];
+const firebaseConfig = {
+  apiKey: "AIzaSyAAF5FLl8xawkivYCcjQGJyb2jo1_A1V7g",
+  authDomain: "tractorbel-8ceb8.firebaseapp.com",
+  projectId: "tractorbel-8ceb8",
+  storageBucket: "tractorbel-8ceb8.firebasestorage.app",
+  messagingSenderId: "720471893475",
+  appId: "1:720471893475:web:e6eb1d64cae5f7aa27ecd6"
+};
+
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
 
 window.login = function() {
-    const usuario = document.getElementById("usuario").value.trim().toLowerCase();
-    const senha = document.getElementById("senha").value.trim();
+  const email = document.getElementById("email").value;
+  const senha = document.getElementById("senha").value;
 
-    const valido = usuarios.find(
-        u => u.user.toLowerCase() === usuario && u.pass === senha
-    );
+  signInWithEmailAndPassword(auth, email, senha)
+    .then(() => {
+      document.getElementById("login").style.display = "none";
+      document.getElementById("conteudo").style.display = "block";
+    })
+    .catch((error) => {
+      alert("Usuário ou senha incorretos");
+    });
+};
 
-    if(valido){
-        localStorage.setItem("logado","sim");
-        mostrarConteudo();
-    }else{
-        alert("Usuário ou senha incorretos");
-    }
-}
+window.logout = function() {
+  signOut(auth);
+};
 
-function mostrarConteudo(){
+onAuthStateChanged(auth, (user) => {
+  if (user) {
     document.getElementById("login").style.display = "none";
     document.getElementById("conteudo").style.display = "block";
-}
-
-if(localStorage.getItem("logado") === "sim"){
-    mostrarConteudo();
-}
-
+  } else {
+    document.getElementById("login").style.display = "block";
+    document.getElementById("conteudo").style.display = "none";
+  }
 });
