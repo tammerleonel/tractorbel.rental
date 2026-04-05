@@ -80,7 +80,7 @@ h3{
 
 /* ===== BLOCO DE TEXTO CENTRALIZADO ===== */
 .texto-container {
-    max-width: 800px;      /* largura máxima do bloco */
+    max-width: 500px;      /* largura máxima do bloco */
     margin: 0 auto;         /* centraliza horizontalmente */
     padding: 20px;          /* espaço interno */
     text-align: left;       /* alinhamento do texto */
