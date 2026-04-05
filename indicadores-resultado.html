@@ -44,7 +44,7 @@ th{
     color:white;
 }
 
-select{
+select, button{
     padding:8px;
     margin-right:10px;
     margin-bottom:10px;
@@ -58,8 +58,12 @@ select{
 <h2>Resultado Cliente</h2>
 
 <input type="file" id="upload" accept=".xls,.xlsx">
+<button onclick="carregarDados()">Carregar Dados</button>
 
 <br><br>
+
+<label>Cliente</label>
+<select id="filtroCliente"><option value="">Todos</option></select>
 
 <label>Patrimônio</label>
 <select id="filtroTag"><option value="">Todos</option></select>
@@ -98,9 +102,11 @@ select{
 let dadosGlobais = [];
 let graficos = [];
 
-document.getElementById('upload').addEventListener('change', function(e){
+function carregarDados(){
 
-    const file = e.target.files[0];
+    const file = document.getElementById('upload').files[0];
+    if(!file) return alert("Selecione um arquivo");
+
     const reader = new FileReader();
 
     reader.onload = function(event){
@@ -108,32 +114,43 @@ document.getElementById('upload').addEventListener('change', function(e){
         const data = new Uint8Array(event.target.result);
         const workbook = XLSX.read(data, {type:'array'});
         const sheet = workbook.Sheets[workbook.SheetNames[0]];
-        const json = XLSX.utils.sheet_to_json(sheet);
+        dadosGlobais = XLSX.utils.sheet_to_json(sheet);
 
-        dadosGlobais = json;
-
-        popularFiltros(json);
+        atualizarFiltros(dadosGlobais);
         aplicarFiltros();
     };
 
     reader.readAsArrayBuffer(file);
-});
+}
 
 document.querySelectorAll("select").forEach(s=>{
-    s.addEventListener("change", aplicarFiltros);
+    s.addEventListener("change", ()=>{
+        aplicarFiltros();
+        atualizarFiltrosFiltrados();
+    });
 });
 
-function popularFiltros(dados){
+function atualizarFiltros(dados){
 
+    preencherSelect("filtroCliente", dados, "Solicitante / Localização");
     preencherSelect("filtroTag", dados, "TAG");
     preencherSelect("filtroTipo", dados, "Tipo de Tecnologia");
     preencherSelect("filtroModelo", dados, "Modelo");
     preencherSelect("filtroSerie", dados, "Nº Série");
 }
 
+function atualizarFiltrosFiltrados(){
+
+    const filtrado = filtrarDados();
+
+    atualizarFiltros(filtrado);
+}
+
 function preencherSelect(id, dados, coluna){
 
     const select = document.getElementById(id);
+    const valorAtual = select.value;
+
     select.innerHTML = '<option value="">Todos</option>';
 
     const valores = [...new Set(dados.map(l => l[coluna]).filter(v => v))];
@@ -141,23 +158,31 @@ function preencherSelect(id, dados, coluna){
     valores.sort().forEach(v=>{
         select.innerHTML += `<option value="${v}">${v}</option>`;
     });
+
+    select.value = valorAtual;
 }
 
-function aplicarFiltros(){
+function filtrarDados(){
 
+    const cliente = document.getElementById("filtroCliente").value;
     const tag = document.getElementById("filtroTag").value;
     const tipo = document.getElementById("filtroTipo").value;
     const modelo = document.getElementById("filtroModelo").value;
     const serie = document.getElementById("filtroSerie").value;
 
-    const filtrado = dadosGlobais.filter(linha =>{
+    return dadosGlobais.filter(linha =>{
 
-        return (!tag || linha["TAG"] == tag) &&
+        return (!cliente || linha["Solicitante / Localização"] == cliente) &&
+               (!tag || linha["TAG"] == tag) &&
                (!tipo || linha["Tipo de Tecnologia"] == tipo) &&
                (!modelo || linha["Modelo"] == modelo) &&
                (!serie || linha["Nº Série"] == serie);
     });
+}
 
+function aplicarFiltros(){
+
+    const filtrado = filtrarDados();
     calcularTotais(filtrado);
 }
 
@@ -179,7 +204,6 @@ function calcularTotais(dados){
             totaisModelo[modelo] = (totaisModelo[modelo] || 0) + 1;
 
             const cliente = linha["Solicitante / Localização"] || "Não informado";
-
             totaisCliente[cliente] = (totaisCliente[cliente] || 0) + total;
         }
     });
