@@ -11,8 +11,22 @@
 
 <body>
 
+<!-- MENU HAMBURGUER FIXO -->
+<nav class="navbar">
+
+    <div class="menu-toggle" onclick="toggleMenu()">
+        ☰
+    </div>
+
+    <ul id="menu">
+        <li><a href="Documento.html">DOCUMENTAÇÃO</a></li>
+        <li><a href="indicadores.html">INDICADORES</a></li>
+    </ul>
+
+</nav>
+
 <!-- LOGIN -->
-<div id="login" style="text-align:center; margin-top:100px;">
+<div id="login" style="text-align:center; margin-top:120px;">
     <h2>Área Restrita</h2>
     <input type="email" id="email" placeholder="Email"><br><br>
     <input type="password" id="senha" placeholder="Senha"><br><br>
@@ -23,20 +37,6 @@
 <div id="conteudo" style="display:none;">
 
 <div class="container">
-
-<!-- MENU HAMBURGUER -->
-<nav class="navbar">
-    <div class="logo-menu">Tractorbel</div>
-
-    <div class="menu-toggle" onclick="toggleMenu()">
-        ☰
-    </div>
-
-    <ul id="menu">
-        <li><a href="Documento.html">DOCUMENTAÇÃO</a></li>
-        <li><a href="indicadores.html">INDICADORES</a></li>
-    </ul>
-</nav>
 
 <header>
     <div class="center">
@@ -55,7 +55,6 @@ O objetivo é centralizar as informações, garantir clareza nas responsabilidad
 <!-- RODAPÉ -->
 <footer class="footer">
     <div class="footer-container">
-
 
         <div class="footer-col">
             <h3>Links rápidos</h3>
