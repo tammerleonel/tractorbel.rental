@@ -11,7 +11,18 @@
 
 <body>
 
-<!-- MENU HAMBURGUER FIXO -->
+<!-- LOGIN -->
+<div id="login" style="text-align:center; margin-top:120px;">
+    <h2>Área Restrita</h2>
+    <input type="email" id="email" placeholder="Email"><br><br>
+    <input type="password" id="senha" placeholder="Senha"><br><br>
+    <button onclick="login()">Entrar</button>
+</div>
+
+<!-- CONTEÚDO PROTEGIDO -->
+<div id="conteudo" style="display:none;">
+
+<!-- MENU (SÓ APÓS LOGIN) -->
 <nav class="navbar">
 
     <div class="menu-toggle" onclick="toggleMenu()">
@@ -24,17 +35,6 @@
     </ul>
 
 </nav>
-
-<!-- LOGIN -->
-<div id="login" style="text-align:center; margin-top:120px;">
-    <h2>Área Restrita</h2>
-    <input type="email" id="email" placeholder="Email"><br><br>
-    <input type="password" id="senha" placeholder="Senha"><br><br>
-    <button onclick="login()">Entrar</button>
-</div>
-
-<!-- CONTEÚDO PROTEGIDO -->
-<div id="conteudo" style="display:none;">
 
 <div class="container">
 
