@@ -18,16 +18,31 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 
+function mostrarConteudo(user){
+
+  const login = document.getElementById("login");
+  const conteudo = document.getElementById("conteudo");
+
+  if(!login || !conteudo) return;
+
+  if(user){
+    login.style.display = "none";
+    conteudo.style.display = "block";
+  }else{
+    login.style.display = "block";
+    conteudo.style.display = "none";
+  }
+}
+
 window.login = function() {
   const email = document.getElementById("email").value;
   const senha = document.getElementById("senha").value;
 
   signInWithEmailAndPassword(auth, email, senha)
     .then(() => {
-      document.getElementById("login").style.display = "none";
-      document.getElementById("conteudo").style.display = "block";
+      mostrarConteudo(true);
     })
-    .catch((error) => {
+    .catch(() => {
       alert("Usuário ou senha incorretos");
     });
 };
@@ -37,11 +52,7 @@ window.logout = function() {
 };
 
 onAuthStateChanged(auth, (user) => {
-  if (user) {
-    document.getElementById("login").style.display = "none";
-    document.getElementById("conteudo").style.display = "block";
-  } else {
-    document.getElementById("login").style.display = "block";
-    document.getElementById("conteudo").style.display = "none";
-  }
+  document.addEventListener("DOMContentLoaded", ()=>{
+    mostrarConteudo(user);
+  });
 });
