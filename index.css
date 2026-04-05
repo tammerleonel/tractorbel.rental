@@ -2,71 +2,151 @@ body{
 color: black;
 background-color: white;
 }
+
 ul{
 background:green;
-display: flex; /* stiliza o menu flexivel no dentro da ul */
-justify-content: space-between; /* stiliza espaça o menu na pagina */
-list-style: none; /* remove bolinha de listagem */
-align-items: center; /* alinha ao centro */
+display: flex;
+justify-content: space-between;
+list-style: none;
+align-items: center;
 padding: 20px;
 font-family:Arial, Helvetica, sans-serif;
-
 }   
 
 a{
-    color: white; /* remove a cor do link */
-    text-decoration: none; /* remove a linha abaixo do link */
+color: white;
+text-decoration: none;
+}
 
-}
 header{
-    align-items: center;
-    
+align-items: center;
 }
+
 header img{
-    border-radius: 50%;
-    border:3px solid green;
-    width: 150px;
-    height:150px;
- }
-.center{            /* classe de div criada para estilizar partes especificas do codigo */
+border-radius: 50%;
+border:3px solid green;
+width: 150px;
+height:150px;
+}
+
+.center{
 text-align: center;
 }
+
 h1{
-    color: black;
-    text-align: center;
-    font-family:Arial, Helvetica, sans-serif;
+color: black;
+text-align: center;
+font-family:Arial, Helvetica, sans-serif;
 }
+
 h3{
-    text-align: left;
-    white-space: pre-wrap;
-    font-family:Arial, Helvetica, sans-serif;
-    padding: 30px;
-    color: black;
-}
-footer img{ 
-border-radius: 50%;
-width: 30px;
-height: 30px;
- border: 2px solid green;
+text-align: left;
+white-space: pre-wrap;
+font-family:Arial, Helvetica, sans-serif;
+padding: 30px;
+color: black;
 }
 
-footer {
-display: flex; /* stiliza o menu flexivel na horiontal no dentro do footer = rodapé */
-justify-content: center
+.container{
+padding: 0px 30px;
 }
 
-footer a{
-    margin: 20px;
-    text-align: center;
-    color: green;
-    
-}
-.container{ /* limita o texto com base nas extreminadas */
-
-    padding: 0px 30px;
-}
 nav a:hover{
 color: black;
 font-weight: bold;
+}
 
+/* ===== RODAPÉ PROFISSIONAL ===== */
+
+.footer {
+background: #1f2937;
+color: #fff;
+margin-top: 40px;
+padding-top: 30px;
+font-family: Arial, Helvetica, sans-serif;
+}
+
+.footer-container {
+display: flex;
+justify-content: space-between;
+max-width: 1100px;
+margin: auto;
+flex-wrap: wrap;
+padding: 20px;
+}
+
+.footer-col {
+flex: 1;
+min-width: 220px;
+margin: 10px;
+}
+
+.footer-col h3 {
+margin-bottom: 15px;
+font-size: 18px;
+border-bottom: 2px solid #22c55e;
+display: inline-block;
+padding-bottom: 5px;
+color: white;
+}
+
+.footer-col p {
+font-size: 14px;
+line-height: 1.5;
+color: #d1d5db;
+}
+
+.footer-col ul {
+list-style: none;
+padding: 0;
+background: none;
+display: block;
+}
+
+.footer-col ul li {
+margin-bottom: 8px;
+}
+
+.footer-col ul li a {
+color: #d1d5db;
+text-decoration: none;
+font-size: 14px;
+}
+
+.footer-col ul li a:hover {
+color: #fff;
+}
+
+.footer-social img {
+width: 28px;
+height: 28px;
+margin-right: 10px;
+border-radius: 50%;
+border: 2px solid #22c55e;
+transition: 0.3s;
+}
+
+.footer-social img:hover {
+transform: scale(1.15);
+}
+
+.footer-bottom {
+background: #111827;
+text-align: center;
+padding: 15px;
+font-size: 13px;
+margin-top: 20px;
+color: #d1d5db;
+}
+
+/* Responsivo */
+@media (max-width: 768px) {
+.footer-container {
+flex-direction: column;
+text-align: center;
+}
+
+.footer-social {
+justify-content: center;
+}
 }
