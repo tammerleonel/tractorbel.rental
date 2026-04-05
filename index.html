@@ -1,36 +1,47 @@
-<!DOCTYPE html> <!-- modelo padrão do documento -->
+<!DOCTYPE html>
 <html lang="pt-BR">
 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>documentacao-de-apoio-rental</title> <!-- Nome do documento -->
-    <link rel="stylesheet" href="index.css"> <!-- folha de stylo e referencia do arquivo css -->
+    <title>documentacao-de-apoio-rental</title>
+    <link rel="stylesheet" href="index.css">
+    <script src="login.js"></script>
 </head>
 
 <body>
+
+<!-- LOGIN -->
+<div id="login" style="text-align:center; margin-top:100px;">
+    <h2>Área Restrita</h2>
+    <input type="text" id="usuario" placeholder="Usuário"><br><br>
+    <input type="password" id="senha" placeholder="Senha"><br><br>
+    <button onclick="login()">Entrar</button>
+</div>
+
+<!-- CONTEÚDO PROTEGIDO -->
+<div id="conteudo" style="display:none;">
+
 <div class="container" >
 <nav>
        <ul>
             <li>
                 <a href="Documento.html">DOCUMENTAÇÃO</a>
-                                        <li>
+            </li>
+            <li>
                 <a href="indicadores.html">INDICADORES</a>
             </li> 
-           
-            </li>    
-      
         </ul>       
     </nav>
 
-    <header> <!-- header é a parte de introdução serve para agrupar e stylizar seguimentos da pagina -->
+    <header>
         
 <div class="center">
         <img src="logo.png" alt="">
         </div>
 </header>
 
-<main> <!-- main é 2ª parte pode ser seguimentada e inserida varias coisas serve para agrupar e stylizar  -->
+<main>
 <h3 class="texto-apresentacao">
 Esta página é destinada à organização dos procedimentos operacionais da Tractorbel, estruturados por área.
 Aqui você encontrará os fluxos de trabalho e o passo a passo de cada processo, facilitando a compreensão, padronização e execução das atividades no dia a dia.
@@ -56,14 +67,17 @@ O objetivo é centralizar as informações, garantir clareza nas responsabilidad
 </a>
 
 </footer>
-<a >
-    <h4>
-    <p>Copyright © Tractorbel Equipamentos - Todos os direitos reservados </p>
-    <p></p>Desenvolvido por Tâmmer Leonel</p>
+
+<a>
+<h4>
+<p>Copyright © Tractorbel Equipamentos - Todos os direitos reservados</p>
+<p>Desenvolvido por Tâmmer Leonel</p>
 </h4>
 </a>
-</div>
-    
-</body>
 
+</div>
+
+</div>
+
+</body>
 </html>
