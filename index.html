@@ -24,15 +24,18 @@
 
 <div class="container">
 
-<nav>
-    <ul>
-        <li>
-            <a href="Documento.html">DOCUMENTAÇÃO</a>
-        </li>
-        <li>
-            <a href="indicadores.html">INDICADORES</a>
-        </li> 
-    </ul>       
+<!-- MENU HAMBURGUER -->
+<nav class="navbar">
+    <div class="logo-menu">Tractorbel</div>
+
+    <div class="menu-toggle" onclick="toggleMenu()">
+        ☰
+    </div>
+
+    <ul id="menu">
+        <li><a href="Documento.html">DOCUMENTAÇÃO</a></li>
+        <li><a href="indicadores.html">INDICADORES</a></li>
+    </ul>
 </nav>
 
 <header>
@@ -49,7 +52,7 @@ O objetivo é centralizar as informações, garantir clareza nas responsabilidad
 </h3>
 </main>
 
-<!-- RODAPÉ PROFISSIONAL -->
+<!-- RODAPÉ -->
 <footer class="footer">
     <div class="footer-container">
 
@@ -96,6 +99,12 @@ O objetivo é centralizar as informações, garantir clareza nas responsabilidad
 
 </div>
 </div>
+
+<script>
+function toggleMenu() {
+    document.getElementById("menu").classList.toggle("active");
+}
+</script>
 
 </body>
 </html>
