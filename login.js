@@ -76,7 +76,11 @@ window.carregarDados = function(){
     const input = document.getElementById('upload');
     const status = document.getElementById("statusCarga");
     const btnCarregar = document.getElementById("btnCarregar");
-    const btnRelatorio = document.getElementById("btnRelatorio");
+
+    let btnRelatorio = document.getElementById("btnRelatorio");
+    if(!btnRelatorio){
+        btnRelatorio = document.getElementById("btnGerar");
+    }
 
     if(!input){
         alert("Input upload não encontrado");
@@ -89,7 +93,7 @@ window.carregarDados = function(){
         return;
     }
 
-    btnCarregar.disabled = true;
+    if(btnCarregar) btnCarregar.disabled = true;
     if(btnRelatorio) btnRelatorio.style.display = "none";
     if(status) status.innerText = "Carregando planilha...";
 
@@ -129,24 +133,30 @@ window.carregarDados = function(){
                     if(i < json.length){
                         setTimeout(processarLote, 0);
                     }else{
+
+                        console.log("Finalizado processamento:", dadosGlobais.length);
+
                         atualizarFiltros(dadosGlobais);
 
                         if(status){
                             status.innerText = "Dados carregados ✔";
                         }
 
-                        if(btnRelatorio){
-                            btnRelatorio.style.display = "inline-block";
+                        const btn = document.getElementById("btnRelatorio") || document.getElementById("btnGerar");
+                        if(btn){
+                            btn.style.display = "inline-block";
+                        }else{
+                            console.warn("Botão gerar não encontrado");
                         }
 
-                        btnCarregar.disabled = false;
+                        if(btnCarregar) btnCarregar.disabled = false;
                     }
                 }
 
                 processarLote();
 
             }catch(e){
-                btnCarregar.disabled = false;
+                if(btnCarregar) btnCarregar.disabled = false;
                 if(status) status.innerText = "";
                 alert("Erro ao ler planilha: " + e.message);
             }
@@ -173,7 +183,10 @@ function atualizarFiltros(dados){
 function preencherSelect(id, dados, coluna){
 
     const select = document.getElementById(id);
-    if(!select) return;
+    if(!select){
+        console.warn("Filtro não encontrado:", id);
+        return;
+    }
 
     const valorAtual = select.value;
     select.innerHTML = '<option value="">Todos</option>';

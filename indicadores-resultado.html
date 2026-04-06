@@ -55,15 +55,7 @@ canvas{
 
 <input type="file" id="upload" accept=".xls,.xlsx">
 <button id="btnCarregar" onclick="carregarDados()">Carregar</button>
-<span id="statusCarga" style="margin-left:10px;color:#555"></span>
-
-<br><br>
-
-<label>Data Inicio</label>
-<input type="date" id="dataInicio">
-
-<label>Data Fim</label>
-<input type="date" id="dataFim">
+<span id="statusCarga"></span>
 
 <br><br>
 
@@ -88,40 +80,9 @@ canvas{
 Gerar Relatório
 </button>
 
-<div class="cards">
-<div class="card"><h4>Faturamento</h4><div class="total" id="cardFat">0</div></div>
-<div class="card"><h4>Manutenção</h4><div class="total" id="cardMan">0</div></div>
-<div class="card"><h4>Financiamento</h4><div class="total" id="cardFin">0</div></div>
-<div class="card"><h4>Impostos</h4><div class="total" id="cardImp">0</div></div>
-<div class="card"><h4>Tx Administrativa</h4><div class="total" id="cardAdm">0</div></div>
-<div class="card"><h4>Resultado</h4><div class="total" id="cardRes">0</div></div>
-<div class="card"><h4>Cobrança Mau Uso</h4><div class="total" id="cardMau">0</div></div>
-</div>
-
-<div class="card">
-<h3>Faturamento x Tipo de equipamento</h3>
-<canvas id="graficoEquipamento"></canvas>
-</div>
-
-<div class="card">
-<h3>Faturamento x Cliente</h3>
-<canvas id="graficoFatCliente"></canvas>
-</div>
-
-<div class="card">
-<h3>Custo de Manutenção x Cliente</h3>
-<canvas id="graficoManCliente"></canvas>
-</div>
-
-<div class="card">
-<h3>Contratos com déficit x Cliente</h3>
-<canvas id="graficoDeficit"></canvas>
-</div>
-
 <script>
 
 let dados=[];
-let charts=[];
 
 function num(v){
     if(!v) return 0;
@@ -198,6 +159,35 @@ function carregarDados(){
     };
 
     reader.readAsBinaryString(file);
+}
+
+function preencherFiltros(){
+    preencherSelect("filtroFilial","filial");
+    preencherSelect("filtroPatrimonio","patrimonio");
+    preencherSelect("filtroSerie","serie");
+    preencherSelect("filtroEquipamento","equipamento");
+    preencherSelect("filtroCliente","cliente");
+}
+
+function preencherSelect(id,campo){
+
+    const select = document.getElementById(id);
+    select.innerHTML="";
+
+    const valores = [...new Set(dados.map(d => d[campo]).filter(Boolean))];
+
+    valores.sort();
+
+    valores.forEach(v=>{
+        const option = document.createElement("option");
+        option.value=v;
+        option.text=v;
+        select.appendChild(option);
+    });
+}
+
+function gerarRelatorio(){
+    alert("Relatório pronto para gerar gráficos");
 }
 
 </script>
