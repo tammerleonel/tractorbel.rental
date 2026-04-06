@@ -1,235 +1,115 @@
-<!DOCTYPE html>
-<html lang="pt-BR">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Relatório custo operacional por Cliente</title>
-
-<script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
-<style>
-body{
-    font-family: Arial;
-    background:#f5f6fa;
-    padding:20px;
-}
-
-.card{
-    background:white;
-    padding:20px;
-    margin-bottom:20px;
-    border-radius:10px;
-    box-shadow:0 2px 5px rgba(0,0,0,0.1);
-}
-
-.total{
-    font-size:28px;
-    font-weight:bold;
-    color:green;
-}
-
-table{
-    width:100%;
-    border-collapse:collapse;
-}
-
-th, td{
-    padding:10px;
-    border-bottom:1px solid #ddd;
-}
-
-th{
-    background:green;
-    color:white;
-}
-
-select, button{
-    padding:8px;
-    margin-right:10px;
-    margin-bottom:10px;
-}
-</style>
-
-</head>
-
-<body>
-
-<h2>Resultado Cliente</h2>
-
-<input type="file" id="upload" accept=".xls,.xlsx">
-<button onclick="carregarDados()">Carregar Dados</button>
-
-<br><br>
-
-<label>Cliente</label>
-<select id="filtroCliente"><option value="">Todos</option></select>
-
-<label>Patrimônio</label>
-<select id="filtroTag"><option value="">Todos</option></select>
-
-<label>Tipo de equipamento</label>
-<select id="filtroTipo"><option value="">Todos</option></select>
-
-<label>Modelo</label>
-<select id="filtroModelo"><option value="">Todos</option></select>
-
-<label>Nº Série</label>
-<select id="filtroSerie"><option value="">Todos</option></select>
-
-<br>
-
-<button onclick="gerarGraficos()">Gerar Gráficos</button>
-
-<div class="card">
-<h3>Total de equipamentos com despesas lançadas</h3>
-<div class="total" id="totalAtendimento">0</div>
-</div>
-
-<div class="card">
-<h3>Total por Modelo</h3>
-<table>
-<thead>
-<tr>
-<th>Modelo</th>
-<th>Quantidade</th>
-</tr>
-</thead>
-<tbody id="tabelaModelos"></tbody>
-</table>
-</div>
-
-<div id="graficosClientes"></div>
-
 <script type="module">
 
 let dadosGlobais = [];
 let graficos = [];
 
-function converterNumero(valor){
-
-    if(valor === null || valor === undefined || valor === "") return 0;
-
-    if(typeof valor === "number") return valor;
-
-    return parseFloat(
-        valor.toString()
-             .replace(/\./g,'')
-             .replace(',','.')
-    ) || 0;
+function numero(v){
+    if(!v) return 0;
+    if(typeof v === "number") return v;
+    return parseFloat(v.toString().replace(/\./g,'').replace(',','.')) || 0;
 }
 
 window.carregarDados = function(){
 
     const file = document.getElementById('upload').files[0];
-    if(!file) return alert("Selecione um arquivo");
+    if(!file) return alert("Selecione o arquivo");
 
     const reader = new FileReader();
 
-    reader.onload = function(event){
+    reader.onload = function(e){
 
-        const data = new Uint8Array(event.target.result);
-        const workbook = XLSX.read(data, {type:'array'});
-        const sheet = workbook.Sheets[workbook.SheetNames[0]];
-        dadosGlobais = XLSX.utils.sheet_to_json(sheet);
+        const data = new Uint8Array(e.target.result);
+        const wb = XLSX.read(data,{type:'array'});
+        const ws = wb.Sheets[wb.SheetNames[0]];
 
+        dadosGlobais = XLSX.utils.sheet_to_json(ws);
         atualizarFiltros(dadosGlobais);
     };
 
     reader.readAsArrayBuffer(file);
 }
 
-document.querySelectorAll("select").forEach(s=>{
-    s.addEventListener("change", ()=>{
-        atualizarFiltrosFiltrados();
-    });
-});
-
 window.gerarGraficos = function(){
     const filtrado = filtrarDados();
-    calcularTotais(filtrado);
-}
-
-function atualizarFiltros(dados){
-
-    preencherSelect("filtroCliente", dados, "Solicitante / Localização");
-    preencherSelect("filtroTag", dados, "TAG");
-    preencherSelect("filtroTipo", dados, "Tipo de Tecnologia");
-    preencherSelect("filtroModelo", dados, "Modelo");
-    preencherSelect("filtroSerie", dados, "Nº Série");
-}
-
-function atualizarFiltrosFiltrados(){
-    const filtrado = filtrarDados();
-    atualizarFiltros(filtrado);
-}
-
-function preencherSelect(id, dados, coluna){
-
-    const select = document.getElementById(id);
-    const valorAtual = select.value;
-
-    select.innerHTML = '<option value="">Todos</option>';
-
-    const valores = [...new Set(dados.map(l => l[coluna]).filter(v => v))];
-
-    valores.sort().forEach(v=>{
-        select.innerHTML += `<option value="${v}">${v}</option>`;
-    });
-
-    select.value = valorAtual;
+    calcularIndicadores(filtrado);
 }
 
 function filtrarDados(){
 
-    const cliente = document.getElementById("filtroCliente").value;
-    const tag = document.getElementById("filtroTag").value;
-    const tipo = document.getElementById("filtroTipo").value;
-    const modelo = document.getElementById("filtroModelo").value;
-    const serie = document.getElementById("filtroSerie").value;
+    const cliente = filtroCliente.value;
+    const tag = filtroTag.value;
+    const tipo = filtroTipo.value;
+    const modelo = filtroModelo.value;
+    const serie = filtroSerie.value;
 
-    return dadosGlobais.filter(linha =>{
+    return dadosGlobais.filter(l =>
 
-        return (!cliente || linha["Solicitante / Localização"] == cliente) &&
-               (!tag || linha["TAG"] == tag) &&
-               (!tipo || linha["Tipo de Tecnologia"] == tipo) &&
-               (!modelo || linha["Modelo"] == modelo) &&
-               (!serie || linha["Nº Série"] == serie);
-    });
+        (!cliente || l["Cliente"] == cliente) &&
+        (!tag || l["Patrimônio"] == tag) &&
+        (!tipo || l["Tipo"] == tipo) &&
+        (!modelo || l["Modelo"] == modelo) &&
+        (!serie || l["Série"] == serie)
+    );
 }
 
-function calcularTotais(dados){
+function calcularIndicadores(dados){
 
-    const totaisModelo = {};
-    const totaisCliente = {};
-    let totalEquipamentos = 0;
+    let totalEquip = 0;
 
-    dados.forEach(linha => {
+    let totalFaturamento = 0;
+    let totalManutencao = 0;
+    let totalFinanciamento = 0;
+    let totalImpostos = 0;
+    let totalAdm = 0;
+    let totalResultado = 0;
 
-        const total = converterNumero(linha["Total"]);
+    const porCliente = {};
+    const porModelo = {};
 
-        if(total > 0){
+    dados.forEach(l =>{
 
-            totalEquipamentos++;
+        const faturamento = numero(l["Faturamento"]);
+        const manutencao = numero(l["Manutenção"]);
+        const financiamento = numero(l["Financiamento"]);
+        const impostos = numero(l["Impostos"]);
+        const adm = numero(l["Tx Adm"] || l["Taxa Adm"]);
 
-            const modelo = linha["Modelo"] || "Não informado";
-            totaisModelo[modelo] = (totaisModelo[modelo] || 0) + 1;
+        const resultado = faturamento - manutencao - financiamento - impostos - adm;
 
-            const cliente = linha["Solicitante / Localização"] || "Não informado";
-            totaisCliente[cliente] = (totaisCliente[cliente] || 0) + total;
+        if(faturamento || manutencao){
+
+            totalEquip++;
+
+            totalFaturamento += faturamento;
+            totalManutencao += manutencao;
+            totalFinanciamento += financiamento;
+            totalImpostos += impostos;
+            totalAdm += adm;
+            totalResultado += resultado;
+
+            const cliente = l["Cliente"] || "Não informado";
+            porCliente[cliente] = (porCliente[cliente] || 0) + resultado;
+
+            const modelo = l["Modelo"] || "Não informado";
+            porModelo[modelo] = (porModelo[modelo] || 0) + 1;
         }
+
     });
 
-    document.getElementById("totalAtendimento").innerText = totalEquipamentos;
+    totalAtendimento.innerText = totalEquip;
 
     const tbody = document.getElementById("tabelaModelos");
     tbody.innerHTML = "";
 
-    for(const modelo in totaisModelo){
-        tbody.innerHTML += `<tr><td>${modelo}</td><td>${totaisModelo[modelo]}</td></tr>`;
+    for(const m in porModelo){
+        tbody.innerHTML += `
+        <tr>
+            <td>${m}</td>
+            <td>${porModelo[m]}</td>
+        </tr>`;
     }
 
-    criarGraficosClientes(totaisCliente);
+    criarGraficosClientes(porCliente);
 }
 
 function criarGraficosClientes(dados){
@@ -237,57 +117,44 @@ function criarGraficosClientes(dados){
     graficos.forEach(g => g.destroy());
     graficos = [];
 
-    const container = document.getElementById("graficosClientes");
-    container.innerHTML = "";
+    graficosClientes.innerHTML = "";
 
     for(const cliente in dados){
-
-        const valor = dados[cliente];
-        if(valor <= 0) continue;
 
         const card = document.createElement("div");
         card.className = "card";
 
-        const titulo = document.createElement("h3");
-        titulo.innerText = "Resultado Cliente - " + cliente;
+        const h = document.createElement("h3");
+        h.innerText = "Resultado Cliente - " + cliente;
 
         const canvas = document.createElement("canvas");
 
-        card.appendChild(titulo);
+        card.appendChild(h);
         card.appendChild(canvas);
-        container.appendChild(card);
+        graficosClientes.appendChild(card);
 
-        const grafico = new Chart(canvas,{
-            type:'bar',
+        const g = new Chart(canvas,{
+            type:"bar",
             data:{
-                labels:["Total"],
+                labels:["Resultado"],
                 datasets:[{
-                    label:"Resultado Cliente",
-                    data:[valor]
+                    data:[dados[cliente]]
                 }]
             },
             options:{
                 responsive:true,
-                plugins:{
-                    legend:{display:false}
-                }
+                plugins:{legend:{display:false}}
             }
         });
 
-        graficos.push(grafico);
+        graficos.push(g);
     }
 }
-
 
 /* FIREBASE */
 
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-app.js";
-import { 
-  getAuth, 
-  signInWithEmailAndPassword,
-  onAuthStateChanged,
-  signOut
-} from "https://www.gstatic.com/firebasejs/12.11.0/firebase-auth.js";
+import { getAuth } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-auth.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyAAF5FLl8xawkivYCcjQGJyb2jo1_A1V7g",
@@ -302,6 +169,3 @@ const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 
 </script>
-
-</body>
-</html>
