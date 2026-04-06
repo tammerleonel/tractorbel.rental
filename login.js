@@ -93,21 +93,55 @@ window.carregarDados = function(){
 
             const l = json[i];
 
-            dadosGlobais.push({
-                filial:l[0],
-                patrimonio:l[1],
-                serie:l[2],
-                equipamento:l[3],
-                faturamento:converterNumero(l[7]),
-                manutencao:converterNumero(l[8]),
-                financiamento:converterNumero(l[9]),
-                impostos:converterNumero(l[10]),
-                tx:converterNumero(l[11]),
-                resultado:converterNumero(l[12]),
-                mau:converterNumero(l[13]),
-                cliente:l[14],
-                data:new Date(l[15])
-            });
+            let dataLinha = l[15];
+
+            // converter data excel
+            if(typeof dataLinha === "number"){
+                dataLinha = new Date((dataLinha - 25569) * 86400 * 1000);
+            }else{
+                dataLinha = new Date(dataLinha);
+            }
+
+            if(!isNaN(dataLinha)){
+                dadosGlobais.push({
+                    filial:l[0],
+                    patrimonio:l[1],
+                    serie:l[2],
+                    equipamento:l[3],
+                    faturamento:converterNumero(l[7]),
+                    manutencao:converterNumero(l[8]),
+                    financiamento:converterNumero(l[9]),
+                    impostos:converterNumero(l[10]),
+                    tx:converterNumero(l[11]),
+                    resultado:converterNumero(l[12]),
+                    mau:converterNumero(l[13]),
+                    cliente:l[14],
+                    data:dataLinha
+                });
+            }
+        }
+
+        // ✅ DEFINIR LIMITE DAS DATAS
+        const datasValidas = dadosGlobais.map(d => d.data).filter(d => d);
+
+        if(datasValidas.length){
+
+            const minData = new Date(Math.min(...datasValidas));
+            const maxData = new Date(Math.max(...datasValidas));
+
+            const formatar = d => d.toISOString().split("T")[0];
+
+            const dataInicio = document.getElementById("dataInicio");
+            const dataFim = document.getElementById("dataFim");
+
+            dataInicio.min = formatar(minData);
+            dataInicio.max = formatar(maxData);
+            dataFim.min = formatar(minData);
+            dataFim.max = formatar(maxData);
+
+            // preencher automaticamente
+            dataInicio.value = formatar(minData);
+            dataFim.value = formatar(maxData);
         }
 
         atualizarFiltros();
