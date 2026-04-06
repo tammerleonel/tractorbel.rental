@@ -168,6 +168,9 @@ function preencherSelect(id,campo){
     const select = document.getElementById(id);
     if(!select) return;
 
+    // ativa seleção múltipla
+    select.multiple = true;
+
     const valores = [...new Set(dadosGlobais.map(d=>d[campo]).filter(Boolean))];
 
     select.innerHTML="";
@@ -214,7 +217,6 @@ function filtrarDados(){
     if(dtFim) dtFim.setHours(23,59,59,999);
 
     return dadosGlobais.filter(d=>
-
         (!filial.length || filial.includes(d.filial)) &&
         (!patrimonio.length || patrimonio.includes(d.patrimonio)) &&
         (!serie.length || serie.includes(d.serie)) &&
@@ -222,7 +224,6 @@ function filtrarDados(){
         (!cliente.length || cliente.includes(d.cliente)) &&
         (!dtInicio || d.data >= dtInicio) &&
         (!dtFim || d.data <= dtFim)
-
     );
 }
 
