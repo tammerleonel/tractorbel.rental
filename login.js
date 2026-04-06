@@ -102,6 +102,10 @@ window.carregarDados = function(){
             }
 
             if(!isNaN(dataLinha)){
+
+                // zerar hora
+                dataLinha.setHours(0,0,0,0);
+
                 dadosGlobais.push({
                     filial:l[0],
                     patrimonio:l[1],
@@ -120,49 +124,27 @@ window.carregarDados = function(){
             }
         }
 
-        // -------- CORREÇÃO DAS DATAS --------
-        const datasValidas = dadosGlobais.map(d => d.data).filter(d => d);
+        const datas = dadosGlobais.map(d=>d.data);
 
-        if(datasValidas.length){
+        const minData = new Date(Math.min(...datas));
+        const maxData = new Date(Math.max(...datas));
 
-            const minData = new Date(Math.min.apply(null, datasValidas));
-            const maxData = new Date(Math.max.apply(null, datasValidas));
+        const formatar = d => {
+            const m = String(d.getMonth()+1).padStart(2,'0');
+            const dia = String(d.getDate()).padStart(2,'0');
+            return `${d.getFullYear()}-${m}-${dia}`;
+        };
 
-            const formatar = (d)=>{
-                const mes = String(d.getMonth()+1).padStart(2,'0');
-                const dia = String(d.getDate()).padStart(2,'0');
-                return `${d.getFullYear()}-${mes}-${dia}`;
-            };
+        const dataInicio = document.getElementById("dataInicio");
+        const dataFim = document.getElementById("dataFim");
 
-            const dataInicio = document.getElementById("dataInicio");
-            const dataFim = document.getElementById("dataFim");
+        dataInicio.min = formatar(minData);
+        dataInicio.max = formatar(maxData);
+        dataFim.min = formatar(minData);
+        dataFim.max = formatar(maxData);
 
-            const min = formatar(minData);
-            const max = formatar(maxData);
-
-            dataInicio.min = min;
-            dataInicio.max = max;
-            dataFim.min = min;
-            dataFim.max = max;
-
-            dataInicio.value = min;
-            dataFim.value = max;
-
-            // travar intervalo
-            dataInicio.onchange = function(){
-                dataFim.min = this.value;
-                if(dataFim.value < this.value){
-                    dataFim.value = this.value;
-                }
-            };
-
-            dataFim.onchange = function(){
-                dataInicio.max = this.value;
-                if(dataInicio.value > this.value){
-                    dataInicio.value = this.value;
-                }
-            };
-        }
+        dataInicio.value = formatar(minData);
+        dataFim.value = formatar(maxData);
 
         atualizarFiltros();
         status.innerText = "Dados carregados ✔";
@@ -228,6 +210,9 @@ function filtrarDados(){
 
     const dtInicio = dataInicio.value ? new Date(dataInicio.value) : null;
     const dtFim = dataFim.value ? new Date(dataFim.value) : null;
+
+    if(dtInicio) dtInicio.setHours(0,0,0,0);
+    if(dtFim) dtFim.setHours(23,59,59,999);
 
     return dadosGlobais.filter(d=>
 
