@@ -49,9 +49,7 @@ window.logout = function() {
 };
 
 onAuthStateChanged(auth, (user) => {
-  document.addEventListener("DOMContentLoaded", ()=>{
-    mostrarConteudo(user);
-  });
+  mostrarConteudo(user);
 });
 
 // ------------------- Planilha e Gráficos -------------------
@@ -73,18 +71,7 @@ function converterNumero(valor){
     return parseFloat(valor.toString().replace(/\./g,'').replace(',','.')) || 0;
 }
 
-// NOVO conversor de data Excel (rápido)
-function converterDataExcel(valor){
-    if(!valor) return null;
-
-    if(typeof valor === "number"){
-        return new Date((valor - 25569) * 86400 * 1000);
-    }
-
-    return new Date(valor);
-}
-
-// ----------- CARREGAMENTO OTIMIZADO (CORRIGIDO) -------------
+// ---------- CARREGAMENTO OTIMIZADO (SEM QUEBRAR LOGIN) ----------
 window.carregarDados = function(){
 
     const file = document.getElementById('upload').files[0];
@@ -96,29 +83,19 @@ window.carregarDados = function(){
 
     reader.onload = function(event){
 
+        // não bloqueia a UI
         setTimeout(()=>{
 
             const data = new Uint8Array(event.target.result);
             const workbook = XLSX.read(data, {type:'array'});
             const sheet = workbook.Sheets[workbook.SheetNames[0]];
 
-            const json = XLSX.utils.sheet_to_json(sheet, {
+            const json = XLSX.utils.sheet_to_json(sheet,{
                 raw:true,
                 defval:""
             });
 
-            dadosGlobais = [];
-
-            for(let i=0;i<json.length;i++){
-                const linha = normalizarChaves(json[i]);
-
-                // se existir coluna de data ele converte
-                if(linha["Data"]){
-                    linha["Data"] = converterDataExcel(linha["Data"]);
-                }
-
-                dadosGlobais.push(linha);
-            }
+            dadosGlobais = json.map(l => normalizarChaves(l));
 
             atualizarFiltros(dadosGlobais);
 
@@ -126,17 +103,11 @@ window.carregarDados = function(){
 
             alert("Dados carregados com sucesso");
 
-        },100);
+        },50);
     };
 
     reader.readAsArrayBuffer(file);
 };
-
-document.querySelectorAll("select").forEach(s=>{
-    s.addEventListener("change", ()=>{
-        atualizarFiltrosFiltrados();
-    });
-});
 
 window.gerarGraficos = function(){
     const filtrado = filtrarDados();
@@ -151,28 +122,27 @@ function atualizarFiltros(dados){
     preencherSelect("filtroSerie", dados, "Nº Série");
 }
 
-function atualizarFiltrosFiltrados(){
-    const filtrado = filtrarDados();
-    atualizarFiltros(filtrado);
-}
-
 function preencherSelect(id, dados, coluna){
     const select = document.getElementById(id);
+    if(!select) return;
+
     const valorAtual = select.value;
     select.innerHTML = '<option value="">Todos</option>';
+
     const valores = [...new Set(dados.map(l => l[coluna]).filter(v => v))];
     valores.sort().forEach(v=>{
         select.innerHTML += `<option value="${v}">${v}</option>`;
     });
+
     select.value = valorAtual;
 }
 
 function filtrarDados(){
-    const cliente = document.getElementById("filtroCliente").value;
-    const tag = document.getElementById("filtroTag").value;
-    const tipo = document.getElementById("filtroTipo").value;
-    const modelo = document.getElementById("filtroModelo").value;
-    const serie = document.getElementById("filtroSerie").value;
+    const cliente = document.getElementById("filtroCliente")?.value;
+    const tag = document.getElementById("filtroTag")?.value;
+    const tipo = document.getElementById("filtroTipo")?.value;
+    const modelo = document.getElementById("filtroModelo")?.value;
+    const serie = document.getElementById("filtroSerie")?.value;
 
     return dadosGlobais.filter(linha =>{
         return (!cliente || linha["Solicitante / Localização"] == cliente) &&
@@ -213,10 +183,12 @@ function calcularTotais(dados){
 function criarGraficosClientes(dados){
     graficos.forEach(g => g.destroy());
     graficos = [];
+
     const container = document.getElementById("graficosClientes");
     container.innerHTML = "";
 
     for(const cliente in dados){
+
         const valor = dados[cliente];
         if(valor <= 0) continue;
 
@@ -237,7 +209,6 @@ function criarGraficosClientes(dados){
             data:{
                 labels:["Total"],
                 datasets:[{
-                    label:"Resultado Cliente",
                     data:[valor]
                 }]
             },
