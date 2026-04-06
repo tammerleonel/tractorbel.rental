@@ -70,7 +70,7 @@ function converterNumero(valor){
     return parseFloat(valor.toString().replace(/\./g,'').replace(',','.')) || 0;
 }
 
-// ----------- CARREGAMENTO -----------
+// ----------- CARREGAMENTO OTIMIZADO -----------
 window.carregarDados = function(){
 
     const input = document.getElementById('upload');
@@ -93,24 +93,46 @@ window.carregarDados = function(){
 
         setTimeout(function(){
 
-            const data = new Uint8Array(event.target.result);
-            const workbook = XLSX.read(data, {type:'array'});
-            const sheet = workbook.Sheets[workbook.SheetNames[0]];
+            try{
 
-            const json = XLSX.utils.sheet_to_json(sheet,{
-                raw:true,
-                defval:""
-            });
+                const data = new Uint8Array(event.target.result);
+                const workbook = XLSX.read(data, {type:'array'});
+                const sheet = workbook.Sheets[workbook.SheetNames[0]];
 
-            dadosGlobais = json.map(function(l){ return normalizarChaves(l); });
+                const json = XLSX.utils.sheet_to_json(sheet,{
+                    raw:true,
+                    defval:"",
+                    blankrows:false
+                });
 
-            atualizarFiltros(dadosGlobais);
+                dadosGlobais = [];
+                let i = 0;
 
-            document.body.style.cursor = "default";
+                function processarLote(){
 
-            alert("Dados carregados com sucesso");
+                    const limite = Math.min(i + 500, json.length);
 
-        },50);
+                    for(; i < limite; i++){
+                        dadosGlobais.push(normalizarChaves(json[i]));
+                    }
+
+                    if(i < json.length){
+                        setTimeout(processarLote, 0);
+                    }else{
+                        atualizarFiltros(dadosGlobais);
+                        document.body.style.cursor = "default";
+                        alert("Dados carregados: " + dadosGlobais.length);
+                    }
+                }
+
+                processarLote();
+
+            }catch(e){
+                document.body.style.cursor = "default";
+                alert("Erro ao ler planilha: " + e.message);
+            }
+
+        },100);
     };
 
     reader.readAsArrayBuffer(file);
