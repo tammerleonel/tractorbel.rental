@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Relatório custo operacional por Cliente</title>
+<title>Relatório Financeiro Rental</title>
 
 <script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -23,25 +23,17 @@ body{
     box-shadow:0 2px 5px rgba(0,0,0,0.1);
 }
 
+.cards{
+    display:grid;
+    grid-template-columns: repeat(auto-fit,minmax(220px,1fr));
+    gap:15px;
+    margin-bottom:20px;
+}
+
 .total{
-    font-size:28px;
+    font-size:26px;
     font-weight:bold;
     color:green;
-}
-
-table{
-    width:100%;
-    border-collapse:collapse;
-}
-
-th, td{
-    padding:10px;
-    border-bottom:1px solid #ddd;
-}
-
-th{
-    background:green;
-    color:white;
 }
 
 select, button{
@@ -49,246 +41,210 @@ select, button{
     margin-right:10px;
     margin-bottom:10px;
 }
+
+canvas{
+    background:white;
+    padding:15px;
+    border-radius:10px;
+}
 </style>
 
 </head>
 
 <body>
 
-<h2>Resultado Cliente</h2>
+<h2>Relatório Financeiro Rental</h2>
 
 <input type="file" id="upload" accept=".xls,.xlsx">
-<button onclick="carregarDados()">Carregar Dados</button>
+<button onclick="carregarDados()">Carregar</button>
 
 <br><br>
 
-<label>Cliente</label>
-<select id="filtroCliente"><option value="">Todos</option></select>
+<label>Período</label>
+<select id="filtroPeriodo"></select>
+
+<label>Filial</label>
+<select id="filtroFilial"></select>
 
 <label>Patrimônio</label>
-<select id="filtroTag"><option value="">Todos</option></select>
+<select id="filtroPatrimonio"></select>
 
-<label>Tipo de equipamento</label>
-<select id="filtroTipo"><option value="">Todos</option></select>
+<label>Série</label>
+<select id="filtroSerie"></select>
+
+<label>Equipamento</label>
+<select id="filtroEquipamento"></select>
 
 <label>Modelo</label>
-<select id="filtroModelo"><option value="">Todos</option></select>
+<select id="filtroModelo"></select>
 
-<label>Nº Série</label>
-<select id="filtroSerie"><option value="">Todos</option></select>
+<label>Cliente</label>
+<select id="filtroCliente"></select>
 
 <br>
 
-<button onclick="gerarGraficos()">Gerar Gráficos</button>
+<button onclick="gerarRelatorio()">Gerar Relatório</button>
 
-<div class="card">
-<h3>Total de equipamentos com despesas lançadas</h3>
-<div class="total" id="totalAtendimento">0</div>
+<div class="cards">
+<div class="card"><h4>Faturamento</h4><div class="total" id="cardFat">0</div></div>
+<div class="card"><h4>Manutenção</h4><div class="total" id="cardMan">0</div></div>
+<div class="card"><h4>Financiamento</h4><div class="total" id="cardFin">0</div></div>
+<div class="card"><h4>Impostos</h4><div class="total" id="cardImp">0</div></div>
+<div class="card"><h4>Tx Adm</h4><div class="total" id="cardAdm">0</div></div>
+<div class="card"><h4>Resultado</h4><div class="total" id="cardRes">0</div></div>
 </div>
 
 <div class="card">
-<h3>Total por Modelo</h3>
-<table>
-<thead>
-<tr>
-<th>Modelo</th>
-<th>Quantidade</th>
-</tr>
-</thead>
-<tbody id="tabelaModelos"></tbody>
-</table>
+<h3>Faturamento por Tipo de Equipamento</h3>
+<canvas id="graficoEquipamento"></canvas>
 </div>
 
-<div id="graficosClientes"></div>
+<div class="card">
+<h3>% Faturamento por Cliente</h3>
+<canvas id="graficoFatCliente"></canvas>
+</div>
 
-<script type="module">
+<div class="card">
+<h3>% Manutenção por Cliente</h3>
+<canvas id="graficoManCliente"></canvas>
+</div>
 
-let dadosGlobais = [];
-let graficos = [];
+<div class="card">
+<h3>% Resultado por Cliente</h3>
+<canvas id="graficoResCliente"></canvas>
+</div>
 
-function numero(v){
+<script>
+
+let dados = [];
+let periodoArquivo = "";
+let charts = [];
+
+function num(v){
     if(!v) return 0;
     if(typeof v === "number") return v;
     return parseFloat(v.toString().replace(/\./g,'').replace(',','.')) || 0;
 }
 
-function get(linha, nomes){
-    for(const n of nomes){
-        if(linha[n] !== undefined) return linha[n];
-    }
-    return null;
-}
+function carregarDados(){
 
-window.carregarDados = function(){
-
-    const file = document.getElementById('upload').files[0];
+    const file = document.getElementById("upload").files[0];
     if(!file) return alert("Selecione o arquivo");
+
+    periodoArquivo = file.name.replace("Demonstrativo Rental","").replace(".xls","").replace(".xlsx","").trim();
 
     const reader = new FileReader();
 
-    reader.onload = function(e){
+    reader.onload = e => {
 
-        const data = new Uint8Array(e.target.result);
-        const wb = XLSX.read(data,{type:'array'});
-        const ws = wb.Sheets[wb.SheetNames[0]];
+        const workbook = XLSX.read(new Uint8Array(e.target.result), {type:'array'});
+        const sheet = workbook.Sheets["Relatório Financeiro"];
+        dados = XLSX.utils.sheet_to_json(sheet);
 
-        dadosGlobais = XLSX.utils.sheet_to_json(ws);
-        atualizarFiltros(dadosGlobais);
+        preencherFiltros();
     };
 
     reader.readAsArrayBuffer(file);
 }
 
-window.gerarGraficos = function(){
-    const filtrado = filtrarDados();
-    calcularIndicadores(filtrado);
+function preencherFiltros(){
+
+    preencher("filtroPeriodo",[periodoArquivo]);
+    preencher("filtroFilial", dados.map(d=>d["Filial"] || d["A"]));
+    preencher("filtroPatrimonio", dados.map(d=>d["Patrimônio"] || d["B"]));
+    preencher("filtroSerie", dados.map(d=>d["Série"] || d["C"]));
+    preencher("filtroEquipamento", dados.map(d=>d["Equipamento"] || d["D"]));
+    preencher("filtroModelo", dados.map(d=>d["Modelo"] || d["F"]));
+    preencher("filtroCliente", dados.map(d=>d["Cliente"] || d["N"]));
 }
 
-function filtrarDados(){
+function preencher(id, valores){
 
-    const cliente = filtroCliente.value;
-    const tag = filtroTag.value;
-    const tipo = filtroTipo.value;
-    const modelo = filtroModelo.value;
-    const serie = filtroSerie.value;
+    const sel = document.getElementById(id);
+    sel.innerHTML = "<option value=''>Todos</option>";
 
-    return dadosGlobais.filter(l =>
-
-        (!cliente || get(l,["Cliente","Solicitante / Localização"]) == cliente) &&
-        (!tag || get(l,["Patrimônio","TAG"]) == tag) &&
-        (!tipo || get(l,["Tipo","Tipo de Tecnologia"]) == tipo) &&
-        (!modelo || get(l,["Modelo"]) == modelo) &&
-        (!serie || get(l,["Série","Nº Série"]) == serie)
-    );
+    [...new Set(valores)].filter(v=>v).sort().forEach(v=>{
+        sel.innerHTML += `<option>${v}</option>`;
+    });
 }
 
-function atualizarFiltros(dados){
+function filtrar(){
 
-    preencherSelect("filtroCliente", dados, ["Cliente","Solicitante / Localização"]);
-    preencherSelect("filtroTag", dados, ["Patrimônio","TAG"]);
-    preencherSelect("filtroTipo", dados, ["Tipo","Tipo de Tecnologia"]);
-    preencherSelect("filtroModelo", dados, ["Modelo"]);
-    preencherSelect("filtroSerie", dados, ["Série","Nº Série"]);
+    return dados.filter(l=>{
+
+        return (!filtroFilial.value || l["Filial"]==filtroFilial.value)
+        && (!filtroPatrimonio.value || l["Patrimônio"]==filtroPatrimonio.value)
+        && (!filtroSerie.value || l["Série"]==filtroSerie.value)
+        && (!filtroEquipamento.value || l["Equipamento"]==filtroEquipamento.value)
+        && (!filtroModelo.value || l["Modelo"]==filtroModelo.value)
+        && (!filtroCliente.value || l["Cliente"]==filtroCliente.value);
+    });
 }
 
-function preencherSelect(id, dados, colunas){
+function gerarRelatorio(){
 
-    const select = document.getElementById(id);
-    const valorAtual = select.value;
+    charts.forEach(c=>c.destroy());
+    charts=[];
 
-    select.innerHTML = '<option value="">Todos</option>';
+    const base = filtrar();
 
-    const valores = [...new Set(
-        dados.map(l => get(l,colunas)).filter(v => v)
-    )];
+    let fat=0, man=0, fin=0, imp=0, adm=0;
 
-    valores.sort().forEach(v=>{
-        select.innerHTML += `<option value="${v}">${v}</option>`;
+    const fatCliente={}, manCliente={}, resCliente={}, equip={};
+
+    base.forEach(l=>{
+
+        const faturamento = num(l["Faturamento"] || l["H"]);
+        const manut = num(l["Manutenção"] || l["I"]);
+        const financ = num(l["Financiamento"] || l["J"]);
+        const imposto = num(l["Impostos"] || l["K"]);
+        const tx = num(l["Tx Adm"] || l["L"]);
+
+        const cliente = l["Cliente"] || "Não informado";
+        const tipo = l["Equipamento"] || "Outros";
+
+        const resultado = faturamento - manut - financ - tx;
+
+        fat+=faturamento;
+        man+=manut;
+        fin+=financ;
+        imp+=imposto;
+        adm+=tx;
+
+        fatCliente[cliente]=(fatCliente[cliente]||0)+faturamento;
+        manCliente[cliente]=(manCliente[cliente]||0)+manut;
+        resCliente[cliente]=(resCliente[cliente]||0)+resultado;
+        equip[tipo]=(equip[tipo]||0)+faturamento;
     });
 
-    select.value = valorAtual;
+    document.getElementById("cardFat").innerText = fat.toLocaleString("pt-BR");
+    document.getElementById("cardMan").innerText = man.toLocaleString("pt-BR");
+    document.getElementById("cardFin").innerText = fin.toLocaleString("pt-BR");
+    document.getElementById("cardImp").innerText = imp.toLocaleString("pt-BR");
+    document.getElementById("cardAdm").innerText = adm.toLocaleString("pt-BR");
+    document.getElementById("cardRes").innerText = (fat-man-fin-adm).toLocaleString("pt-BR");
+
+    criarGrafico("graficoEquipamento","bar",equip);
+    criarGrafico("graficoFatCliente","pie",fatCliente);
+    criarGrafico("graficoManCliente","pie",manCliente);
+    criarGrafico("graficoResCliente","pie",resCliente);
 }
 
-function calcularIndicadores(dados){
+function criarGrafico(id,tipo,dados){
 
-    let totalEquip = 0;
-
-    const porCliente = {};
-    const porModelo = {};
-
-    dados.forEach(l =>{
-
-        const faturamento = numero(get(l,["Faturamento","Receita","Total Receita"]));
-        const manutencao = numero(get(l,["Manutenção","Custo Manutenção"]));
-        const financiamento = numero(get(l,["Financiamento"]));
-        const impostos = numero(get(l,["Impostos"]));
-        const adm = numero(get(l,["Taxa Adm","Tx Adm"]));
-
-        const resultado = faturamento - manutencao - financiamento - impostos - adm;
-
-        if(faturamento || manutencao){
-
-            totalEquip++;
-
-            const cliente = get(l,["Cliente","Solicitante / Localização"]) || "Não informado";
-            porCliente[cliente] = (porCliente[cliente] || 0) + resultado;
-
-            const modelo = get(l,["Modelo"]) || "Não informado";
-            porModelo[modelo] = (porModelo[modelo] || 0) + 1;
-        }
+    const chart = new Chart(document.getElementById(id),{
+        type:tipo,
+        data:{
+            labels:Object.keys(dados),
+            datasets:[{
+                data:Object.values(dados)
+            }]
+        },
+        options:{responsive:true}
     });
 
-    document.getElementById("totalAtendimento").innerText = totalEquip;
-
-    const tbody = document.getElementById("tabelaModelos");
-    tbody.innerHTML = "";
-
-    for(const m in porModelo){
-        tbody.innerHTML += `
-        <tr>
-            <td>${m}</td>
-            <td>${porModelo[m]}</td>
-        </tr>`;
-    }
-
-    criarGraficosClientes(porCliente);
+    charts.push(chart);
 }
-
-function criarGraficosClientes(dados){
-
-    graficos.forEach(g => g.destroy());
-    graficos = [];
-
-    graficosClientes.innerHTML = "";
-
-    for(const cliente in dados){
-
-        const card = document.createElement("div");
-        card.className = "card";
-
-        const h = document.createElement("h3");
-        h.innerText = "Resultado Cliente - " + cliente;
-
-        const canvas = document.createElement("canvas");
-
-        card.appendChild(h);
-        card.appendChild(canvas);
-        graficosClientes.appendChild(card);
-
-        const g = new Chart(canvas,{
-            type:"bar",
-            data:{
-                labels:["Resultado"],
-                datasets:[{
-                    data:[dados[cliente]]
-                }]
-            },
-            options:{
-                responsive:true,
-                plugins:{legend:{display:false}}
-            }
-        });
-
-        graficos.push(g);
-    }
-}
-
-/* FIREBASE */
-
-import { initializeApp } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-app.js";
-import { getAuth } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-auth.js";
-
-const firebaseConfig = {
-  apiKey: "AIzaSyAAF5FLl8xawkivYCcjQGJyb2jo1_A1V7g",
-  authDomain: "tractorbel-8ceb8.firebaseapp.com",
-  projectId: "tractorbel-8ceb8",
-  storageBucket: "tractorbel-8ceb8.firebasestorage.app",
-  messagingSenderId: "720471893475",
-  appId: "1:720471893475:web:e6eb1d64cae5f7aa27ecd6"
-};
-
-const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
 
 </script>
 
