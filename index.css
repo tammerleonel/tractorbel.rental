@@ -211,3 +211,78 @@ h3{
         text-align: center;
     }
 }
+
+/* ===== MELHORIAS RELATÓRIO FINANCEIRO ===== */
+
+/* Layout de cards no relatório */
+.cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 15px;
+    margin-bottom: 20px;
+}
+
+/* Cartões individuais */
+.card {
+    background: white;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.12);
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+
+/* Valores totais */
+.total {
+    font-size: 22px;
+    font-weight: bold;
+    color: green;
+    margin-top: 8px;
+}
+
+/* Inputs, selects e botões */
+select, button, input[type="date"], input[type="file"] {
+    padding: 8px 10px;
+    margin-right: 10px;
+    margin-bottom: 10px;
+    border-radius: 6px;
+    border: 1px solid #ccc;
+    font-size: 14px;
+}
+
+/* Select múltiplo */
+.multi {
+    width: 220px;
+    height: 120px;
+}
+
+/* Gráficos */
+canvas {
+    background: white;
+    padding: 15px;
+    border-radius: 10px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+
+/* Responsividade filtros e cards */
+@media (max-width: 900px) {
+    .cards {
+        grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    }
+
+    .multi {
+        width: 100%;
+        height: 100px;
+    }
+}
+
+@media (max-width: 600px) {
+    select, button, input[type="date"], input[type="file"] {
+        width: 100%;
+        margin-right: 0;
+    }
+}
