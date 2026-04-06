@@ -103,7 +103,6 @@ window.carregarDados = function(){
 
             if(!isNaN(dataLinha)){
 
-                // zerar hora
                 dataLinha.setHours(0,0,0,0);
 
                 dadosGlobais.push({
@@ -245,6 +244,10 @@ function calcularTotais(dados){
     document.getElementById("cardFat").innerText = fat.toLocaleString('pt-BR',{style:'currency',currency:'BRL'});
     document.getElementById("cardMan").innerText = man.toLocaleString('pt-BR',{style:'currency',currency:'BRL'});
     document.getElementById("cardRes").innerText = res.toLocaleString('pt-BR',{style:'currency',currency:'BRL'});
+    document.getElementById("cardFin").innerText = fin.toLocaleString('pt-BR',{style:'currency',currency:'BRL'});
+    document.getElementById("cardImp").innerText = imp.toLocaleString('pt-BR',{style:'currency',currency:'BRL'});
+    document.getElementById("cardTx").innerText = tx.toLocaleString('pt-BR',{style:'currency',currency:'BRL'});
+    document.getElementById("cardMau").innerText = mau.toLocaleString('pt-BR',{style:'currency',currency:'BRL'});
 }
 
 // ------------------- GRÁFICOS -------------------
@@ -276,12 +279,12 @@ function gerarGraficos(dados){
         data:{labels:Object.keys(fatCliente),datasets:[{data:Object.values(fatCliente)}]}
     }));
 
-    graficos.push(new Chart(graficoManutencaoCliente,{
+    graficos.push(new Chart(graficoManutencao,{
         type:'pie',
         data:{labels:Object.keys(manCliente),datasets:[{data:Object.values(manCliente)}]}
     }));
 
-    graficos.push(new Chart(graficoDeficitCliente,{
+    graficos.push(new Chart(graficoDeficit,{
         type:'bar',
         data:{labels:Object.keys(deficitCliente),datasets:[{data:Object.values(deficitCliente)}]}
     }));

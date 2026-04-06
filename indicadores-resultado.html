@@ -92,6 +92,10 @@ Gerar Relatório
 <div class="card"><h4>Faturamento</h4><div class="total" id="cardFat">0</div></div>
 <div class="card"><h4>Manutenção</h4><div class="total" id="cardMan">0</div></div>
 <div class="card"><h4>Resultado</h4><div class="total" id="cardRes">0</div></div>
+<div class="card"><h4>Financiamento</h4><div class="total" id="cardFin">0</div></div>
+<div class="card"><h4>Impostos</h4><div class="total" id="cardImp">0</div></div>
+<div class="card"><h4>Tx Administrativa</h4><div class="total" id="cardTx">0</div></div>
+<div class="card"><h4>MAU</h4><div class="total" id="cardMau">0</div></div>
 </div>
 
 <div class="card">
@@ -230,7 +234,7 @@ function gerarRelatorio(){
         (!multi("filtroCliente").length || multi("filtroCliente").includes(d.cliente))
     );
 
-    let fat=0,man=0,res=0;
+    let fat=0,man=0,res=0,fin=0,imp=0,tx=0,mau=0;
 
     const equip={},cliente={},manCliente={},deficit={};
 
@@ -239,6 +243,10 @@ function gerarRelatorio(){
         fat+=d.faturamento;
         man+=d.manutencao;
         res+=d.resultado;
+        fin+=d.financiamento;
+        imp+=d.impostos;
+        tx+=d.tx;
+        mau+=d.mau;
 
         equip[d.equipamento]=(equip[d.equipamento]||0)+d.faturamento;
         cliente[d.cliente]=(cliente[d.cliente]||0)+d.faturamento;
@@ -252,6 +260,10 @@ function gerarRelatorio(){
     cardFat.innerText=fat.toLocaleString('pt-BR',{style:'currency',currency:'BRL'});
     cardMan.innerText=man.toLocaleString('pt-BR',{style:'currency',currency:'BRL'});
     cardRes.innerText=res.toLocaleString('pt-BR',{style:'currency',currency:'BRL'});
+    cardFin.innerText=fin.toLocaleString('pt-BR',{style:'currency',currency:'BRL'});
+    cardImp.innerText=imp.toLocaleString('pt-BR',{style:'currency',currency:'BRL'});
+    cardTx.innerText=tx.toLocaleString('pt-BR',{style:'currency',currency:'BRL'});
+    cardMau.innerText=mau.toLocaleString('pt-BR',{style:'currency',currency:'BRL'});
 
     charts.forEach(c=>c.destroy());
     charts=[];
