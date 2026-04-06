@@ -1,3 +1,106 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Relatório custo operacional por Cliente</title>
+
+<script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<style>
+body{
+    font-family: Arial;
+    background:#f5f6fa;
+    padding:20px;
+}
+
+.card{
+    background:white;
+    padding:20px;
+    margin-bottom:20px;
+    border-radius:10px;
+    box-shadow:0 2px 5px rgba(0,0,0,0.1);
+}
+
+.total{
+    font-size:28px;
+    font-weight:bold;
+    color:green;
+}
+
+table{
+    width:100%;
+    border-collapse:collapse;
+}
+
+th, td{
+    padding:10px;
+    border-bottom:1px solid #ddd;
+}
+
+th{
+    background:green;
+    color:white;
+}
+
+select, button{
+    padding:8px;
+    margin-right:10px;
+    margin-bottom:10px;
+}
+</style>
+
+</head>
+
+<body>
+
+<h2>Resultado Cliente</h2>
+
+<input type="file" id="upload" accept=".xls,.xlsx">
+<button onclick="carregarDados()">Carregar Dados</button>
+
+<br><br>
+
+<label>Cliente</label>
+<select id="filtroCliente"><option value="">Todos</option></select>
+
+<label>Patrimônio</label>
+<select id="filtroTag"><option value="">Todos</option></select>
+
+<label>Tipo de equipamento</label>
+<select id="filtroTipo"><option value="">Todos</option></select>
+
+<label>Modelo</label>
+<select id="filtroModelo"><option value="">Todos</option></select>
+
+<label>Nº Série</label>
+<select id="filtroSerie"><option value="">Todos</option></select>
+
+<br>
+
+<button onclick="gerarGraficos()">Gerar Gráficos</button>
+
+<div class="card">
+<h3>Total de equipamentos com despesas lançadas</h3>
+<div class="total" id="totalAtendimento">0</div>
+</div>
+
+<div class="card">
+<h3>Total por Modelo</h3>
+<table>
+<thead>
+<tr>
+<th>Modelo</th>
+<th>Quantidade</th>
+</tr>
+</thead>
+<tbody id="tabelaModelos"></tbody>
+</table>
+</div>
+
+<div id="graficosClientes"></div>
+
 <script type="module">
 
 let dadosGlobais = [];
@@ -16,7 +119,6 @@ function get(linha, nomes){
     return null;
 }
 
-/* CARREGAR PLANILHA */
 window.carregarDados = function(){
 
     const file = document.getElementById('upload').files[0];
@@ -37,13 +139,11 @@ window.carregarDados = function(){
     reader.readAsArrayBuffer(file);
 }
 
-/* GERAR */
 window.gerarGraficos = function(){
     const filtrado = filtrarDados();
     calcularIndicadores(filtrado);
 }
 
-/* FILTROS */
 function filtrarDados(){
 
     const cliente = filtroCliente.value;
@@ -62,7 +162,6 @@ function filtrarDados(){
     );
 }
 
-/* ATUALIZA FILTROS */
 function atualizarFiltros(dados){
 
     preencherSelect("filtroCliente", dados, ["Cliente","Solicitante / Localização"]);
@@ -90,7 +189,6 @@ function preencherSelect(id, dados, colunas){
     select.value = valorAtual;
 }
 
-/* CALCULAR */
 function calcularIndicadores(dados){
 
     let totalEquip = 0;
@@ -136,7 +234,6 @@ function calcularIndicadores(dados){
     criarGraficosClientes(porCliente);
 }
 
-/* GRAFICOS */
 function criarGraficosClientes(dados){
 
     graficos.forEach(g => g.destroy());
@@ -194,3 +291,6 @@ const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 
 </script>
+
+</body>
+</html>
