@@ -70,10 +70,14 @@ function converterNumero(valor){
     return parseFloat(valor.toString().replace(/\./g,'').replace(',','.')) || 0;
 }
 
-// ----------- CARREGAMENTO OTIMIZADO -----------
+// ----------- CARREGAMENTO OTIMIZADO (SEM TRAVAR) -----------
 window.carregarDados = function(){
 
     const input = document.getElementById('upload');
+    const status = document.getElementById("statusCarga");
+    const btnCarregar = document.getElementById("btnCarregar");
+    const btnRelatorio = document.getElementById("btnRelatorio");
+
     if(!input){
         alert("Input upload não encontrado");
         return;
@@ -85,7 +89,9 @@ window.carregarDados = function(){
         return;
     }
 
-    document.body.style.cursor = "wait";
+    btnCarregar.disabled = true;
+    if(btnRelatorio) btnRelatorio.style.display = "none";
+    if(status) status.innerText = "Carregando planilha...";
 
     const reader = new FileReader();
 
@@ -110,29 +116,42 @@ window.carregarDados = function(){
 
                 function processarLote(){
 
-                    const limite = Math.min(i + 500, json.length);
+                    const limite = Math.min(i + 300, json.length);
 
                     for(; i < limite; i++){
                         dadosGlobais.push(normalizarChaves(json[i]));
+                    }
+
+                    if(status){
+                        status.innerText = "Processando " + i + " de " + json.length;
                     }
 
                     if(i < json.length){
                         setTimeout(processarLote, 0);
                     }else{
                         atualizarFiltros(dadosGlobais);
-                        document.body.style.cursor = "default";
-                        alert("Dados carregados: " + dadosGlobais.length);
+
+                        if(status){
+                            status.innerText = "Dados carregados ✔";
+                        }
+
+                        if(btnRelatorio){
+                            btnRelatorio.style.display = "inline-block";
+                        }
+
+                        btnCarregar.disabled = false;
                     }
                 }
 
                 processarLote();
 
             }catch(e){
-                document.body.style.cursor = "default";
+                btnCarregar.disabled = false;
+                if(status) status.innerText = "";
                 alert("Erro ao ler planilha: " + e.message);
             }
 
-        },100);
+        },50);
     };
 
     reader.readAsArrayBuffer(file);
