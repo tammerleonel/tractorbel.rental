@@ -70,22 +70,13 @@ function converterNumero(valor){
     return parseFloat(valor.toString().replace(/\./g,'').replace(',','.')) || 0;
 }
 
-// ----------- CARREGAMENTO OTIMIZADO (SEM TRAVAR) -----------
+// ----------- CARREGAMENTO OTIMIZADO -----------
 window.carregarDados = function(){
 
     const input = document.getElementById('upload');
     const status = document.getElementById("statusCarga");
     const btnCarregar = document.getElementById("btnCarregar");
-
-    let btnRelatorio = document.getElementById("btnRelatorio");
-    if(!btnRelatorio){
-        btnRelatorio = document.getElementById("btnGerar");
-    }
-
-    if(!input){
-        alert("Input upload não encontrado");
-        return;
-    }
+    const btnRelatorio = document.getElementById("btnRelatorio");
 
     const file = input.files[0];
     if(!file){
@@ -93,9 +84,9 @@ window.carregarDados = function(){
         return;
     }
 
-    if(btnCarregar) btnCarregar.disabled = true;
-    if(btnRelatorio) btnRelatorio.style.display = "none";
-    if(status) status.innerText = "Carregando planilha...";
+    btnCarregar.disabled = true;
+    btnRelatorio.style.display = "none";
+    status.innerText = "Carregando planilha...";
 
     const reader = new FileReader();
 
@@ -103,63 +94,41 @@ window.carregarDados = function(){
 
         setTimeout(function(){
 
-            try{
+            const data = new Uint8Array(event.target.result);
+            const workbook = XLSX.read(data, {type:'array'});
+            const sheet = workbook.Sheets[workbook.SheetNames[0]];
 
-                const data = new Uint8Array(event.target.result);
-                const workbook = XLSX.read(data, {type:'array'});
-                const sheet = workbook.Sheets[workbook.SheetNames[0]];
+            const json = XLSX.utils.sheet_to_json(sheet,{
+                raw:true,
+                defval:"",
+                blankrows:false
+            });
 
-                const json = XLSX.utils.sheet_to_json(sheet,{
-                    raw:true,
-                    defval:"",
-                    blankrows:false
-                });
+            dadosGlobais = [];
+            let i = 0;
 
-                dadosGlobais = [];
-                let i = 0;
+            function processarLote(){
 
-                function processarLote(){
+                const limite = Math.min(i + 300, json.length);
 
-                    const limite = Math.min(i + 300, json.length);
-
-                    for(; i < limite; i++){
-                        dadosGlobais.push(normalizarChaves(json[i]));
-                    }
-
-                    if(status){
-                        status.innerText = "Processando " + i + " de " + json.length;
-                    }
-
-                    if(i < json.length){
-                        setTimeout(processarLote, 0);
-                    }else{
-
-                        console.log("Finalizado processamento:", dadosGlobais.length);
-
-                        atualizarFiltros(dadosGlobais);
-
-                        if(status){
-                            status.innerText = "Dados carregados ✔";
-                        }
-
-                        const btn = document.getElementById("btnRelatorio") || document.getElementById("btnGerar");
-                        if(btn){
-                            btn.style.display = "inline-block";
-                        }else{
-                            console.warn("Botão gerar não encontrado");
-                        }
-
-                        if(btnCarregar) btnCarregar.disabled = false;
-                    }
+                for(; i < limite; i++){
+                    dadosGlobais.push(normalizarChaves(json[i]));
                 }
 
-                processarLote();
+                status.innerText = "Processando " + i + " de " + json.length;
 
-            }catch(e){
-                if(btnCarregar) btnCarregar.disabled = false;
-                if(status) status.innerText = "";
-                alert("Erro ao ler planilha: " + e.message);
+                if(i < json.length){
+                    setTimeout(processarLote, 0);
+                }else{
+
+                    atualizarFiltros(dadosGlobais);
+                    status.innerText = "Dados carregados ✔";
+                    btnRelatorio.style.display = "inline-block";
+                    btnCarregar.disabled = false;
+                }
             }
+
+            processarLote();
 
         },50);
     };
@@ -167,7 +136,8 @@ window.carregarDados = function(){
     reader.readAsArrayBuffer(file);
 };
 
-window.gerarGraficos = function(){
+// BOTÃO DO HTML CHAMA ESTE
+window.gerarRelatorio = function(){
     const filtrado = filtrarDados();
     calcularTotais(filtrado);
 };
@@ -183,109 +153,72 @@ function atualizarFiltros(dados){
 function preencherSelect(id, dados, coluna){
 
     const select = document.getElementById(id);
-    if(!select){
-        console.warn("Filtro não encontrado:", id);
-        return;
-    }
+    if(!select) return;
 
-    const valorAtual = select.value;
-    select.innerHTML = '<option value="">Todos</option>';
+    const valores = [...new Set(dados.map(l => l[coluna]).filter(Boolean))];
 
-    const valores = [];
-    dados.forEach(function(l){
-        if(l[coluna] && valores.indexOf(l[coluna]) === -1){
-            valores.push(l[coluna]);
-        }
-    });
-
+    select.innerHTML = "";
     valores.sort();
 
-    valores.forEach(function(v){
-        select.innerHTML += '<option value="' + v + '">' + v + '</option>';
+    valores.forEach(v=>{
+        const opt = document.createElement("option");
+        opt.value = v;
+        opt.text = v;
+        select.appendChild(opt);
     });
+}
 
-    select.value = valorAtual;
+function getMultiValues(select){
+    return [...select.selectedOptions].map(o=>o.value);
 }
 
 function filtrarDados(){
 
-    const clienteEl = document.getElementById("filtroCliente");
-    const tagEl = document.getElementById("filtroTag");
-    const tipoEl = document.getElementById("filtroTipo");
-    const modeloEl = document.getElementById("filtroModelo");
-    const serieEl = document.getElementById("filtroSerie");
-
-    const cliente = clienteEl ? clienteEl.value : "";
-    const tag = tagEl ? tagEl.value : "";
-    const tipo = tipoEl ? tipoEl.value : "";
-    const modelo = modeloEl ? modeloEl.value : "";
-    const serie = serieEl ? serieEl.value : "";
+    const cliente = getMultiValues(document.getElementById("filtroCliente"));
+    const tag = getMultiValues(document.getElementById("filtroTag"));
+    const tipo = getMultiValues(document.getElementById("filtroTipo"));
+    const modelo = getMultiValues(document.getElementById("filtroModelo"));
+    const serie = getMultiValues(document.getElementById("filtroSerie"));
 
     return dadosGlobais.filter(function(linha){
-        return (!cliente || linha["Solicitante / Localização"] == cliente) &&
-               (!tag || linha["TAG"] == tag) &&
-               (!tipo || linha["Tipo de Tecnologia"] == tipo) &&
-               (!modelo || linha["Modelo"] == modelo) &&
-               (!serie || linha["Nº Série"] == serie);
+        return (!cliente.length || cliente.includes(linha["Solicitante / Localização"])) &&
+               (!tag.length || tag.includes(linha["TAG"])) &&
+               (!tipo.length || tipo.includes(linha["Tipo de Tecnologia"])) &&
+               (!modelo.length || modelo.includes(linha["Modelo"])) &&
+               (!serie.length || serie.includes(linha["Nº Série"]));
     });
 }
 
 function calcularTotais(dados){
 
-    const totaisModelo = {};
     const totaisCliente = {};
-    let totalEquipamentos = 0;
 
     dados.forEach(function(linha){
 
         const total = converterNumero(linha["Total"]);
+        const cliente = linha["Solicitante / Localização"] || "Não informado";
 
-        if(total > 0){
-
-            totalEquipamentos++;
-
-            const modelo = linha["Modelo"] || "Não informado";
-            totaisModelo[modelo] = (totaisModelo[modelo] || 0) + 1;
-
-            const cliente = linha["Solicitante / Localização"] || "Não informado";
-            totaisCliente[cliente] = (totaisCliente[cliente] || 0) + total;
-        }
+        totaisCliente[cliente] = (totaisCliente[cliente] || 0) + total;
     });
-
-    const totalEl = document.getElementById("totalAtendimento");
-    if(totalEl) totalEl.innerText = totalEquipamentos;
-
-    const tbody = document.getElementById("tabelaModelos");
-    if(tbody){
-        tbody.innerHTML = "";
-        for(const modelo in totaisModelo){
-            tbody.innerHTML += '<tr><td>' + modelo + '</td><td>' + totaisModelo[modelo] + '</td></tr>';
-        }
-    }
 
     criarGraficosClientes(totaisCliente);
 }
 
 function criarGraficosClientes(dados){
 
-    graficos.forEach(function(g){ g.destroy(); });
+    graficos.forEach(g => g.destroy());
     graficos = [];
 
     const container = document.getElementById("graficosClientes");
-    if(!container) return;
-
     container.innerHTML = "";
 
     for(const cliente in dados){
-
-        const valor = dados[cliente];
-        if(valor <= 0) continue;
 
         const card = document.createElement("div");
         card.className = "card";
 
         const titulo = document.createElement("h3");
-        titulo.innerText = "Resultado Cliente - " + cliente;
+        titulo.innerText = cliente;
 
         const canvas = document.createElement("canvas");
 
@@ -293,12 +226,12 @@ function criarGraficosClientes(dados){
         card.appendChild(canvas);
         container.appendChild(card);
 
-        const grafico = new Chart(canvas,{
+        graficos.push(new Chart(canvas,{
             type:'bar',
             data:{
                 labels:["Total"],
                 datasets:[{
-                    data:[valor]
+                    data:[dados[cliente]]
                 }]
             },
             options:{
@@ -307,8 +240,6 @@ function criarGraficosClientes(dados){
                     legend:{display:false}
                 }
             }
-        });
-
-        graficos.push(grafico);
+        }));
     }
 }
