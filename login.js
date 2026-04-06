@@ -1,4 +1,3 @@
-```javascript
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-app.js";
 import { 
   getAuth, 
@@ -40,15 +39,15 @@ window.login = function() {
   const senha = document.getElementById("senha").value;
 
   signInWithEmailAndPassword(auth, email, senha)
-    .then(() => mostrarConteudo(true))
-    .catch(() => alert("Usuário ou senha incorretos"));
+    .then(function(){ mostrarConteudo(true); })
+    .catch(function(){ alert("Usuário ou senha incorretos"); });
 };
 
 window.logout = function() {
   signOut(auth);
 };
 
-onAuthStateChanged(auth, (user) => {
+onAuthStateChanged(auth, function(user){
   mostrarConteudo(user);
 });
 
@@ -58,7 +57,7 @@ let graficos = [];
 
 function normalizarChaves(obj){
     const novo = {};
-    Object.keys(obj).forEach(k=>{
+    Object.keys(obj).forEach(function(k){
         const chave = k.trim();
         novo[chave] = obj[k];
     });
@@ -71,14 +70,20 @@ function converterNumero(valor){
     return parseFloat(valor.toString().replace(/\./g,'').replace(',','.')) || 0;
 }
 
-// ----------- CARREGAMENTO OTIMIZADO -----------
+// ----------- CARREGAMENTO -----------
 window.carregarDados = function(){
 
     const input = document.getElementById('upload');
-    if(!input) return alert("Input upload não encontrado");
+    if(!input){
+        alert("Input upload não encontrado");
+        return;
+    }
 
     const file = input.files[0];
-    if(!file) return alert("Selecione um arquivo");
+    if(!file){
+        alert("Selecione um arquivo");
+        return;
+    }
 
     document.body.style.cursor = "wait";
 
@@ -86,7 +91,7 @@ window.carregarDados = function(){
 
     reader.onload = function(event){
 
-        setTimeout(()=>{
+        setTimeout(function(){
 
             const data = new Uint8Array(event.target.result);
             const workbook = XLSX.read(data, {type:'array'});
@@ -97,7 +102,7 @@ window.carregarDados = function(){
                 defval:""
             });
 
-            dadosGlobais = json.map(l => normalizarChaves(l));
+            dadosGlobais = json.map(function(l){ return normalizarChaves(l); });
 
             atualizarFiltros(dadosGlobais);
 
@@ -132,9 +137,17 @@ function preencherSelect(id, dados, coluna){
     const valorAtual = select.value;
     select.innerHTML = '<option value="">Todos</option>';
 
-    const valores = [...new Set(dados.map(l => l[coluna]).filter(v => v))];
-    valores.sort().forEach(v=>{
-        select.innerHTML += `<option value="${v}">${v}</option>`;
+    const valores = [];
+    dados.forEach(function(l){
+        if(l[coluna] && valores.indexOf(l[coluna]) === -1){
+            valores.push(l[coluna]);
+        }
+    });
+
+    valores.sort();
+
+    valores.forEach(function(v){
+        select.innerHTML += '<option value="' + v + '">' + v + '</option>';
     });
 
     select.value = valorAtual;
@@ -154,7 +167,7 @@ function filtrarDados(){
     const modelo = modeloEl ? modeloEl.value : "";
     const serie = serieEl ? serieEl.value : "";
 
-    return dadosGlobais.filter(linha =>{
+    return dadosGlobais.filter(function(linha){
         return (!cliente || linha["Solicitante / Localização"] == cliente) &&
                (!tag || linha["TAG"] == tag) &&
                (!tipo || linha["Tipo de Tecnologia"] == tipo) &&
@@ -169,7 +182,7 @@ function calcularTotais(dados){
     const totaisCliente = {};
     let totalEquipamentos = 0;
 
-    dados.forEach(linha => {
+    dados.forEach(function(linha){
 
         const total = converterNumero(linha["Total"]);
 
@@ -192,7 +205,7 @@ function calcularTotais(dados){
     if(tbody){
         tbody.innerHTML = "";
         for(const modelo in totaisModelo){
-            tbody.innerHTML += `<tr><td>${modelo}</td><td>${totaisModelo[modelo]}</td></tr>`;
+            tbody.innerHTML += '<tr><td>' + modelo + '</td><td>' + totaisModelo[modelo] + '</td></tr>';
         }
     }
 
@@ -201,7 +214,7 @@ function calcularTotais(dados){
 
 function criarGraficosClientes(dados){
 
-    graficos.forEach(g => g.destroy());
+    graficos.forEach(function(g){ g.destroy(); });
     graficos = [];
 
     const container = document.getElementById("graficosClientes");
@@ -245,4 +258,3 @@ function criarGraficosClientes(dados){
         graficos.push(grafico);
     }
 }
-```
