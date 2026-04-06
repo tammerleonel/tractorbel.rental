@@ -9,6 +9,14 @@ function numero(v){
     return parseFloat(v.toString().replace(/\./g,'').replace(',','.')) || 0;
 }
 
+function get(linha, nomes){
+    for(const n of nomes){
+        if(linha[n] !== undefined) return linha[n];
+    }
+    return null;
+}
+
+/* CARREGAR PLANILHA */
 window.carregarDados = function(){
 
     const file = document.getElementById('upload').files[0];
@@ -29,11 +37,13 @@ window.carregarDados = function(){
     reader.readAsArrayBuffer(file);
 }
 
+/* GERAR */
 window.gerarGraficos = function(){
     const filtrado = filtrarDados();
     calcularIndicadores(filtrado);
 }
 
+/* FILTROS */
 function filtrarDados(){
 
     const cliente = filtroCliente.value;
@@ -44,35 +54,57 @@ function filtrarDados(){
 
     return dadosGlobais.filter(l =>
 
-        (!cliente || l["Cliente"] == cliente) &&
-        (!tag || l["Patrimônio"] == tag) &&
-        (!tipo || l["Tipo"] == tipo) &&
-        (!modelo || l["Modelo"] == modelo) &&
-        (!serie || l["Série"] == serie)
+        (!cliente || get(l,["Cliente","Solicitante / Localização"]) == cliente) &&
+        (!tag || get(l,["Patrimônio","TAG"]) == tag) &&
+        (!tipo || get(l,["Tipo","Tipo de Tecnologia"]) == tipo) &&
+        (!modelo || get(l,["Modelo"]) == modelo) &&
+        (!serie || get(l,["Série","Nº Série"]) == serie)
     );
 }
 
+/* ATUALIZA FILTROS */
+function atualizarFiltros(dados){
+
+    preencherSelect("filtroCliente", dados, ["Cliente","Solicitante / Localização"]);
+    preencherSelect("filtroTag", dados, ["Patrimônio","TAG"]);
+    preencherSelect("filtroTipo", dados, ["Tipo","Tipo de Tecnologia"]);
+    preencherSelect("filtroModelo", dados, ["Modelo"]);
+    preencherSelect("filtroSerie", dados, ["Série","Nº Série"]);
+}
+
+function preencherSelect(id, dados, colunas){
+
+    const select = document.getElementById(id);
+    const valorAtual = select.value;
+
+    select.innerHTML = '<option value="">Todos</option>';
+
+    const valores = [...new Set(
+        dados.map(l => get(l,colunas)).filter(v => v)
+    )];
+
+    valores.sort().forEach(v=>{
+        select.innerHTML += `<option value="${v}">${v}</option>`;
+    });
+
+    select.value = valorAtual;
+}
+
+/* CALCULAR */
 function calcularIndicadores(dados){
 
     let totalEquip = 0;
-
-    let totalFaturamento = 0;
-    let totalManutencao = 0;
-    let totalFinanciamento = 0;
-    let totalImpostos = 0;
-    let totalAdm = 0;
-    let totalResultado = 0;
 
     const porCliente = {};
     const porModelo = {};
 
     dados.forEach(l =>{
 
-        const faturamento = numero(l["Faturamento"]);
-        const manutencao = numero(l["Manutenção"]);
-        const financiamento = numero(l["Financiamento"]);
-        const impostos = numero(l["Impostos"]);
-        const adm = numero(l["Tx Adm"] || l["Taxa Adm"]);
+        const faturamento = numero(get(l,["Faturamento","Receita","Total Receita"]));
+        const manutencao = numero(get(l,["Manutenção","Custo Manutenção"]));
+        const financiamento = numero(get(l,["Financiamento"]));
+        const impostos = numero(get(l,["Impostos"]));
+        const adm = numero(get(l,["Taxa Adm","Tx Adm"]));
 
         const resultado = faturamento - manutencao - financiamento - impostos - adm;
 
@@ -80,23 +112,15 @@ function calcularIndicadores(dados){
 
             totalEquip++;
 
-            totalFaturamento += faturamento;
-            totalManutencao += manutencao;
-            totalFinanciamento += financiamento;
-            totalImpostos += impostos;
-            totalAdm += adm;
-            totalResultado += resultado;
-
-            const cliente = l["Cliente"] || "Não informado";
+            const cliente = get(l,["Cliente","Solicitante / Localização"]) || "Não informado";
             porCliente[cliente] = (porCliente[cliente] || 0) + resultado;
 
-            const modelo = l["Modelo"] || "Não informado";
+            const modelo = get(l,["Modelo"]) || "Não informado";
             porModelo[modelo] = (porModelo[modelo] || 0) + 1;
         }
-
     });
 
-    totalAtendimento.innerText = totalEquip;
+    document.getElementById("totalAtendimento").innerText = totalEquip;
 
     const tbody = document.getElementById("tabelaModelos");
     tbody.innerHTML = "";
@@ -112,6 +136,7 @@ function calcularIndicadores(dados){
     criarGraficosClientes(porCliente);
 }
 
+/* GRAFICOS */
 function criarGraficosClientes(dados){
 
     graficos.forEach(g => g.destroy());
