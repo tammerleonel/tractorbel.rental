@@ -95,7 +95,6 @@ window.carregarDados = function(){
 
             let dataLinha = l[15];
 
-            // converter data excel
             if(typeof dataLinha === "number"){
                 dataLinha = new Date((dataLinha - 25569) * 86400 * 1000);
             }else{
@@ -121,27 +120,48 @@ window.carregarDados = function(){
             }
         }
 
-        // ✅ DEFINIR LIMITE DAS DATAS
+        // -------- CORREÇÃO DAS DATAS --------
         const datasValidas = dadosGlobais.map(d => d.data).filter(d => d);
 
         if(datasValidas.length){
 
-            const minData = new Date(Math.min(...datasValidas));
-            const maxData = new Date(Math.max(...datasValidas));
+            const minData = new Date(Math.min.apply(null, datasValidas));
+            const maxData = new Date(Math.max.apply(null, datasValidas));
 
-            const formatar = d => d.toISOString().split("T")[0];
+            const formatar = (d)=>{
+                const mes = String(d.getMonth()+1).padStart(2,'0');
+                const dia = String(d.getDate()).padStart(2,'0');
+                return `${d.getFullYear()}-${mes}-${dia}`;
+            };
 
             const dataInicio = document.getElementById("dataInicio");
             const dataFim = document.getElementById("dataFim");
 
-            dataInicio.min = formatar(minData);
-            dataInicio.max = formatar(maxData);
-            dataFim.min = formatar(minData);
-            dataFim.max = formatar(maxData);
+            const min = formatar(minData);
+            const max = formatar(maxData);
 
-            // preencher automaticamente
-            dataInicio.value = formatar(minData);
-            dataFim.value = formatar(maxData);
+            dataInicio.min = min;
+            dataInicio.max = max;
+            dataFim.min = min;
+            dataFim.max = max;
+
+            dataInicio.value = min;
+            dataFim.value = max;
+
+            // travar intervalo
+            dataInicio.onchange = function(){
+                dataFim.min = this.value;
+                if(dataFim.value < this.value){
+                    dataFim.value = this.value;
+                }
+            };
+
+            dataFim.onchange = function(){
+                dataInicio.max = this.value;
+                if(dataInicio.value > this.value){
+                    dataInicio.value = this.value;
+                }
+            };
         }
 
         atualizarFiltros();
