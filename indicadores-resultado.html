@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8">
@@ -6,6 +7,7 @@
 <title>Relatório Financeiro Rental</title>
 
 <script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
+
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 <style>
@@ -60,26 +62,17 @@ canvas{
 
 <br><br>
 
-<label>Período</label>
-<select id="filtroPeriodo"></select>
+<label>Filial</label> <select id="filtroFilial"></select>
 
-<label>Filial</label>
-<select id="filtroFilial"></select>
+<label>Patrimônio</label> <select id="filtroPatrimonio"></select>
 
-<label>Patrimônio</label>
-<select id="filtroPatrimonio"></select>
+<label>Série</label> <select id="filtroSerie"></select>
 
-<label>Série</label>
-<select id="filtroSerie"></select>
+<label>Equipamento</label> <select id="filtroEquipamento"></select>
 
-<label>Equipamento</label>
-<select id="filtroEquipamento"></select>
+<label>Modelo</label> <select id="filtroModelo"></select>
 
-<label>Modelo</label>
-<select id="filtroModelo"></select>
-
-<label>Cliente</label>
-<select id="filtroCliente"></select>
+<label>Cliente</label> <select id="filtroCliente"></select>
 
 <br>
 
@@ -117,7 +110,6 @@ canvas{
 <script>
 
 let dados = [];
-let periodoArquivo = "";
 let charts = [];
 
 function num(v){
@@ -129,33 +121,56 @@ function num(v){
 function carregarDados(){
 
     const file = document.getElementById("upload").files[0];
-    if(!file) return alert("Selecione o arquivo");
-
-    periodoArquivo = file.name.replace("Demonstrativo Rental","").replace(".xls","").replace(".xlsx","").trim();
+    if(!file){
+        alert("Selecione o arquivo");
+        return;
+    }
 
     const reader = new FileReader();
 
-    reader.onload = e => {
+    reader.onload = function(e){
 
-        const workbook = XLSX.read(new Uint8Array(e.target.result), {type:'array'});
-        const sheet = workbook.Sheets["Relatório Financeiro"];
-        dados = XLSX.utils.sheet_to_json(sheet);
+        try{
 
-        preencherFiltros();
+            const workbook = XLSX.read(e.target.result, {type:'binary'});
+
+            let sheetName = workbook.SheetNames.find(n => 
+                n.toLowerCase().includes("relat")
+            );
+
+            if(!sheetName){
+                alert("Aba Relatório não encontrada");
+                return;
+            }
+
+            const sheet = workbook.Sheets[sheetName];
+            dados = XLSX.utils.sheet_to_json(sheet);
+
+            if(dados.length === 0){
+                alert("Planilha sem dados");
+                return;
+            }
+
+            preencherFiltros();
+            alert("Dados carregados com sucesso");
+
+        }catch(err){
+            console.error(err);
+            alert("Erro ao ler planilha");
+        }
     };
 
-    reader.readAsArrayBuffer(file);
+    reader.readAsBinaryString(file);
 }
 
 function preencherFiltros(){
 
-    preencher("filtroPeriodo",[periodoArquivo]);
-    preencher("filtroFilial", dados.map(d=>d["Filial"] || d["A"]));
-    preencher("filtroPatrimonio", dados.map(d=>d["Patrimônio"] || d["B"]));
-    preencher("filtroSerie", dados.map(d=>d["Série"] || d["C"]));
-    preencher("filtroEquipamento", dados.map(d=>d["Equipamento"] || d["D"]));
-    preencher("filtroModelo", dados.map(d=>d["Modelo"] || d["F"]));
-    preencher("filtroCliente", dados.map(d=>d["Cliente"] || d["N"]));
+    preencher("filtroFilial", dados.map(d=>d["Filial"]));
+    preencher("filtroPatrimonio", dados.map(d=>d["Patrimônio"]));
+    preencher("filtroSerie", dados.map(d=>d["Série"]));
+    preencher("filtroEquipamento", dados.map(d=>d["Equipamento"]));
+    preencher("filtroModelo", dados.map(d=>d["Modelo"]));
+    preencher("filtroCliente", dados.map(d=>d["Cliente"]));
 }
 
 function preencher(id, valores){
@@ -163,8 +178,11 @@ function preencher(id, valores){
     const sel = document.getElementById(id);
     sel.innerHTML = "<option value=''>Todos</option>";
 
-    [...new Set(valores)].filter(v=>v).sort().forEach(v=>{
-        sel.innerHTML += `<option>${v}</option>`;
+    [...new Set(valores)]
+    .filter(v=>v)
+    .sort()
+    .forEach(v=>{
+        sel.innerHTML += `<option value="${v}">${v}</option>`;
     });
 }
 
@@ -194,11 +212,11 @@ function gerarRelatorio(){
 
     base.forEach(l=>{
 
-        const faturamento = num(l["Faturamento"] || l["H"]);
-        const manut = num(l["Manutenção"] || l["I"]);
-        const financ = num(l["Financiamento"] || l["J"]);
-        const imposto = num(l["Impostos"] || l["K"]);
-        const tx = num(l["Tx Adm"] || l["L"]);
+        const faturamento = num(l["Faturamento"]);
+        const manut = num(l["Manutenção"]);
+        const financ = num(l["Financiamento"]);
+        const imposto = num(l["Impostos"]);
+        const tx = num(l["Tx Adm"]);
 
         const cliente = l["Cliente"] || "Não informado";
         const tipo = l["Equipamento"] || "Outros";
