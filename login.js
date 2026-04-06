@@ -136,10 +136,20 @@ window.carregarDados = function(){
     reader.readAsArrayBuffer(file);
 };
 
-// BOTÃO DO HTML CHAMA ESTE
+// BOTÃO GERAR RELATÓRIO
 window.gerarRelatorio = function(){
-    const filtrado = filtrarDados();
-    calcularTotais(filtrado);
+
+    const status = document.getElementById("statusCarga");
+    if(status) status.innerText = "Gerando relatório...";
+
+    setTimeout(()=>{
+
+        const filtrado = filtrarDados();
+        calcularTotais(filtrado);
+
+        if(status) status.innerText = "Relatório gerado ✔";
+
+    },10);
 };
 
 function atualizarFiltros(dados){
@@ -169,6 +179,7 @@ function preencherSelect(id, dados, coluna){
 }
 
 function getMultiValues(select){
+    if(!select) return [];
     return [...select.selectedOptions].map(o=>o.value);
 }
 
@@ -180,12 +191,25 @@ function filtrarDados(){
     const modelo = getMultiValues(document.getElementById("filtroModelo"));
     const serie = getMultiValues(document.getElementById("filtroSerie"));
 
+    const dataInicio = document.getElementById("dataInicio")?.value;
+    const dataFim = document.getElementById("dataFim")?.value;
+
+    const dtInicio = dataInicio ? new Date(dataInicio) : null;
+    const dtFim = dataFim ? new Date(dataFim) : null;
+
     return dadosGlobais.filter(function(linha){
+
+        const dataLinha = linha["Relatório Financeiro Mês"]
+            ? new Date(linha["Relatório Financeiro Mês"])
+            : null;
+
         return (!cliente.length || cliente.includes(linha["Solicitante / Localização"])) &&
                (!tag.length || tag.includes(linha["TAG"])) &&
                (!tipo.length || tipo.includes(linha["Tipo de Tecnologia"])) &&
                (!modelo.length || modelo.includes(linha["Modelo"])) &&
-               (!serie.length || serie.includes(linha["Nº Série"]));
+               (!serie.length || serie.includes(linha["Nº Série"])) &&
+               (!dtInicio || (dataLinha && dataLinha >= dtInicio)) &&
+               (!dtFim || (dataLinha && dataLinha <= dtFim));
     });
 }
 
@@ -210,6 +234,8 @@ function criarGraficosClientes(dados){
     graficos = [];
 
     const container = document.getElementById("graficosClientes");
+    if(!container) return;
+
     container.innerHTML = "";
 
     for(const cliente in dados){

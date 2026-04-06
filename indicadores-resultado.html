@@ -59,6 +59,14 @@ canvas{
 
 <br><br>
 
+<label>Data Inicio</label>
+<input type="date" id="dataInicio">
+
+<label>Data Fim</label>
+<input type="date" id="dataFim">
+
+<br><br>
+
 <label>Filial</label>
 <select multiple class="multi" id="filtroFilial"></select>
 
@@ -80,9 +88,26 @@ canvas{
 Gerar Relatório
 </button>
 
+<div class="cards">
+<div class="card"><h4>Faturamento</h4><div class="total" id="cardFat">0</div></div>
+<div class="card"><h4>Manutenção</h4><div class="total" id="cardMan">0</div></div>
+<div class="card"><h4>Resultado</h4><div class="total" id="cardRes">0</div></div>
+</div>
+
+<div class="card">
+<h3>Faturamento por Equipamento</h3>
+<canvas id="graficoEquipamento"></canvas>
+</div>
+
+<div class="card">
+<h3>Faturamento por Cliente</h3>
+<canvas id="graficoCliente"></canvas>
+</div>
+
 <script>
 
 let dados=[];
+let charts=[];
 
 function num(v){
     if(!v) return 0;
@@ -92,7 +117,7 @@ function num(v){
 
 function carregarDados(){
 
-    const file = document.getElementById("upload").files[0];
+    const file = upload.files[0];
 
     if(!file){
         alert("Selecione um arquivo");
@@ -107,55 +132,34 @@ function carregarDados(){
 
     reader.onload = e => {
 
-        setTimeout(()=>{
+        const workbook = XLSX.read(e.target.result,{type:'binary'});
+        const sheet = workbook.Sheets[workbook.SheetNames[0]];
+        const json = XLSX.utils.sheet_to_json(sheet,{header:1});
 
-            const workbook = XLSX.read(e.target.result,{type:'binary'});
-            const sheet = workbook.Sheets[workbook.SheetNames[0]];
-            const json = XLSX.utils.sheet_to_json(sheet,{header:1});
+        dados = [];
 
-            dados = [];
-            let i = 1;
+        for(let i=1;i<json.length;i++){
 
-            function processarLote(){
+            const l = json[i];
 
-                const limite = Math.min(i + 300, json.length);
+            dados.push({
+                filial:l[0],
+                patrimonio:l[1],
+                serie:l[2],
+                equipamento:l[3],
+                faturamento:num(l[7]),
+                manutencao:num(l[8]),
+                resultado:num(l[12]),
+                cliente:l[14],
+                data:new Date(l[15])
+            });
+        }
 
-                for(; i < limite; i++){
+        preencherFiltros();
 
-                    const l = json[i];
-
-                    dados.push({
-                        filial:l[0],
-                        patrimonio:l[1],
-                        serie:l[2],
-                        equipamento:l[3],
-                        faturamento:num(l[7]),
-                        manutencao:num(l[8]),
-                        financiamento:num(l[9]),
-                        impostos:num(l[10]),
-                        tx:num(l[11]),
-                        resultado:num(l[12]),
-                        mau:num(l[13]),
-                        cliente:l[14],
-                        data: new Date(l[15])
-                    });
-                }
-
-                statusCarga.innerText = "Processando " + i + " de " + json.length;
-
-                if(i < json.length){
-                    setTimeout(processarLote,0);
-                }else{
-                    preencherFiltros();
-                    statusCarga.innerText = "Dados carregados ✔";
-                    btnRelatorio.style.display = "inline-block";
-                    btnCarregar.disabled = false;
-                }
-            }
-
-            processarLote();
-
-        },50);
+        statusCarga.innerText = "Dados carregados ✔";
+        btnRelatorio.style.display = "inline-block";
+        btnCarregar.disabled = false;
     };
 
     reader.readAsBinaryString(file);
@@ -187,7 +191,52 @@ function preencherSelect(id,campo){
 }
 
 function gerarRelatorio(){
-    alert("Relatório pronto para gerar gráficos");
+
+    const dtIni = dataInicio.value ? new Date(dataInicio.value) : null;
+    const dtFim = dataFim.value ? new Date(dataFim.value) : null;
+
+    const filtrado = dados.filter(d =>
+        (!dtIni || d.data >= dtIni) &&
+        (!dtFim || d.data <= dtFim)
+    );
+
+    let fat=0, man=0, res=0;
+
+    const porEquip={}
+    const porCliente={}
+
+    filtrado.forEach(d=>{
+
+        fat+=d.faturamento
+        man+=d.manutencao
+        res+=d.resultado
+
+        porEquip[d.equipamento]=(porEquip[d.equipamento]||0)+d.faturamento
+        porCliente[d.cliente]=(porCliente[d.cliente]||0)+d.faturamento
+    })
+
+    cardFat.innerText = fat.toLocaleString('pt-BR',{style:'currency',currency:'BRL'})
+    cardMan.innerText = man.toLocaleString('pt-BR',{style:'currency',currency:'BRL'})
+    cardRes.innerText = res.toLocaleString('pt-BR',{style:'currency',currency:'BRL'})
+
+    charts.forEach(c=>c.destroy())
+    charts=[]
+
+    charts.push(new Chart(graficoEquipamento,{
+        type:'bar',
+        data:{
+            labels:Object.keys(porEquip),
+            datasets:[{data:Object.values(porEquip)}]
+        }
+    }))
+
+    charts.push(new Chart(graficoCliente,{
+        type:'pie',
+        data:{
+            labels:Object.keys(porCliente),
+            datasets:[{data:Object.values(porCliente)}]
+        }
+    }))
 }
 
 </script>
