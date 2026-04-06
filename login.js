@@ -1,3 +1,4 @@
+```javascript
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-app.js";
 import { 
   getAuth, 
@@ -72,20 +73,62 @@ function converterNumero(valor){
     return parseFloat(valor.toString().replace(/\./g,'').replace(',','.')) || 0;
 }
 
+// NOVO conversor de data Excel (rápido)
+function converterDataExcel(valor){
+    if(!valor) return null;
+
+    if(typeof valor === "number"){
+        return new Date((valor - 25569) * 86400 * 1000);
+    }
+
+    return new Date(valor);
+}
+
+// ----------- CARREGAMENTO OTIMIZADO (CORRIGIDO) -------------
 window.carregarDados = function(){
+
     const file = document.getElementById('upload').files[0];
     if(!file) return alert("Selecione um arquivo");
 
-    const reader = new FileReader();
-    reader.onload = function(event){
-        const data = new Uint8Array(event.target.result);
-        const workbook = XLSX.read(data, {type:'array'});
-        const sheet = workbook.Sheets[workbook.SheetNames[0]];
-        const json = XLSX.utils.sheet_to_json(sheet);
+    document.body.style.cursor = "wait";
 
-        dadosGlobais = json.map(l => normalizarChaves(l));
-        atualizarFiltros(dadosGlobais);
+    const reader = new FileReader();
+
+    reader.onload = function(event){
+
+        setTimeout(()=>{
+
+            const data = new Uint8Array(event.target.result);
+            const workbook = XLSX.read(data, {type:'array'});
+            const sheet = workbook.Sheets[workbook.SheetNames[0]];
+
+            const json = XLSX.utils.sheet_to_json(sheet, {
+                raw:true,
+                defval:""
+            });
+
+            dadosGlobais = [];
+
+            for(let i=0;i<json.length;i++){
+                const linha = normalizarChaves(json[i]);
+
+                // se existir coluna de data ele converte
+                if(linha["Data"]){
+                    linha["Data"] = converterDataExcel(linha["Data"]);
+                }
+
+                dadosGlobais.push(linha);
+            }
+
+            atualizarFiltros(dadosGlobais);
+
+            document.body.style.cursor = "default";
+
+            alert("Dados carregados com sucesso");
+
+        },100);
     };
+
     reader.readAsArrayBuffer(file);
 };
 
@@ -209,3 +252,4 @@ function criarGraficosClientes(dados){
         graficos.push(grafico);
     }
 }
+```
