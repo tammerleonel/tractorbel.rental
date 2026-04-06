@@ -71,10 +71,13 @@ function converterNumero(valor){
     return parseFloat(valor.toString().replace(/\./g,'').replace(',','.')) || 0;
 }
 
-// ---------- CARREGAMENTO OTIMIZADO (SEM QUEBRAR LOGIN) ----------
+// ----------- CARREGAMENTO OTIMIZADO -----------
 window.carregarDados = function(){
 
-    const file = document.getElementById('upload').files[0];
+    const input = document.getElementById('upload');
+    if(!input) return alert("Input upload não encontrado");
+
+    const file = input.files[0];
     if(!file) return alert("Selecione um arquivo");
 
     document.body.style.cursor = "wait";
@@ -83,7 +86,6 @@ window.carregarDados = function(){
 
     reader.onload = function(event){
 
-        // não bloqueia a UI
         setTimeout(()=>{
 
             const data = new Uint8Array(event.target.result);
@@ -123,6 +125,7 @@ function atualizarFiltros(dados){
 }
 
 function preencherSelect(id, dados, coluna){
+
     const select = document.getElementById(id);
     if(!select) return;
 
@@ -138,11 +141,18 @@ function preencherSelect(id, dados, coluna){
 }
 
 function filtrarDados(){
-    const cliente = document.getElementById("filtroCliente")?.value;
-    const tag = document.getElementById("filtroTag")?.value;
-    const tipo = document.getElementById("filtroTipo")?.value;
-    const modelo = document.getElementById("filtroModelo")?.value;
-    const serie = document.getElementById("filtroSerie")?.value;
+
+    const clienteEl = document.getElementById("filtroCliente");
+    const tagEl = document.getElementById("filtroTag");
+    const tipoEl = document.getElementById("filtroTipo");
+    const modeloEl = document.getElementById("filtroModelo");
+    const serieEl = document.getElementById("filtroSerie");
+
+    const cliente = clienteEl ? clienteEl.value : "";
+    const tag = tagEl ? tagEl.value : "";
+    const tipo = tipoEl ? tipoEl.value : "";
+    const modelo = modeloEl ? modeloEl.value : "";
+    const serie = serieEl ? serieEl.value : "";
 
     return dadosGlobais.filter(linha =>{
         return (!cliente || linha["Solicitante / Localização"] == cliente) &&
@@ -154,37 +164,49 @@ function filtrarDados(){
 }
 
 function calcularTotais(dados){
+
     const totaisModelo = {};
     const totaisCliente = {};
     let totalEquipamentos = 0;
 
     dados.forEach(linha => {
+
         const total = converterNumero(linha["Total"]);
+
         if(total > 0){
+
             totalEquipamentos++;
+
             const modelo = linha["Modelo"] || "Não informado";
             totaisModelo[modelo] = (totaisModelo[modelo] || 0) + 1;
+
             const cliente = linha["Solicitante / Localização"] || "Não informado";
             totaisCliente[cliente] = (totaisCliente[cliente] || 0) + total;
         }
     });
 
-    document.getElementById("totalAtendimento").innerText = totalEquipamentos;
+    const totalEl = document.getElementById("totalAtendimento");
+    if(totalEl) totalEl.innerText = totalEquipamentos;
 
     const tbody = document.getElementById("tabelaModelos");
-    tbody.innerHTML = "";
-    for(const modelo in totaisModelo){
-        tbody.innerHTML += `<tr><td>${modelo}</td><td>${totaisModelo[modelo]}</td></tr>`;
+    if(tbody){
+        tbody.innerHTML = "";
+        for(const modelo in totaisModelo){
+            tbody.innerHTML += `<tr><td>${modelo}</td><td>${totaisModelo[modelo]}</td></tr>`;
+        }
     }
 
     criarGraficosClientes(totaisCliente);
 }
 
 function criarGraficosClientes(dados){
+
     graficos.forEach(g => g.destroy());
     graficos = [];
 
     const container = document.getElementById("graficosClientes");
+    if(!container) return;
+
     container.innerHTML = "";
 
     for(const cliente in dados){
