@@ -51,18 +51,9 @@ onAuthStateChanged(auth, function(user){
   mostrarConteudo(user);
 });
 
-// ------------------- Planilha e Gráficos -------------------
+// ------------------- PLANILHA -------------------
 let dadosGlobais = [];
 let graficos = [];
-
-function normalizarChaves(obj){
-    const novo = {};
-    Object.keys(obj).forEach(function(k){
-        const chave = k.trim();
-        novo[chave] = obj[k];
-    });
-    return novo;
-}
 
 function converterNumero(valor){
     if(valor === null || valor === undefined || valor === "") return 0;
@@ -70,7 +61,6 @@ function converterNumero(valor){
     return parseFloat(valor.toString().replace(/\./g,'').replace(',','.')) || 0;
 }
 
-// ----------- CARREGAMENTO OTIMIZADO -----------
 window.carregarDados = function(){
 
     const input = document.getElementById('upload');
@@ -92,88 +82,66 @@ window.carregarDados = function(){
 
     reader.onload = function(event){
 
-        setTimeout(function(){
+        const data = new Uint8Array(event.target.result);
+        const workbook = XLSX.read(data, {type:'array'});
+        const sheet = workbook.Sheets[workbook.SheetNames[0]];
+        const json = XLSX.utils.sheet_to_json(sheet,{header:1});
 
-            const data = new Uint8Array(event.target.result);
-            const workbook = XLSX.read(data, {type:'array'});
-            const sheet = workbook.Sheets[workbook.SheetNames[0]];
+        dadosGlobais = [];
 
-            const json = XLSX.utils.sheet_to_json(sheet,{
-                raw:true,
-                defval:"",
-                blankrows:false
+        for(let i=1;i<json.length;i++){
+
+            const l = json[i];
+
+            dadosGlobais.push({
+                filial:l[0],
+                patrimonio:l[1],
+                serie:l[2],
+                equipamento:l[3],
+                faturamento:converterNumero(l[7]),
+                manutencao:converterNumero(l[8]),
+                financiamento:converterNumero(l[9]),
+                impostos:converterNumero(l[10]),
+                tx:converterNumero(l[11]),
+                resultado:converterNumero(l[12]),
+                mau:converterNumero(l[13]),
+                cliente:l[14],
+                data:new Date(l[15])
             });
+        }
 
-            dadosGlobais = [];
-            let i = 0;
-
-            function processarLote(){
-
-                const limite = Math.min(i + 300, json.length);
-
-                for(; i < limite; i++){
-                    dadosGlobais.push(normalizarChaves(json[i]));
-                }
-
-                status.innerText = "Processando " + i + " de " + json.length;
-
-                if(i < json.length){
-                    setTimeout(processarLote, 0);
-                }else{
-
-                    atualizarFiltros(dadosGlobais);
-                    status.innerText = "Dados carregados ✔";
-                    btnRelatorio.style.display = "inline-block";
-                    btnCarregar.disabled = false;
-                }
-            }
-
-            processarLote();
-
-        },50);
+        atualizarFiltros();
+        status.innerText = "Dados carregados ✔";
+        btnRelatorio.style.display = "inline-block";
+        btnCarregar.disabled = false;
     };
 
     reader.readAsArrayBuffer(file);
 };
 
-// BOTÃO GERAR RELATÓRIO
-window.gerarRelatorio = function(){
-
-    const status = document.getElementById("statusCarga");
-    if(status) status.innerText = "Gerando relatório...";
-
-    setTimeout(()=>{
-
-        const filtrado = filtrarDados();
-        calcularTotais(filtrado);
-
-        if(status) status.innerText = "Relatório gerado ✔";
-
-    },10);
-};
-
-function atualizarFiltros(dados){
-    preencherSelect("filtroCliente", dados, "Solicitante / Localização");
-    preencherSelect("filtroTag", dados, "TAG");
-    preencherSelect("filtroTipo", dados, "Tipo de Tecnologia");
-    preencherSelect("filtroModelo", dados, "Modelo");
-    preencherSelect("filtroSerie", dados, "Nº Série");
+// ------------------- FILTROS -------------------
+function atualizarFiltros(){
+    preencherSelect("filtroFilial","filial");
+    preencherSelect("filtroPatrimonio","patrimonio");
+    preencherSelect("filtroSerie","serie");
+    preencherSelect("filtroEquipamento","equipamento");
+    preencherSelect("filtroCliente","cliente");
 }
 
-function preencherSelect(id, dados, coluna){
+function preencherSelect(id,campo){
 
     const select = document.getElementById(id);
     if(!select) return;
 
-    const valores = [...new Set(dados.map(l => l[coluna]).filter(Boolean))];
+    const valores = [...new Set(dadosGlobais.map(d=>d[campo]).filter(Boolean))];
 
-    select.innerHTML = "";
+    select.innerHTML="";
     valores.sort();
 
     valores.forEach(v=>{
         const opt = document.createElement("option");
-        opt.value = v;
-        opt.text = v;
+        opt.value=v;
+        opt.text=v;
         select.appendChild(opt);
     });
 }
@@ -183,89 +151,99 @@ function getMultiValues(select){
     return [...select.selectedOptions].map(o=>o.value);
 }
 
+// ------------------- RELATÓRIO -------------------
+window.gerarRelatorio = function(){
+
+    const status = document.getElementById("statusCarga");
+    status.innerText = "Gerando relatório...";
+
+    const filtrado = filtrarDados();
+    calcularTotais(filtrado);
+    gerarGraficos(filtrado);
+
+    status.innerText = "Relatório gerado ✔";
+};
+
 function filtrarDados(){
 
-    const cliente = getMultiValues(document.getElementById("filtroCliente"));
-    const tag = getMultiValues(document.getElementById("filtroTag"));
-    const tipo = getMultiValues(document.getElementById("filtroTipo"));
-    const modelo = getMultiValues(document.getElementById("filtroModelo"));
+    const filial = getMultiValues(document.getElementById("filtroFilial"));
+    const patrimonio = getMultiValues(document.getElementById("filtroPatrimonio"));
     const serie = getMultiValues(document.getElementById("filtroSerie"));
+    const equipamento = getMultiValues(document.getElementById("filtroEquipamento"));
+    const cliente = getMultiValues(document.getElementById("filtroCliente"));
 
-    const dataInicio = document.getElementById("dataInicio")?.value;
-    const dataFim = document.getElementById("dataFim")?.value;
+    const dtInicio = dataInicio.value ? new Date(dataInicio.value) : null;
+    const dtFim = dataFim.value ? new Date(dataFim.value) : null;
 
-    const dtInicio = dataInicio ? new Date(dataInicio) : null;
-    const dtFim = dataFim ? new Date(dataFim) : null;
+    return dadosGlobais.filter(d=>
 
-    return dadosGlobais.filter(function(linha){
+        (!filial.length || filial.includes(d.filial)) &&
+        (!patrimonio.length || patrimonio.includes(d.patrimonio)) &&
+        (!serie.length || serie.includes(d.serie)) &&
+        (!equipamento.length || equipamento.includes(d.equipamento)) &&
+        (!cliente.length || cliente.includes(d.cliente)) &&
+        (!dtInicio || d.data >= dtInicio) &&
+        (!dtFim || d.data <= dtFim)
 
-        const dataLinha = linha["Relatório Financeiro Mês"]
-            ? new Date(linha["Relatório Financeiro Mês"])
-            : null;
-
-        return (!cliente.length || cliente.includes(linha["Solicitante / Localização"])) &&
-               (!tag.length || tag.includes(linha["TAG"])) &&
-               (!tipo.length || tipo.includes(linha["Tipo de Tecnologia"])) &&
-               (!modelo.length || modelo.includes(linha["Modelo"])) &&
-               (!serie.length || serie.includes(linha["Nº Série"])) &&
-               (!dtInicio || (dataLinha && dataLinha >= dtInicio)) &&
-               (!dtFim || (dataLinha && dataLinha <= dtFim));
-    });
+    );
 }
 
+// ------------------- CARDS -------------------
 function calcularTotais(dados){
 
-    const totaisCliente = {};
+    let fat=0,man=0,fin=0,imp=0,tx=0,res=0,mau=0;
 
-    dados.forEach(function(linha){
-
-        const total = converterNumero(linha["Total"]);
-        const cliente = linha["Solicitante / Localização"] || "Não informado";
-
-        totaisCliente[cliente] = (totaisCliente[cliente] || 0) + total;
+    dados.forEach(d=>{
+        fat+=d.faturamento;
+        man+=d.manutencao;
+        fin+=d.financiamento;
+        imp+=d.impostos;
+        tx+=d.tx;
+        res+=d.resultado;
+        mau+=d.mau;
     });
 
-    criarGraficosClientes(totaisCliente);
+    document.getElementById("cardFat").innerText = fat.toLocaleString('pt-BR',{style:'currency',currency:'BRL'});
+    document.getElementById("cardMan").innerText = man.toLocaleString('pt-BR',{style:'currency',currency:'BRL'});
+    document.getElementById("cardRes").innerText = res.toLocaleString('pt-BR',{style:'currency',currency:'BRL'});
 }
 
-function criarGraficosClientes(dados){
+// ------------------- GRÁFICOS -------------------
+function gerarGraficos(dados){
 
-    graficos.forEach(g => g.destroy());
-    graficos = [];
+    graficos.forEach(g=>g.destroy());
+    graficos=[];
 
-    const container = document.getElementById("graficosClientes");
-    if(!container) return;
+    const fatEquip={}, fatCliente={}, manCliente={}, deficitCliente={};
 
-    container.innerHTML = "";
+    dados.forEach(d=>{
 
-    for(const cliente in dados){
+        fatEquip[d.equipamento]=(fatEquip[d.equipamento]||0)+d.faturamento;
+        fatCliente[d.cliente]=(fatCliente[d.cliente]||0)+d.faturamento;
+        manCliente[d.cliente]=(manCliente[d.cliente]||0)+d.manutencao;
 
-        const card = document.createElement("div");
-        card.className = "card";
+        if(d.resultado < 0){
+            deficitCliente[d.cliente]=(deficitCliente[d.cliente]||0)+d.resultado;
+        }
+    });
 
-        const titulo = document.createElement("h3");
-        titulo.innerText = cliente;
+    graficos.push(new Chart(graficoEquipamento,{
+        type:'bar',
+        data:{labels:Object.keys(fatEquip),datasets:[{data:Object.values(fatEquip)}]}
+    }));
 
-        const canvas = document.createElement("canvas");
+    graficos.push(new Chart(graficoCliente,{
+        type:'pie',
+        data:{labels:Object.keys(fatCliente),datasets:[{data:Object.values(fatCliente)}]}
+    }));
 
-        card.appendChild(titulo);
-        card.appendChild(canvas);
-        container.appendChild(card);
+    graficos.push(new Chart(graficoManutencaoCliente,{
+        type:'pie',
+        data:{labels:Object.keys(manCliente),datasets:[{data:Object.values(manCliente)}]}
+    }));
 
-        graficos.push(new Chart(canvas,{
-            type:'bar',
-            data:{
-                labels:["Total"],
-                datasets:[{
-                    data:[dados[cliente]]
-                }]
-            },
-            options:{
-                responsive:true,
-                plugins:{
-                    legend:{display:false}
-                }
-            }
-        }));
-    }
+    graficos.push(new Chart(graficoDeficitCliente,{
+        type:'bar',
+        data:{labels:Object.keys(deficitCliente),datasets:[{data:Object.values(deficitCliente)}]}
+    }));
 }
