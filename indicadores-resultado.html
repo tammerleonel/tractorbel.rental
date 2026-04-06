@@ -1,3 +1,4 @@
+```html
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -14,7 +15,6 @@ body{
     background:#f5f6fa;
     padding:20px;
 }
-
 .card{
     background:white;
     padding:20px;
@@ -22,32 +22,27 @@ body{
     border-radius:10px;
     box-shadow:0 2px 5px rgba(0,0,0,0.1);
 }
-
 .cards{
     display:grid;
     grid-template-columns: repeat(auto-fit,minmax(220px,1fr));
     gap:15px;
     margin-bottom:20px;
 }
-
 .total{
     font-size:22px;
     font-weight:bold;
     color:green;
 }
-
 select, button, input{
     padding:8px;
     margin-right:10px;
     margin-bottom:10px;
 }
-
 canvas{
     background:white;
     padding:15px;
     border-radius:10px;
 }
-
 .multi{
     width:220px;
     height:120px;
@@ -134,7 +129,13 @@ function num(v){
 
 function carregarDados(){
 
-    const file = upload.files[0];
+    const file = document.getElementById("upload").files[0];
+
+    if(!file){
+        alert("Selecione um arquivo");
+        return;
+    }
+
     const reader = new FileReader();
 
     reader.onload = e => {
@@ -156,28 +157,17 @@ function carregarDados(){
             resultado:num(l[12]),
             mau:num(l[13]),
             cliente:l[14],
-            data: converterDataExcel(l[15])
+            data: new Date(l[15])
         }));
 
         preencherFiltros();
-        alert("Dados carregados");
+        alert("Dados carregados com sucesso");
     };
 
     reader.readAsBinaryString(file);
 }
 
-function converterDataExcel(valor){
-    if(typeof valor === "number"){
-        const utc_days = Math.floor(valor - 25569);
-        const utc_value = utc_days * 86400;                                        
-        const date = new Date(utc_value * 1000);
-        return date;
-    }
-    return new Date(valor);
-}
-
 function preencherFiltros(){
-
     preencher("filtroFilial",dados.map(d=>d.filial));
     preencher("filtroPatrimonio",dados.map(d=>d.patrimonio));
     preencher("filtroSerie",dados.map(d=>d.serie));
@@ -297,3 +287,4 @@ function criarGrafico(id,tipo,obj){
 
 </body>
 </html>
+```
