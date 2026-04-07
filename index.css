@@ -223,3 +223,18 @@ label {
     background: #27ae60;
     color: white;
 }
+.topo{
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px; /* mesma margem que tinha antes do h2 */
+}
+
+.topo h2{
+    margin: 0; /* remove margem extra do h2 */
+}
+
+.topo .logo{
+    height: 50px; /* ajuste a altura do logo como quiser */
+    object-fit: contain;
+}
