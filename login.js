@@ -61,6 +61,12 @@ function converterNumero(valor){
     return parseFloat(valor.toString().replace(/\./g,'').replace(',','.')) || 0;
 }
 
+// Desabilitar datas inicialmente
+const dataInicio = document.getElementById("dataInicio");
+const dataFim = document.getElementById("dataFim");
+dataInicio.disabled = true;
+dataFim.disabled = true;
+
 window.carregarDados = function(){
 
     const input = document.getElementById('upload');
@@ -90,9 +96,7 @@ window.carregarDados = function(){
         dadosGlobais = [];
 
         for(let i=1;i<json.length;i++){
-
             const l = json[i];
-
             let dataLinha = l[15];
 
             if(typeof dataLinha === "number"){
@@ -102,7 +106,6 @@ window.carregarDados = function(){
             }
 
             if(!isNaN(dataLinha)){
-
                 dataLinha.setHours(0,0,0,0);
 
                 dadosGlobais.push({
@@ -123,8 +126,8 @@ window.carregarDados = function(){
             }
         }
 
+        // Calcular datas mínima e máxima
         const datas = dadosGlobais.map(d=>d.data);
-
         const minData = new Date(Math.min(...datas));
         const maxData = new Date(Math.max(...datas));
 
@@ -134,9 +137,7 @@ window.carregarDados = function(){
             return `${d.getFullYear()}-${m}-${dia}`;
         };
 
-        const dataInicio = document.getElementById("dataInicio");
-        const dataFim = document.getElementById("dataFim");
-
+        // Atualizar inputs de data
         dataInicio.min = formatar(minData);
         dataInicio.max = formatar(maxData);
         dataFim.min = formatar(minData);
@@ -144,6 +145,10 @@ window.carregarDados = function(){
 
         dataInicio.value = formatar(minData);
         dataFim.value = formatar(maxData);
+
+        // Habilitar os campos de data apenas após carregar
+        dataInicio.disabled = false;
+        dataFim.disabled = false;
 
         atualizarFiltros();
         status.innerText = "Dados carregados ✔";
@@ -164,17 +169,12 @@ function atualizarFiltros(){
 }
 
 function preencherSelect(id,campo){
-
     const select = document.getElementById(id);
     if(!select) return;
-
     select.multiple = true;
-
     const valores = [...new Set(dadosGlobais.map(d=>d[campo]).filter(Boolean))];
-
     select.innerHTML="";
     valores.sort();
-
     valores.forEach(v=>{
         const opt = document.createElement("option");
         opt.value=v;
@@ -190,19 +190,15 @@ function getMultiValues(select){
 
 // ------------------- RELATÓRIO -------------------
 window.gerarRelatorio = function(){
-
     const status = document.getElementById("statusCarga");
     status.innerText = "Gerando relatório...";
-
     const filtrado = filtrarDados();
     calcularTotais(filtrado);
     gerarGraficos(filtrado);
-
     status.innerText = "Relatório gerado ✔";
 };
 
 function filtrarDados(){
-
     const filial = getMultiValues(document.getElementById("filtroFilial"));
     const patrimonio = getMultiValues(document.getElementById("filtroPatrimonio"));
     const serie = getMultiValues(document.getElementById("filtroSerie"));
@@ -228,9 +224,7 @@ function filtrarDados(){
 
 // ------------------- CARDS -------------------
 function calcularTotais(dados){
-
     let fat=0,man=0,fin=0,imp=0,tx=0,res=0,mau=0;
-
     dados.forEach(d=>{
         fat+=d.faturamento;
         man+=d.manutencao;
@@ -252,18 +246,15 @@ function calcularTotais(dados){
 
 // ------------------- GRÁFICOS -------------------
 function gerarGraficos(dados){
-
     graficos.forEach(g=>g.destroy());
     graficos=[];
 
     const fatEquip={}, fatCliente={}, manCliente={}, deficitCliente={};
 
     dados.forEach(d=>{
-
         fatEquip[d.equipamento]=(fatEquip[d.equipamento]||0)+d.faturamento;
         fatCliente[d.cliente]=(fatCliente[d.cliente]||0)+d.faturamento;
         manCliente[d.cliente]=(manCliente[d.cliente]||0)+d.manutencao;
-
         if(d.resultado < 0){
             deficitCliente[d.cliente]=(deficitCliente[d.cliente]||0)+d.resultado;
         }
@@ -275,49 +266,29 @@ function gerarGraficos(dados){
         if(equip && valor) fatEquipValid[equip] = valor;
     });
 
-    // Gráfico Faturamento x Equipamento
     graficos.push(new Chart(graficoEquipamento,{
         type:'bar',
         data:{labels:Object.keys(fatEquipValid),datasets:[{data:Object.values(fatEquipValid), backgroundColor:'blue'}]},
-        options:{
-            scales:{ y:{ beginAtZero:true }, x:{ beginAtZero:true } },
-            plugins:{ legend:{ display:false } }
-        }
+        options:{ scales:{ y:{ beginAtZero:true }, x:{ beginAtZero:true } }, plugins:{ legend:{ display:false } } }
     }));
 
-    // Gráfico Faturamento x Cliente
     graficos.push(new Chart(graficoCliente,{
         type:'pie',
         data:{labels:Object.keys(fatCliente),datasets:[{data:Object.values(fatCliente)}]}
     }));
 
-    // Gráfico Manutenção x Cliente
     graficos.push(new Chart(graficoManutencao,{
         type:'pie',
         data:{labels:Object.keys(manCliente),datasets:[{data:Object.values(manCliente)}]}
     }));
 
-    // Gráfico Déficit x Cliente (cor vermelha, valores negativos para cima)
     graficos.push(new Chart(graficoDeficit,{
         type:'bar',
-        data:{
-            labels:Object.keys(deficitCliente),
-            datasets:[{
-                label:'Déficit',
-                data:Object.values(deficitCliente).map(v=>Math.abs(v)),
-                backgroundColor:'red',
-                borderSkipped:false
-            }]
-        },
+        data:{labels:Object.keys(deficitCliente),datasets:[{data:Object.values(deficitCliente).map(v=>Math.abs(v)), backgroundColor:'red', borderSkipped:false}]},
         options:{
             indexAxis:'y',
             scales:{
-                x:{
-                    beginAtZero:true,
-                    ticks:{
-                        callback:function(value){ return value.toLocaleString('pt-BR',{style:'currency',currency:'BRL'}); }
-                    }
-                },
+                x:{ beginAtZero:true, ticks:{ callback:function(value){ return value.toLocaleString('pt-BR',{style:'currency',currency:'BRL'}); } } },
                 y:{ beginAtZero:true }
             },
             plugins:{
