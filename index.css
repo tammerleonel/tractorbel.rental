@@ -218,3 +218,8 @@ label {
     margin-bottom: 5px;   /* espaçamento agradável */
     font-weight: bold;    /* destaca o nome do filtro */
 }
+
+.multi option:checked {
+    background: #27ae60;
+    color: white;
+}
