@@ -11,15 +11,11 @@
 <style>
 body{
     font-family: Arial, Helvetica, sans-serif;
-    background:#ffffff;
+    background:#f5f6fa;
     padding:10px;
-    margin:0;
 }
-h2{
-    margin:5px 0 10px 0;
-    color:green;
-    text-align:center;
-}
+h2{margin-bottom:10px;}
+#login input, #login button{margin-right:5px; margin-bottom:5px;}
 .card{
     background:white;
     text-align:center;
@@ -30,34 +26,28 @@ h2{
 }
 .cards{
     display:grid;
-    grid-template-columns: repeat(auto-fit,minmax(180px,1fr));
-    gap:8px;
+    grid-template-columns: repeat(auto-fit,minmax(150px,1fr));
+    gap:10px;
     margin-bottom:10px;
 }
 .total{
     font-size:18px;
     font-weight:bold;
     color:green;
-    text-align:center;
-    margin:5px 0 0 0;
 }
 select, button, input{
-    margin:2px 5px 2px 0;
-    padding:4px;
-    font-size:14px;
+    margin-right:5px;
+    margin-bottom:5px;
+    font-size:0.9em;
 }
 canvas{
     background:white;
-    padding:5px;
+    padding:10px;
     border-radius:5px;
 }
 .multi{
-    width:180px;
+    width:150px;
     height:100px;
-    font-size:13px;
-}
-#conteudo{
-    margin-top:5px;
 }
 </style>
 </head>
@@ -78,14 +68,14 @@ canvas{
     <button id="btnCarregar">Carregar</button>
     <span id="statusCarga"></span>
 
-    <br><br>
+    <br>
 
     <label>Mês/Ano Início</label>
     <input type="month" id="mesInicio" disabled>
     <label>Mês/Ano Fim</label>
     <input type="month" id="mesFim" disabled>
 
-    <br><br>
+    <br>
 
     <label>Filial</label>
     <select multiple class="multi" id="filtroFilial"></select>
@@ -142,7 +132,7 @@ canvas{
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-app.js"; 
 import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-auth.js";
 
-// ------------------- FIREBASE -------------------
+// FIREBASE
 const firebaseConfig = {
   apiKey: "AIzaSyAAF5FLl8xawkivYCcjQGJyb2jo1_A1V7g",
   authDomain: "tractorbel-8ceb8.firebaseapp.com",
@@ -154,7 +144,7 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 
-// ------------------- LOGIN -------------------
+// LOGIN
 function mostrarConteudo(user){
     const login = document.getElementById("login");
     const conteudo = document.getElementById("conteudo");
@@ -174,21 +164,20 @@ window.login = function(){
 window.logout = function(){ signOut(auth); };
 onAuthStateChanged(auth, user => mostrarConteudo(user));
 
-// ------------------- VARIÁVEIS -------------------
+// VARIÁVEIS
 let dadosGlobais = [];
 let graficos = [];
-
 const mesInicio = document.getElementById("mesInicio");
 const mesFim = document.getElementById("mesFim");
 
-// ------------------- FUNÇÕES -------------------
+// FUNÇÕES
 function converterNumero(valor){
     if(valor===null||valor===undefined||valor==="") return 0;
     if(typeof valor==="number") return valor;
     return parseFloat(valor.toString().replace(/\./g,'').replace(',','.')) || 0;
 }
 
-// ------------------- CARREGAR EXCEL -------------------
+// CARREGAR EXCEL
 window.carregarDados = function(){
     const input = document.getElementById('upload');
     const file = input.files[0];
@@ -257,7 +246,7 @@ window.carregarDados = function(){
     reader.readAsArrayBuffer(file);
 };
 
-// ------------------- FILTROS -------------------
+// FILTROS
 function atualizarFiltros(){
     ["filtroFilial","filtroPatrimonio","filtroSerie","filtroEquipamento","filtroCliente"]
     .forEach(id=>{
@@ -265,11 +254,9 @@ function atualizarFiltros(){
         if(!select) return;
         select.innerHTML="";
         select.multiple = true;
-
         const campo = id.replace("filtro","").toLowerCase();
         [...new Set(dadosGlobais.map(d=>d[campo]).filter(Boolean))].sort()
             .forEach(v=>{ const opt=document.createElement("option"); opt.value=v; opt.text=v; select.appendChild(opt); });
-
         select.addEventListener("change", gerarRelatorio);
     });
 }
@@ -286,7 +273,7 @@ function selecionarFiltro(id, valor){
     for(const opt of select.options){ opt.selected = (opt.value===valor); }
 }
 
-// ------------------- RELATÓRIO -------------------
+// RELATÓRIO
 window.gerarRelatorio = function(){
     const mesIni = mesInicio.value;
     const mesFimVal = mesFim.value;
@@ -318,21 +305,17 @@ window.gerarRelatorio = function(){
     gerarGraficos(filtrado);
 };
 
-// ------------------- LIMPAR FILTROS -------------------
+// LIMPAR FILTROS (não altera data)
 window.limparFiltros = function(){
-    mesInicio.value = mesInicio.min;
-    mesFim.value = mesFim.max;
-
     ["filtroFilial","filtroPatrimonio","filtroSerie","filtroEquipamento","filtroCliente"]
     .forEach(id=>{
         const select = document.getElementById(id);
         if(select) select.selectedIndex = -1;
     });
-
     gerarRelatorio();
 };
 
-// ------------------- CARDS -------------------
+// CARDS
 function calcularTotais(dados){
     let fat=0, man=0, fin=0, imp=0, tx=0, res=0, mau=0;
     dados.forEach(d=>{
@@ -348,7 +331,7 @@ function calcularTotais(dados){
     document.getElementById("cardMau").innerText=mau.toLocaleString('pt-BR',{style:'currency',currency:'BRL'});
 }
 
-// ------------------- GRÁFICOS -------------------
+// GRÁFICOS
 function gerarGraficos(dados){
     graficos.forEach(g=>g.destroy());
     graficos=[];
@@ -363,30 +346,49 @@ function gerarGraficos(dados){
 
     graficos.push(new Chart(graficoEquipamento,{
         type:'bar',
-        data:{labels:Object.keys(fatEquip),datasets:[{data:Object.values(fatEquip),backgroundColor:'green'}]},
-        options:{scales:{y:{beginAtZero:true}},plugins:{legend:{display:false}},onClick:(evt,elements)=>{if(elements.length>0){selecionarFiltro("filtroEquipamento", Object.keys(fatEquip)[elements[0].index]); gerarRelatorio();}}}
+        data:{labels:Object.keys(fatEquip),datasets:[{data:Object.values(fatEquip),backgroundColor:'blue'}]},
+        options:{scales:{y:{beginAtZero:true}},plugins:{legend:{display:false}},onClick:(evt, e)=>{
+            if(e.length>0){const idx=e[0].index; selecionarFiltro("filtroEquipamento",Object.keys(fatEquip)[idx]); gerarRelatorio();}
+        }}
     }));
 
     graficos.push(new Chart(graficoCliente,{
         type:'bar',
         data:{labels:Object.keys(fatCliente),datasets:[{data:Object.values(fatCliente),backgroundColor:'green'}]},
-        options:{scales:{y:{beginAtZero:true}},plugins:{legend:{display:false}},onClick:(evt,elements)=>{if(elements.length>0){selecionarFiltro("filtroCliente", Object.keys(fatCliente)[elements[0].index]); gerarRelatorio();}}}
+        options:{scales:{y:{beginAtZero:true}},plugins:{legend:{display:false}},onClick:(evt, e)=>{
+            if(e.length>0){const idx=e[0].index; selecionarFiltro("filtroCliente",Object.keys(fatCliente)[idx]); gerarRelatorio();}
+        }}
     }));
 
     graficos.push(new Chart(graficoManutencao,{
         type:'bar',
-        data:{labels:Object.keys(manCliente),datasets:[{data:Object.values(manCliente),backgroundColor:'green'}]},
-        options:{scales:{y:{beginAtZero:true}},plugins:{legend:{display:false}},onClick:(evt,elements)=>{if(elements.length>0){selecionarFiltro("filtroCliente", Object.keys(manCliente)[elements[0].index]); gerarRelatorio();}}}
+        data:{labels:Object.keys(manCliente),datasets:[{data:Object.values(manCliente),backgroundColor:'orange'}]},
+        options:{scales:{y:{beginAtZero:true}},plugins:{legend:{display:false}},onClick:(evt, e)=>{
+            if(e.length>0){const idx=e[0].index; selecionarFiltro("filtroCliente",Object.keys(manCliente)[idx]); gerarRelatorio();}
+        }}
     }));
 
     graficos.push(new Chart(graficoDeficit,{
         type:'bar',
-        data:{labels:Object.keys(deficitCliente),datasets:[{data:Object.values(deficitCliente).map(v=>Math.abs(v)),backgroundColor:'green'}]},
-        options:{indexAxis:'y',scales:{x:{beginAtZero:true,ticks:{callback:v=>v.toLocaleString('pt-BR',{style:'currency',currency:'BRL'})}},y:{beginAtZero:true}},plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>Object.values(deficitCliente)[ctx.dataIndex].toLocaleString('pt-BR',{style:'currency',currency:'BRL'})}}},onClick:(evt,elements)=>{if(elements.length>0){selecionarFiltro("filtroCliente", Object.keys(deficitCliente)[elements[0].index]); gerarRelatorio();}}}
+        data:{labels:Object.keys(deficitCliente),datasets:[{data:Object.values(deficitCliente).map(v=>Math.abs(v)),backgroundColor:'red'}]},
+        options:{
+            indexAxis:'y',
+            scales:{
+                x:{beginAtZero:true,ticks:{callback:v=>v.toLocaleString('pt-BR',{style:'currency',currency:'BRL'})}},
+                y:{beginAtZero:true}
+            },
+            plugins:{
+                legend:{display:false},
+                tooltip:{callbacks:{label:ctx=>Object.values(deficitCliente)[ctx.dataIndex].toLocaleString('pt-BR',{style:'currency',currency:'BRL'})}}
+            },
+            onClick:(evt,elements)=>{
+                if(elements.length>0){const idx=elements[0].index; selecionarFiltro("filtroCliente", Object.keys(deficitCliente)[idx]); gerarRelatorio();}
+            }
+        }
     }));
 }
 
-// ------------------- EVENTOS -------------------
+// EVENTOS
 mesInicio.addEventListener("change", gerarRelatorio);
 mesFim.addEventListener("change", gerarRelatorio);
 document.getElementById("btnCarregar").addEventListener("click", carregarDados);
@@ -394,6 +396,5 @@ document.getElementById("btnRelatorio").addEventListener("click", gerarRelatorio
 document.getElementById("btnLimpar").addEventListener("click", limparFiltros);
 
 </script>
-    
 </body>
 </html>
