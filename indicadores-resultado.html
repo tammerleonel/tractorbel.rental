@@ -225,7 +225,7 @@ dadosGlobais.push({
 
     marca: l[4],
     modelo: l[5],
-    ano: l[6],
+    ano: String(l[6]).trim(),
 
     faturamento: converterNumero(l[7]),
     manutencao: converterNumero(l[8]),
