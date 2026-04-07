@@ -94,6 +94,7 @@ canvas{
     <br>
 
     <button id="btnRelatorio" style="display:none">Gerar Relatório</button>
+    <button id="btnLimpar" style="display:none">Limpar Filtros</button>
 
     <div class="cards">
         <div class="card"><h4>Faturamento</h4><div class="total" id="cardFat">0</div></div>
@@ -183,10 +184,12 @@ window.carregarDados = function(){
     const status = document.getElementById("statusCarga");
     const btnCarregar = document.getElementById("btnCarregar");
     const btnRelatorio = document.getElementById("btnRelatorio");
+    const btnLimpar = document.getElementById("btnLimpar");
     if(!file){ alert("Selecione um arquivo"); return; }
 
     btnCarregar.disabled = true;
     btnRelatorio.style.display="none";
+    btnLimpar.style.display="none";
     status.innerText="Carregando planilha...";
 
     const reader = new FileReader();
@@ -235,6 +238,7 @@ window.carregarDados = function(){
 
         status.innerText="Dados carregados ✔";
         btnRelatorio.style.display="inline-block";
+        btnLimpar.style.display="inline-block";
         btnCarregar.disabled=false;
 
         gerarRelatorio();
@@ -292,6 +296,20 @@ window.gerarRelatorio = function(){
     gerarGraficos(filtrado);
 };
 
+// ------------------- LIMPAR FILTROS -------------------
+window.limparFiltros = function(){
+    dataInicio.value = dataInicio.min;
+    dataFim.value = dataFim.max;
+
+    ["filtroFilial","filtroPatrimonio","filtroSerie","filtroEquipamento","filtroCliente"]
+    .forEach(id=>{
+        const select = document.getElementById(id);
+        if(select) select.selectedIndex = -1;
+    });
+
+    gerarRelatorio();
+};
+
 // ------------------- CARDS -------------------
 function calcularTotais(dados){
     let fat=0, man=0, fin=0, imp=0, tx=0, res=0, mau=0;
@@ -332,6 +350,7 @@ dataInicio.addEventListener("change", gerarRelatorio);
 dataFim.addEventListener("change", gerarRelatorio);
 document.getElementById("btnCarregar").addEventListener("click", carregarDados);
 document.getElementById("btnRelatorio").addEventListener("click", gerarRelatorio);
+document.getElementById("btnLimpar").addEventListener("click", limparFiltros);
 
 </script>
 
