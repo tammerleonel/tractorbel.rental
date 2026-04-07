@@ -11,40 +11,53 @@
 <style>
 body{
     font-family: Arial, Helvetica, sans-serif;
-    background:#f5f6fa;
-    padding:20px;
+    background:#ffffff;
+    padding:10px;
+    margin:0;
+}
+h2{
+    margin:5px 0 10px 0;
+    color:green;
+    text-align:center;
 }
 .card{
     background:white;
-    text-align: center;
-    padding:20px;
-    border-radius:10px;
-    box-shadow:0 2px 5px rgba(0,0,0,0.1);
+    text-align:center;
+    padding:10px;
+    border-radius:5px;
+    box-shadow:0 1px 3px rgba(0,0,0,0.1);
+    margin-bottom:10px;
 }
 .cards{
     display:grid;
-    grid-template-columns: repeat(auto-fit,minmax(220px,1fr));
-    gap:15px;
-    margin-bottom:20px;
+    grid-template-columns: repeat(auto-fit,minmax(180px,1fr));
+    gap:8px;
+    margin-bottom:10px;
 }
 .total{
-    font-size:22px;
+    font-size:18px;
     font-weight:bold;
     color:green;
-    text-align: center;
+    text-align:center;
+    margin:5px 0 0 0;
 }
 select, button, input{
-    margin-right:10px;
-    margin-bottom:10px;
+    margin:2px 5px 2px 0;
+    padding:4px;
+    font-size:14px;
 }
 canvas{
     background:white;
-    padding:15px;
-    border-radius:10px;
+    padding:5px;
+    border-radius:5px;
 }
 .multi{
-    width:220px;
-    height:120px;
+    width:180px;
+    height:100px;
+    font-size:13px;
+}
+#conteudo{
+    margin-top:5px;
 }
 </style>
 </head>
@@ -267,7 +280,6 @@ function getMultiValues(id){
     return [...select.selectedOptions].map(o=>o.value);
 }
 
-// Função para selecionar filtro ao clicar no gráfico
 function selecionarFiltro(id, valor){
     const select = document.getElementById(id);
     if(!select) return;
@@ -349,79 +361,28 @@ function gerarGraficos(dados){
         if(d.resultado<0) deficitCliente[d.cliente]=(deficitCliente[d.cliente]||0)+d.resultado;
     });
 
-    // Equipamento - Bar
     graficos.push(new Chart(graficoEquipamento,{
         type:'bar',
-        data:{labels:Object.keys(fatEquip),datasets:[{data:Object.values(fatEquip),backgroundColor:'blue'}]},
-        options:{
-            scales:{y:{beginAtZero:true}},
-            plugins:{legend:{display:false}},
-            onClick:(evt, elements)=>{
-                if(elements.length>0){
-                    const idx = elements[0].index;
-                    selecionarFiltro("filtroEquipamento", Object.keys(fatEquip)[idx]);
-                    gerarRelatorio();
-                }
-            }
-        }
+        data:{labels:Object.keys(fatEquip),datasets:[{data:Object.values(fatEquip),backgroundColor:'green'}]},
+        options:{scales:{y:{beginAtZero:true}},plugins:{legend:{display:false}},onClick:(evt,elements)=>{if(elements.length>0){selecionarFiltro("filtroEquipamento", Object.keys(fatEquip)[elements[0].index]); gerarRelatorio();}}}
     }));
 
-    // Cliente - Faturamento Bar
     graficos.push(new Chart(graficoCliente,{
         type:'bar',
         data:{labels:Object.keys(fatCliente),datasets:[{data:Object.values(fatCliente),backgroundColor:'green'}]},
-        options:{
-            scales:{y:{beginAtZero:true}},
-            plugins:{legend:{display:false}},
-            onClick:(evt, elements)=>{
-                if(elements.length>0){
-                    const idx = elements[0].index;
-                    selecionarFiltro("filtroCliente", Object.keys(fatCliente)[idx]);
-                    gerarRelatorio();
-                }
-            }
-        }
+        options:{scales:{y:{beginAtZero:true}},plugins:{legend:{display:false}},onClick:(evt,elements)=>{if(elements.length>0){selecionarFiltro("filtroCliente", Object.keys(fatCliente)[elements[0].index]); gerarRelatorio();}}}
     }));
 
-    // Cliente - Manutenção Bar
     graficos.push(new Chart(graficoManutencao,{
         type:'bar',
-        data:{labels:Object.keys(manCliente),datasets:[{data:Object.values(manCliente),backgroundColor:'orange'}]},
-        options:{
-            scales:{y:{beginAtZero:true}},
-            plugins:{legend:{display:false}},
-            onClick:(evt, elements)=>{
-                if(elements.length>0){
-                    const idx = elements[0].index;
-                    selecionarFiltro("filtroCliente", Object.keys(manCliente)[idx]);
-                    gerarRelatorio();
-                }
-            }
-        }
+        data:{labels:Object.keys(manCliente),datasets:[{data:Object.values(manCliente),backgroundColor:'green'}]},
+        options:{scales:{y:{beginAtZero:true}},plugins:{legend:{display:false}},onClick:(evt,elements)=>{if(elements.length>0){selecionarFiltro("filtroCliente", Object.keys(manCliente)[elements[0].index]); gerarRelatorio();}}}
     }));
 
-    // Déficit - Bar Horizontal
     graficos.push(new Chart(graficoDeficit,{
         type:'bar',
-        data:{labels:Object.keys(deficitCliente),datasets:[{data:Object.values(deficitCliente).map(v=>Math.abs(v)),backgroundColor:'red'}]},
-        options:{
-            indexAxis:'y',
-            scales:{
-                x:{beginAtZero:true,ticks:{callback: v=>v.toLocaleString('pt-BR',{style:'currency',currency:'BRL'})}},
-                y:{beginAtZero:true}
-            },
-            plugins:{
-                legend:{display:false},
-                tooltip:{callbacks:{label:ctx=>Object.values(deficitCliente)[ctx.dataIndex].toLocaleString('pt-BR',{style:'currency',currency:'BRL'})}}
-            },
-            onClick:(evt,elements)=>{
-                if(elements.length>0){
-                    const idx = elements[0].index;
-                    selecionarFiltro("filtroCliente", Object.keys(deficitCliente)[idx]);
-                    gerarRelatorio();
-                }
-            }
-        }
+        data:{labels:Object.keys(deficitCliente),datasets:[{data:Object.values(deficitCliente).map(v=>Math.abs(v)),backgroundColor:'green'}]},
+        options:{indexAxis:'y',scales:{x:{beginAtZero:true,ticks:{callback:v=>v.toLocaleString('pt-BR',{style:'currency',currency:'BRL'})}},y:{beginAtZero:true}},plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>Object.values(deficitCliente)[ctx.dataIndex].toLocaleString('pt-BR',{style:'currency',currency:'BRL'})}}},onClick:(evt,elements)=>{if(elements.length>0){selecionarFiltro("filtroCliente", Object.keys(deficitCliente)[elements[0].index]); gerarRelatorio();}}}
     }));
 }
 
