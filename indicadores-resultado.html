@@ -210,7 +210,7 @@ window.carregarDados = function(){
 
         for(let i=1;i<json.length;i++){
             const l = json[i];
-            let dataLinha = l[15];
+            let dataLinha = l[16];
             if(typeof dataLinha==="number"){ dataLinha = new Date((dataLinha-25569)*86400*1000); }
             else{ dataLinha = new Date(dataLinha); }
 
