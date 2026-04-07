@@ -177,6 +177,7 @@ onAuthStateChanged(auth, user => mostrarConteudo(user));
 // VARIÁVEIS
 let dadosGlobais = [];
 let graficos = [];
+let atualizandoFiltros = false;
 const mesInicio = document.getElementById("mesInicio");
 const mesFim = document.getElementById("mesFim");
 
@@ -284,6 +285,45 @@ function atualizarFiltros(){
     });
 }
 
+function atualizarFiltrosDinamicos(dados){
+
+    atualizandoFiltros = true;
+
+    const mapa={
+        filtroFilial:"filial",
+        filtroPatrimonio:"patrimonio",
+        filtroSerie:"serie",
+        filtroEquipamento:"equipamento",
+        filtroMarca:"marca",
+        filtroModelo:"modelo",
+        filtroAno:"ano",
+        filtroCliente:"cliente"
+    };
+
+    Object.keys(mapa).forEach(id=>{
+        const select=document.getElementById(id);
+        if(!select) return;
+
+        const selecionados=[...select.selectedOptions].map(o=>o.value);
+
+        const valores=[...new Set(
+            dados.map(d=>d[mapa[id]]).filter(Boolean)
+        )].sort();
+
+        select.innerHTML="";
+
+        valores.forEach(v=>{
+            const opt=document.createElement("option");
+            opt.value=v;
+            opt.text=v;
+            if(selecionados.includes(v)) opt.selected=true;
+            select.appendChild(opt);
+        });
+    });
+
+    atualizandoFiltros = false;
+}
+
 function getMultiValues(id){
     const select = document.getElementById(id);
     if(!select) return [];
@@ -298,6 +338,7 @@ function selecionarFiltro(id, valor){
 
 // RELATÓRIO
 window.gerarRelatorio = function(){
+    if(atualizandoFiltros) return;
     const mesIni = mesInicio.value;
     const mesFimVal = mesFim.value;
     let dtIni = mesIni ? new Date(mesIni + "-01") : null;
@@ -330,8 +371,9 @@ window.gerarRelatorio = function(){
         (!cliente.length || cliente.includes(d.cliente))
     );
 
-    calcularTotais(filtrado);
-    gerarGraficos(filtrado);
+atualizarFiltrosDinamicos(filtrado);
+calcularTotais(filtrado);
+gerarGraficos(filtrado);
 };
 
 // LIMPAR FILTROS
