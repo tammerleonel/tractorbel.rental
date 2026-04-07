@@ -312,6 +312,9 @@ window.gerarRelatorio = function(){
     const patrimonio = getMultiValues("filtroPatrimonio");
     const serie = getMultiValues("filtroSerie");
     const equipamento = getMultiValues("filtroEquipamento");
+    const marca = getMultiValues("filtroMarca");
+    const modelo = getMultiValues("filtroModelo");
+    const ano = getMultiValues("filtroAno");
     const cliente = getMultiValues("filtroCliente");
 
     const filtrado = dadosGlobais.filter(d=>
