@@ -270,23 +270,50 @@ function gerarGraficos(dados){
         }
     });
 
+    // Gráfico Faturamento x Equipamento
     graficos.push(new Chart(graficoEquipamento,{
         type:'bar',
         data:{labels:Object.keys(fatEquip),datasets:[{data:Object.values(fatEquip)}]}
     }));
 
+    // Gráfico Faturamento x Cliente
     graficos.push(new Chart(graficoCliente,{
         type:'pie',
         data:{labels:Object.keys(fatCliente),datasets:[{data:Object.values(fatCliente)}]}
     }));
 
+    // Gráfico Manutenção x Cliente
     graficos.push(new Chart(graficoManutencao,{
         type:'pie',
         data:{labels:Object.keys(manCliente),datasets:[{data:Object.values(manCliente)}]}
     }));
 
+    // Gráfico Déficit x Cliente (cor vermelha, valores negativos para cima)
     graficos.push(new Chart(graficoDeficit,{
         type:'bar',
-        data:{labels:Object.keys(deficitCliente),datasets:[{data:Object.values(deficitCliente)}]}
+        data:{
+            labels:Object.keys(deficitCliente),
+            datasets:[{
+                data:Object.values(deficitCliente).map(v=>Math.abs(v)),
+                backgroundColor:'red'
+            }]
+        },
+        options:{
+            scales:{
+                y:{ beginAtZero:true },
+                x:{ beginAtZero:true }
+            },
+            plugins:{
+                legend:{ display:false },
+                tooltip:{
+                    callbacks:{
+                        label:function(context){
+                            const valorReal = Object.values(deficitCliente)[context.dataIndex];
+                            return valorReal.toLocaleString('pt-BR',{style:'currency',currency:'BRL'});
+                        }
+                    }
+                }
+            }
+        }
     }));
 }
