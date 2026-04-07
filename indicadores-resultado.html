@@ -5,18 +5,49 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Relatório Financeiro Rental</title>
 
-<!-- XLSX e Chart.js -->
 <script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 <style>
-body{ font-family: Arial; background:#f5f6fa; padding:20px; }
-.card{ background:white; text-align:center; padding:20px; margin-bottom:20px; border-radius:10px; box-shadow:0 2px 5px rgba(0,0,0,0.1);}
-.cards{ display:grid; grid-template-columns: repeat(auto-fit,minmax(220px,1fr)); gap:15px; margin-bottom:20px; }
-.total{ font-size:22px; font-weight:bold; color:green; text-align:center; }
-select, button, input{ padding:8px; margin-right:10px; margin-bottom:10px; }
-canvas{ background:white; padding:15px; border-radius:10px; }
-.multi{ width:220px; height:120px; }
+body{
+    font-family: Arial;
+    background:#f5f6fa;
+    padding:20px;
+}
+.card{
+    background:white;
+    text-align: center;
+    padding:20px;
+    margin-bottom:20px;
+    border-radius:10px;
+    box-shadow:0 2px 5px rgba(0,0,0,0.1);
+}
+.cards{
+    display:grid;
+    grid-template-columns: repeat(auto-fit,minmax(220px,1fr));
+    gap:15px;
+    margin-bottom:20px;
+}
+.total{
+    font-size:22px;
+    font-weight:bold;
+    color:green;
+    text-align: center;
+}
+select, button, input{
+    padding:8px;
+    margin-right:10px;
+    margin-bottom:10px;
+}
+canvas{
+    background:white;
+    padding:15px;
+    border-radius:10px;
+}
+.multi{
+    width:220px;
+    height:120px;
+}
 </style>
 </head>
 
@@ -29,24 +60,32 @@ canvas{ background:white; padding:15px; border-radius:10px; }
 <span id="statusCarga"></span>
 
 <br><br>
-<label>Data Inicio</label>
+
+<label>Data Início</label>
 <input type="date" id="dataInicio" disabled>
+
 <label>Data Fim</label>
 <input type="date" id="dataFim" disabled>
 
 <br><br>
+
 <label>Filial</label>
 <select multiple class="multi" id="filtroFilial"></select>
+
 <label>Patrimônio</label>
 <select multiple class="multi" id="filtroPatrimonio"></select>
+
 <label>Série</label>
 <select multiple class="multi" id="filtroSerie"></select>
+
 <label>Equipamento</label>
 <select multiple class="multi" id="filtroEquipamento"></select>
+
 <label>Cliente</label>
 <select multiple class="multi" id="filtroCliente"></select>
 
 <br>
+
 <button id="btnRelatorio" style="display:none">Gerar Relatório</button>
 
 <div class="cards">
@@ -59,187 +98,218 @@ canvas{ background:white; padding:15px; border-radius:10px; }
 <div class="card"><h4>Faturamento Avaria</h4><div class="total" id="cardMau">0</div></div>
 </div>
 
-<div class="card"><h3>Faturamento x Equipamento</h3><canvas id="graficoEquipamento"></canvas></div>
-<div class="card"><h3>Faturamento x Cliente</h3><canvas id="graficoCliente"></canvas></div>
-<div class="card"><h3>Manutenção x Cliente</h3><canvas id="graficoManutencao"></canvas></div>
-<div class="card"><h3>Déficit x Cliente</h3><canvas id="graficoDeficit"></canvas></div>
+<div class="card">
+<h3>Faturamento x Equipamento</h3>
+<canvas id="graficoEquipamento"></canvas>
+</div>
 
-<script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-app.js"; 
-import { 
-  getAuth, 
-  signInWithEmailAndPassword,
-  onAuthStateChanged,
-  signOut
-} from "https://www.gstatic.com/firebasejs/12.11.0/firebase-auth.js";
+<div class="card">
+<h3>Faturamento x Cliente</h3>
+<canvas id="graficoCliente"></canvas>
+</div>
 
-// ------------------- FIREBASE -------------------
-const firebaseConfig = {
-  apiKey: "AIzaSyAAF5FLl8xawkivYCcjQGJyb2jo1_A1V7g",
-  authDomain: "tractorbel-8ceb8.firebaseapp.com",
-  projectId: "tractorbel-8ceb8",
-  storageBucket: "tractorbel-8ceb8.firebasestorage.app",
-  messagingSenderId: "720471893475",
-  appId: "1:720471893475:web:e6eb1d64cae5f7aa27ecd6"
-};
-const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
+<div class="card">
+<h3>Manutenção x Cliente</h3>
+<canvas id="graficoManutencao"></canvas>
+</div>
 
-// ------------------- AUTENTICAÇÃO -------------------
-function mostrarConteudo(user){
-  const login = document.getElementById("login");
-  const conteudo = document.getElementById("conteudo");
-  if(!login || !conteudo) return;
-  if(user){ login.style.display="none"; conteudo.style.display="block"; }
-  else{ login.style.display="block"; conteudo.style.display="none"; }
-}
-window.login = ()=>{ 
-  const email=document.getElementById("email").value;
-  const senha=document.getElementById("senha").value;
-  signInWithEmailAndPassword(auth,email,senha)
-    .then(()=>mostrarConteudo(true))
-    .catch(()=>alert("Usuário ou senha incorretos"));
-};
-window.logout = ()=>signOut(auth);
-onAuthStateChanged(auth, user => mostrarConteudo(user));
+<div class="card">
+<h3>Déficit x Cliente</h3>
+<canvas id="graficoDeficit"></canvas>
+</div>
 
-// ------------------- VARIÁVEIS -------------------
-let dadosGlobais=[], graficos=[];
-const dataInicio=document.getElementById("dataInicio");
-const dataFim=document.getElementById("dataFim");
+<script>
+let dadosGlobais = [];
+let graficos = [];
 
-// ------------------- FUNÇÕES AUX -------------------
+// Converter valores para número
 function converterNumero(valor){
-  if(valor==null||valor==="") return 0;
-  if(typeof valor==="number") return valor;
-  return parseFloat(valor.toString().replace(/\./g,'').replace(',','.'))||0;
-}
-function getMultiValues(id){
-  const select=document.getElementById(id);
-  if(!select) return [];
-  return [...select.selectedOptions].map(o=>o.value);
+    if(valor === null || valor === undefined || valor === "") return 0;
+    if(typeof valor === "number") return valor;
+    return parseFloat(valor.toString().replace(/\./g,'').replace(',','.')) || 0;
 }
 
-// ------------------- CARREGAR PLANILHA -------------------
-window.carregarDados=()=>{
-  const file=document.getElementById("upload").files[0];
-  const status=document.getElementById("statusCarga");
-  const btnCarregar=document.getElementById("btnCarregar");
-  const btnRelatorio=document.getElementById("btnRelatorio");
-  if(!file){alert("Selecione um arquivo"); return;}
-  btnCarregar.disabled=true; btnRelatorio.style.display="none"; status.innerText="Carregando planilha...";
-  const reader=new FileReader();
-  reader.onload=(e)=>{
-    const data=new Uint8Array(e.target.result);
-    const workbook=XLSX.read(data,{type:'array'});
-    const sheet=workbook.Sheets[workbook.SheetNames[0]];
-    const json=XLSX.utils.sheet_to_json(sheet,{header:1});
-    dadosGlobais=[];
-    for(let i=1;i<json.length;i++){
-      const l=json[i];
-      let dataLinha=l[15];
-      dataLinha=(typeof dataLinha==="number")?new Date((dataLinha-25569)*86400*1000):new Date(dataLinha);
-      if(!isNaN(dataLinha)){
-        dataLinha.setHours(0,0,0,0);
-        dadosGlobais.push({
-          filial:l[0], patrimonio:l[1], serie:l[2], equipamento:l[3],
-          faturamento:converterNumero(l[7]), manutencao:converterNumero(l[8]),
-          financiamento:converterNumero(l[9]), impostos:converterNumero(l[10]),
-          tx:converterNumero(l[11]), resultado:converterNumero(l[12]), mau:converterNumero(l[13]),
-          cliente:l[14], data:dataLinha
-        });
-      }
-    }
-    // Datas min/max
-    const datas=dadosGlobais.map(d=>d.data);
-    const minData=new Date(Math.min(...datas));
-    const maxData=new Date(Math.max(...datas));
-    const formatar=d=>`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
-    dataInicio.min=formatar(minData); dataInicio.max=formatar(maxData); dataInicio.value=formatar(minData);
-    dataFim.min=formatar(minData); dataFim.max=formatar(maxData); dataFim.value=formatar(maxData);
-    dataInicio.disabled=false; dataFim.disabled=false;
-    atualizarFiltros();
-    status.innerText="Dados carregados ✔"; btnRelatorio.style.display="inline-block"; btnCarregar.disabled=false;
-    gerarRelatorio();
-  };
-  reader.readAsArrayBuffer(file);
-};
+// Inputs de data
+const dataInicio = document.getElementById("dataInicio");
+const dataFim = document.getElementById("dataFim");
 
-// ------------------- FILTROS -------------------
-function atualizarFiltros(){
-  ["filtroFilial","filtroPatrimonio","filtroSerie","filtroEquipamento","filtroCliente"]
-  .forEach(id=>{
-    const select=document.getElementById(id);
-    if(!select) return;
-    select.innerHTML=""; select.multiple=true;
-    const campo=id.replace("filtro","").toLowerCase();
-    [...new Set(dadosGlobais.map(d=>d[campo]).filter(Boolean))].sort().forEach(v=>{
-      const opt=document.createElement("option"); opt.value=v; opt.text=v; select.appendChild(opt);
-    });
-    select.addEventListener("change", gerarRelatorio);
-  });
+// ------------------- AJUSTE AUTOMÁTICO DE DATAS -------------------
+function ajustarDatas(){
+    if(dadosGlobais.length === 0) return;
+
+    const min = new Date(Math.min(...dadosGlobais.map(d => d.data)));
+    const max = new Date(Math.max(...dadosGlobais.map(d => d.data)));
+    const formatar = d => `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+
+    dataInicio.min = formatar(min);
+    dataInicio.max = formatar(max);
+    dataFim.min = formatar(min);
+    dataFim.max = formatar(max);
+
+    if(!dataInicio.value || new Date(dataInicio.value) < min || isNaN(new Date(dataInicio.value))) dataInicio.value = formatar(min);
+    if(!dataFim.value || new Date(dataFim.value) > max || isNaN(new Date(dataFim.value))) dataFim.value = formatar(max);
 }
 
-// ------------------- RELATÓRIO -------------------
-window.gerarRelatorio=()=>{
-  const dtIni=dataInicio.value?new Date(dataInicio.value):null;
-  const dtFim=dataFim.value?new Date(dataFim.value):null;
-  if(dtIni) dtIni.setHours(0,0,0,0);
-  if(dtFim) dtFim.setHours(23,59,59,999);
-  const filial=getMultiValues("filtroFilial");
-  const patrimonio=getMultiValues("filtroPatrimonio");
-  const serie=getMultiValues("filtroSerie");
-  const equipamento=getMultiValues("filtroEquipamento");
-  const cliente=getMultiValues("filtroCliente");
-  const filtrado=dadosGlobais.filter(d=>
-    (!dtIni||d.data>=dtIni)&&(!dtFim||d.data<=dtFim)&&
-    (!filial.length||filial.includes(d.filial))&&
-    (!patrimonio.length||patrimonio.includes(d.patrimonio))&&
-    (!serie.length||serie.includes(d.serie))&&
-    (!equipamento.length||equipamento.includes(d.equipamento))&&
-    (!cliente.length||cliente.includes(d.cliente))
-  );
-  calcularTotais(filtrado);
-  gerarGraficos(filtrado);
-};
+dataInicio.addEventListener("change", () => { ajustarDatas(); gerarRelatorio(); });
+dataFim.addEventListener("change", () => { ajustarDatas(); gerarRelatorio(); });
 
-// ------------------- CARDS -------------------
-function calcularTotais(dados){
-  let fat=0, man=0, fin=0, imp=0, tx=0, res=0, mau=0;
-  dados.forEach(d=>{ fat+=d.faturamento; man+=d.manutencao; fin+=d.financiamento;
-    imp+=d.impostos; tx+=d.tx; res+=d.resultado; mau+=d.mau; });
-  document.getElementById("cardFat").innerText=fat.toLocaleString('pt-BR',{style:'currency',currency:'BRL'});
-  document.getElementById("cardMan").innerText=man.toLocaleString('pt-BR',{style:'currency',currency:'BRL'});
-  document.getElementById("cardRes").innerText=res.toLocaleString('pt-BR',{style:'currency',currency:'BRL'});
-  document.getElementById("cardFin").innerText=fin.toLocaleString('pt-BR',{style:'currency',currency:'BRL'});
-  document.getElementById("cardImp").innerText=imp.toLocaleString('pt-BR',{style:'currency',currency:'BRL'});
-  document.getElementById("cardTx").innerText=tx.toLocaleString('pt-BR',{style:'currency',currency:'BRL'});
-  document.getElementById("cardMau").innerText=mau.toLocaleString('pt-BR',{style:'currency',currency:'BRL'});
-}
-
-// ------------------- GRÁFICOS -------------------
-function gerarGraficos(dados){
-  graficos.forEach(g=>g.destroy()); graficos=[];
-  const fatEquip={}, fatCliente={}, manCliente={}, deficitCliente={};
-  dados.forEach(d=>{
-    fatEquip[d.equipamento]=(fatEquip[d.equipamento]||0)+d.faturamento;
-    fatCliente[d.cliente]=(fatCliente[d.cliente]||0)+d.faturamento;
-    manCliente[d.cliente]=(manCliente[d.cliente]||0)+d.manutencao;
-    if(d.resultado<0) deficitCliente[d.cliente]=(deficitCliente[d.cliente]||0)+d.resultado;
-  });
-
-  graficos.push(new Chart(graficoEquipamento,{type:'bar',data:{labels:Object.keys(fatEquip),datasets:[{data:Object.values(fatEquip), backgroundColor:'blue'}]},options:{scales:{y:{beginAtZero:true}},plugins:{legend:{display:false}}}}));
-  graficos.push(new Chart(graficoCliente,{type:'pie',data:{labels:Object.keys(fatCliente),datasets:[{data:Object.values(fatCliente)}]}}));
-  graficos.push(new Chart(graficoManutencao,{type:'pie',data:{labels:Object.keys(manCliente),datasets:[{data:Object.values(manCliente)}]}}));
-  graficos.push(new Chart(graficoDeficit,{type:'bar',data:{labels:Object.keys(deficitCliente),datasets:[{data:Object.values(deficitCliente).map(v=>Math.abs(v)), backgroundColor:'red'}]},options:{indexAxis:'y',scales:{x:{beginAtZero:true,ticks:{callback:v=>v.toLocaleString('pt-BR',{style:'currency',currency:'BRL'})}},y:{beginAtZero:true}},plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>Object.values(deficitCliente)[ctx.dataIndex].toLocaleString('pt-BR',{style:'currency',currency:'BRL'})}}}}}));
-}
-
-// ------------------- EVENTOS -------------------
-dataInicio.addEventListener("change", gerarRelatorio);
-dataFim.addEventListener("change", gerarRelatorio);
+// ------------------- CARREGAR ARQUIVO -------------------
 document.getElementById("btnCarregar").addEventListener("click", carregarDados);
 document.getElementById("btnRelatorio").addEventListener("click", gerarRelatorio);
 
+function carregarDados(){
+    const file = document.getElementById("upload").files[0];
+    const status = document.getElementById("statusCarga");
+    const btnRelatorio = document.getElementById("btnRelatorio");
+
+    if(!file){ alert("Selecione um arquivo"); return; }
+
+    status.innerText = "Carregando planilha...";
+
+    const reader = new FileReader();
+    reader.onload = function(e){
+        const data = new Uint8Array(e.target.result);
+        const workbook = XLSX.read(data, {type:'array'});
+        const sheet = workbook.Sheets[workbook.SheetNames[0]];
+        const json = XLSX.utils.sheet_to_json(sheet,{header:1});
+
+        dadosGlobais = [];
+
+        for(let i=1;i<json.length;i++){
+            const l = json[i];
+            let dataLinha = l[15];
+            if(typeof dataLinha === "number") dataLinha = new Date((dataLinha-25569)*86400*1000);
+            else dataLinha = new Date(dataLinha);
+
+            if(!isNaN(dataLinha)){
+                dataLinha.setHours(0,0,0,0);
+                dadosGlobais.push({
+                    filial:l[0],
+                    patrimonio:l[1],
+                    serie:l[2],
+                    equipamento:l[3],
+                    faturamento:converterNumero(l[7]),
+                    manutencao:converterNumero(l[8]),
+                    financiamento:converterNumero(l[9]),
+                    impostos:converterNumero(l[10]),
+                    tx:converterNumero(l[11]),
+                    resultado:converterNumero(l[12]),
+                    mau:converterNumero(l[13]),
+                    cliente:l[14],
+                    data:dataLinha
+                });
+            }
+        }
+
+        ajustarDatas();
+        preencherFiltros();
+
+        status.innerText="Dados carregados ✔";
+        btnRelatorio.style.display="inline-block";
+
+        gerarRelatorio();
+    };
+    reader.readAsArrayBuffer(file);
+}
+
+// ------------------- FILTROS -------------------
+function preencherFiltros(){
+    ["filtroFilial","filtroPatrimonio","filtroSerie","filtroEquipamento","filtroCliente"]
+    .forEach(id=>{
+        const select = document.getElementById(id);
+        select.innerHTML = "";
+        select.multiple = true;
+        const campo = id.replace("filtro","").toLowerCase();
+        [...new Set(dadosGlobais.map(d=>d[campo]).filter(Boolean))]
+        .sort()
+        .forEach(v=>{
+            const opt = document.createElement("option");
+            opt.value=v; opt.text=v;
+            select.appendChild(opt);
+        });
+        select.addEventListener("change", gerarRelatorio);
+    });
+}
+
+function getMultiValues(id){
+    const select = document.getElementById(id);
+    if(!select) return [];
+    return [...select.selectedOptions].map(o=>o.value);
+}
+
+// ------------------- GERAR RELATÓRIO -------------------
+function gerarRelatorio(){
+    if(dadosGlobais.length === 0) return;
+
+    const dtIni = new Date(dataInicio.value);
+    const dtFim = new Date(dataFim.value);
+    dtIni.setHours(0,0,0,0);
+    dtFim.setHours(23,59,59,999);
+
+    const filtrado = dadosGlobais.filter(d =>
+        (!getMultiValues("filtroFilial").length || getMultiValues("filtroFilial").includes(d.filial)) &&
+        (!getMultiValues("filtroPatrimonio").length || getMultiValues("filtroPatrimonio").includes(d.patrimonio)) &&
+        (!getMultiValues("filtroSerie").length || getMultiValues("filtroSerie").includes(d.serie)) &&
+        (!getMultiValues("filtroEquipamento").length || getMultiValues("filtroEquipamento").includes(d.equipamento)) &&
+        (!getMultiValues("filtroCliente").length || getMultiValues("filtroCliente").includes(d.cliente)) &&
+        d.data >= dtIni && d.data <= dtFim
+    );
+
+    // ------------------- CALCULO CARDS -------------------
+    let fat=0, man=0, res=0, fin=0, imp=0, tx=0, mau=0;
+    const equip = {}, cliente = {}, manCliente = {}, deficit = {};
+
+    filtrado.forEach(d=>{
+        fat+=d.faturamento; man+=d.manutencao; res+=d.resultado;
+        fin+=d.financiamento; imp+=d.impostos; tx+=d.tx; mau+=d.mau;
+
+        equip[d.equipamento] = (equip[d.equipamento]||0)+d.faturamento;
+        cliente[d.cliente] = (cliente[d.cliente]||0)+d.faturamento;
+        manCliente[d.cliente] = (manCliente[d.cliente]||0)+d.manutencao;
+        if(d.resultado<0) deficit[d.cliente] = (deficit[d.cliente]||0)+d.resultado;
+    });
+
+    document.getElementById("cardFat").innerText=fat.toLocaleString('pt-BR',{style:'currency',currency:'BRL'});
+    document.getElementById("cardMan").innerText=man.toLocaleString('pt-BR',{style:'currency',currency:'BRL'});
+    document.getElementById("cardRes").innerText=res.toLocaleString('pt-BR',{style:'currency',currency:'BRL'});
+    document.getElementById("cardFin").innerText=fin.toLocaleString('pt-BR',{style:'currency',currency:'BRL'});
+    document.getElementById("cardImp").innerText=imp.toLocaleString('pt-BR',{style:'currency',currency:'BRL'});
+    document.getElementById("cardTx").innerText=tx.toLocaleString('pt-BR',{style:'currency',currency:'BRL'});
+    document.getElementById("cardMau").innerText=mau.toLocaleString('pt-BR',{style:'currency',currency:'BRL'});
+
+    // ------------------- GRÁFICOS -------------------
+    graficos.forEach(g=>g.destroy());
+    graficos=[];
+
+    const equipLabels = Object.keys(equip).filter(k=>equip[k]>0);
+    const equipData = equipLabels.map(k=>equip[k]);
+
+    const clienteLabels = Object.keys(cliente).filter(k=>cliente[k]>0);
+    const clienteData = clienteLabels.map(k=>cliente[k]);
+
+    const manLabels = Object.keys(manCliente).filter(k=>manCliente[k]>0);
+    const manData = manLabels.map(k=>manCliente[k]);
+
+    const deficitLabels = Object.keys(deficit).filter(k=>deficit[k]<0);
+    const deficitData = deficitLabels.map(k=>Math.abs(deficit[k]));
+
+    graficos.push(new Chart(document.getElementById("graficoEquipamento"),{
+        type:'bar', data:{labels:equipLabels,datasets:[{data:equipData, backgroundColor:'blue'}]}
+    }));
+
+    graficos.push(new Chart(document.getElementById("graficoCliente"),{
+        type:'pie', data:{labels:clienteLabels,datasets:[{data:clienteData}]}
+    }));
+
+    graficos.push(new Chart(document.getElementById("graficoManutencao"),{
+        type:'pie', data:{labels:manLabels,datasets:[{data:manData}]}
+    }));
+
+    graficos.push(new Chart(document.getElementById("graficoDeficit"),{
+        type:'bar', data:{labels:deficitLabels,datasets:[{data:deficitData, backgroundColor:'red'}]}
+    }));
+}
 </script>
+
 </body>
 </html>
