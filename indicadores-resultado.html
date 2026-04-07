@@ -227,6 +227,7 @@ window.carregarDados = function(){
         mesFim.min = formatarMes(minData);
         mesFim.max = formatarMes(maxData);
 
+        // ALTERAÇÃO: define Mês/Ano Início = último mês da base
         mesInicio.value = formatarMes(maxData);
         mesFim.value = formatarMes(maxData);
 
@@ -355,33 +356,14 @@ function gerarGraficos(dados){
     const manClienteFiltrado = filtrarZero(manCliente);
     const deficitClienteFiltrado = filtrarZero(deficitCliente);
 
-    // --- CONDICIONAL: se houver apenas 1 patrimônio ou 1 série selecionada, não exibe o gráfico ---
-    const patrimonioSelecionado = getMultiValues("filtroPatrimonio");
-    const serieSelecionada = getMultiValues("filtroSerie");
-    const graficoEquipamentoCard = document.getElementById("graficoEquipamento").parentElement;
+    graficos.push(new Chart(graficoEquipamento,{
+        type:'bar',
+        data:{labels:Object.keys(fatEquipFiltrado),datasets:[{data:Object.values(fatEquipFiltrado),backgroundColor:'blue'}]},
+        options:{scales:{y:{beginAtZero:true}},plugins:{legend:{display:false}},onClick:(evt, e)=>{
+            if(e.length>0){const idx=e[0].index; selecionarFiltro("filtroEquipamento",Object.keys(fatEquipFiltrado)[idx]); gerarRelatorio();}
+        }}
+    }));
 
-    if((patrimonioSelecionado.length === 1 || serieSelecionada.length === 1) || Object.keys(fatEquipFiltrado).length === 0){
-        graficoEquipamentoCard.style.display = "none";
-    } else {
-        graficoEquipamentoCard.style.display = "block";
-        graficos.push(new Chart(graficoEquipamento,{
-            type:'bar',
-            data:{labels:Object.keys(fatEquipFiltrado),datasets:[{data:Object.values(fatEquipFiltrado),backgroundColor:'blue'}]},
-            options:{
-                scales:{y:{beginAtZero:true}},
-                plugins:{legend:{display:false}},
-                onClick:(evt, e)=>{
-                    if(e.length>0){
-                        const idx=e[0].index;
-                        selecionarFiltro("filtroEquipamento",Object.keys(fatEquipFiltrado)[idx]);
-                        gerarRelatorio();
-                    }
-                }
-            }
-        }));
-    }
-
-    // Resto dos gráficos permanece igual...
     graficos.push(new Chart(graficoCliente,{
         type:'bar',
         data:{labels:Object.keys(fatClienteFiltrado),datasets:[{data:Object.values(fatClienteFiltrado),backgroundColor:'green'}]},
@@ -418,4 +400,12 @@ function gerarGraficos(dados){
     }));
 }
 
-//
+// EVENTOS
+mesInicio.addEventListener("change", gerarRelatorio);
+mesFim.addEventListener("change", gerarRelatorio);
+document.getElementById("btnCarregar").addEventListener("click", carregarDados);
+document.getElementById("btnLimpar").addEventListener("click", limparFiltros);
+
+</script>
+</body>
+</html>
