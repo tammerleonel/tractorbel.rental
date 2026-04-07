@@ -67,6 +67,9 @@ const dataFim = document.getElementById("dataFim");
 dataInicio.disabled = true;
 dataFim.disabled = true;
 
+dataInicio.addEventListener("change", () => gerarRelatorio());
+dataFim.addEventListener("change", () => gerarRelatorio());
+
 window.carregarDados = function(){
 
     const input = document.getElementById('upload');
@@ -154,6 +157,9 @@ window.carregarDados = function(){
         status.innerText = "Dados carregados ✔";
         btnRelatorio.style.display = "inline-block";
         btnCarregar.disabled = false;
+
+        // Gerar relatório automaticamente após carregar
+        gerarRelatorio();
     };
 
     reader.readAsArrayBuffer(file);
@@ -181,6 +187,9 @@ function preencherSelect(id,campo){
         opt.text=v;
         select.appendChild(opt);
     });
+
+    // Atualizar relatório automaticamente quando mudar filtros
+    select.addEventListener("change", () => gerarRelatorio());
 }
 
 function getMultiValues(select){
@@ -260,7 +269,6 @@ function gerarGraficos(dados){
         }
     });
 
-    // --- FILTRAR EQUIPAMENTOS INVÁLIDOS OU ZERO ---
     const fatEquipValid = {};
     Object.entries(fatEquip).forEach(([equip, valor])=>{
         if(equip && valor) fatEquipValid[equip] = valor;
