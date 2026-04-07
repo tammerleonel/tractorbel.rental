@@ -300,9 +300,15 @@ dadosGlobais.push({
 
         atualizarFiltros();
 
-        status.innerText="Dados carregados ✔";
+        status.innerText = "Dados carregados ✔";
+        status.style.visibility = "visible";
         btnLimpar.style.display="inline-block";
         btnCarregar.disabled=false;
+
+setTimeout(() => {
+    status.style.visibility = "hidden";
+}, 1500); // oculta texto após 1,5 segundos
+        
 
         gerarRelatorio();
     };
