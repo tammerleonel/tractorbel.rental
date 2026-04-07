@@ -119,142 +119,153 @@ canvas{
 </div>
 
 <script>
+let dadosGlobais=[];
+let graficos=[];
 
-let dados=[];
-let charts=[];
-
-function num(v){
-    if(!v) return 0;
-    if(typeof v === "number") return v;
-    return parseFloat(v.toString().replace(/\./g,'').replace(',','.')) || 0;
+// Função para converter valores numéricos
+function converterNumero(valor){
+    if(valor === null || valor === undefined || valor === "") return 0;
+    if(typeof valor === "number") return valor;
+    return parseFloat(valor.toString().replace(/\./g,'').replace(',','.')) || 0;
 }
 
-document.getElementById("btnCarregar").onclick = carregarDados;
-document.getElementById("btnRelatorio").onclick = gerarRelatorio;
+// Inputs de data
+const dataInicio = document.getElementById("dataInicio");
+const dataFim = document.getElementById("dataFim");
 
+// Habilitar relatório ao alterar datas
+dataInicio.addEventListener("change", gerarRelatorio);
+dataFim.addEventListener("change", gerarRelatorio);
+
+document.getElementById("btnCarregar").addEventListener("click", carregarDados);
+document.getElementById("btnRelatorio").addEventListener("click", gerarRelatorio);
+
+// Carregar arquivo Excel
 function carregarDados(){
+    const file = document.getElementById("upload").files[0];
+    const status = document.getElementById("statusCarga");
+    const btnRelatorio = document.getElementById("btnRelatorio");
 
-    const file = upload.files[0];
-    if(!file){
-        alert("Selecione um arquivo");
-        return;
-    }
+    if(!file){ alert("Selecione um arquivo"); return; }
 
-    statusCarga.innerText="Carregando...";
+    status.innerText="Carregando planilha...";
 
     const reader = new FileReader();
-
-    reader.onload = e => {
-
-        const workbook = XLSX.read(e.target.result,{type:'binary'});
+    reader.onload = function(e){
+        const data = new Uint8Array(e.target.result);
+        const workbook = XLSX.read(data, {type:'array'});
         const sheet = workbook.Sheets[workbook.SheetNames[0]];
         const json = XLSX.utils.sheet_to_json(sheet,{header:1});
 
-        dados=[];
+        dadosGlobais=[];
 
         for(let i=1;i<json.length;i++){
-
             const l=json[i];
+            let dataLinha=l[15];
+            if(typeof dataLinha === "number") dataLinha=new Date((dataLinha-25569)*86400*1000);
+            else dataLinha=new Date(dataLinha);
 
-            const dataExcel=l[15];
-            let data=null;
-
-            if(typeof dataExcel === "number"){
-                data = new Date((dataExcel - 25569) * 86400 * 1000);
-            }else{
-                data = new Date(dataExcel);
+            if(!isNaN(dataLinha)){
+                dataLinha.setHours(0,0,0,0);
+                dadosGlobais.push({
+                    filial:l[0],
+                    patrimonio:l[1],
+                    serie:l[2],
+                    equipamento:l[3],
+                    faturamento:converterNumero(l[7]),
+                    manutencao:converterNumero(l[8]),
+                    financiamento:converterNumero(l[9]),
+                    impostos:converterNumero(l[10]),
+                    tx:converterNumero(l[11]),
+                    resultado:converterNumero(l[12]),
+                    mau:converterNumero(l[13]),
+                    cliente:l[14],
+                    data:dataLinha
+                });
             }
-
-            dados.push({
-                filial:l[0],
-                patrimonio:l[1],
-                serie:l[2],
-                equipamento:l[3],
-                faturamento:num(l[7]),
-                manutencao:num(l[8]),
-                financiamento:num(l[9]),
-                impostos:num(l[10]),
-                tx:num(l[11]),
-                resultado:num(l[12]),
-                mau:num(l[13]),
-                cliente:l[14],
-                data:data
-            });
         }
+
+        // Atualizar datas mínimas e máximas
+        const datas = dadosGlobais.map(d=>d.data);
+        const minData = new Date(Math.min(...datas));
+        const maxData = new Date(Math.max(...datas));
+        const formatar = d => `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+
+        dataInicio.min=formatar(minData);
+        dataInicio.max=formatar(maxData);
+        dataFim.min=formatar(minData);
+        dataFim.max=formatar(maxData);
+
+        dataInicio.value=formatar(minData);
+        dataFim.value=formatar(maxData);
+
+        dataInicio.disabled=false;
+        dataFim.disabled=false;
 
         preencherFiltros();
 
-        statusCarga.innerText="Dados carregados ✔";
+        status.innerText="Dados carregados ✔";
         btnRelatorio.style.display="inline-block";
+
+        gerarRelatorio();
     };
-
-    reader.readAsBinaryString(file);
+    reader.readAsArrayBuffer(file);
 }
 
+// Preencher filtros
 function preencherFiltros(){
-    preencher("filtroFilial","filial");
-    preencher("filtroPatrimonio","patrimonio");
-    preencher("filtroSerie","serie");
-    preencher("filtroEquipamento","equipamento");
-    preencher("filtroCliente","cliente");
-}
-
-function preencher(id,campo){
-    const select=document.getElementById(id);
-    select.innerHTML="";
-    select.multiple=true;
-    [...new Set(dados.map(d=>d[campo]).filter(Boolean))]
-    .sort()
-    .forEach(v=>{
-        const o=document.createElement("option");
-        o.value=v;
-        o.text=v;
-        select.appendChild(o);
+    ["filtroFilial","filtroPatrimonio","filtroSerie","filtroEquipamento","filtroCliente"]
+    .forEach(id=>{
+        const select = document.getElementById(id);
+        select.innerHTML="";
+        select.multiple=true;
+        [...new Set(dadosGlobais.map(d=>d[id.replace("filtro","").toLowerCase()]).filter(Boolean))]
+        .sort()
+        .forEach(v=>{
+            const opt=document.createElement("option");
+            opt.value=v; opt.text=v; select.appendChild(opt);
+        });
+        select.addEventListener("change", gerarRelatorio);
     });
 }
 
-function multi(id){
+// Obter valores selecionados
+function getMultiValues(id){
     return [...document.getElementById(id).selectedOptions].map(o=>o.value);
 }
 
+// Gerar relatório
 function gerarRelatorio(){
+    const dtIni = dataInicio.value ? new Date(dataInicio.value) : null;
+    const dtFim = dataFim.value ? new Date(dataFim.value) : null;
+    if(dtIni) dtIni.setHours(0,0,0,0);
+    if(dtFim) dtFim.setHours(23,59,59,999);
 
-    const dtIni=dataInicio.value?new Date(dataInicio.value):null;
-    const dtFim=dataFim.value?new Date(dataFim.value):null;
-
-    const filtrado=dados.filter(d=>
+    const filtrado = dadosGlobais.filter(d=>
         (!dtIni || d.data>=dtIni) &&
         (!dtFim || d.data<=dtFim) &&
-        (!multi("filtroFilial").length || multi("filtroFilial").includes(d.filial)) &&
-        (!multi("filtroPatrimonio").length || multi("filtroPatrimonio").includes(d.patrimonio)) &&
-        (!multi("filtroSerie").length || multi("filtroSerie").includes(d.serie)) &&
-        (!multi("filtroEquipamento").length || multi("filtroEquipamento").includes(d.equipamento)) &&
-        (!multi("filtroCliente").length || multi("filtroCliente").includes(d.cliente))
+        (!getMultiValues("filtroFilial").length || getMultiValues("filtroFilial").includes(d.filial)) &&
+        (!getMultiValues("filtroPatrimonio").length || getMultiValues("filtroPatrimonio").includes(d.patrimonio)) &&
+        (!getMultiValues("filtroSerie").length || getMultiValues("filtroSerie").includes(d.serie)) &&
+        (!getMultiValues("filtroEquipamento").length || getMultiValues("filtroEquipamento").includes(d.equipamento)) &&
+        (!getMultiValues("filtroCliente").length || getMultiValues("filtroCliente").includes(d.cliente))
     );
 
+    // Totais
     let fat=0,man=0,res=0,fin=0,imp=0,tx=0,mau=0;
-
     const equip={},cliente={},manCliente={},deficit={};
 
     filtrado.forEach(d=>{
-        fat+=d.faturamento;
-        man+=d.manutencao;
-        res+=d.resultado;
-        fin+=d.financiamento;
-        imp+=d.impostos;
-        tx+=d.tx;
-        mau+=d.mau;
+        fat+=d.faturamento; man+=d.manutencao; res+=d.resultado;
+        fin+=d.financiamento; imp+=d.impostos; tx+=d.tx; mau+=d.mau;
 
         equip[d.equipamento]=(equip[d.equipamento]||0)+d.faturamento;
         cliente[d.cliente]=(cliente[d.cliente]||0)+d.faturamento;
         manCliente[d.cliente]=(manCliente[d.cliente]||0)+d.manutencao;
-
-        if(d.resultado<0){
-            deficit[d.cliente]=(deficit[d.cliente]||0)+d.resultado;
-        }
+        if(d.resultado<0) deficit[d.cliente]=(deficit[d.cliente]||0)+d.resultado;
     });
 
-    // Atualiza os cards
+    // Atualiza cards
     cardFat.innerText=fat.toLocaleString('pt-BR',{style:'currency',currency:'BRL'});
     cardMan.innerText=man.toLocaleString('pt-BR',{style:'currency',currency:'BRL'});
     cardRes.innerText=res.toLocaleString('pt-BR',{style:'currency',currency:'BRL'});
@@ -263,44 +274,24 @@ function gerarRelatorio(){
     cardTx.innerText=tx.toLocaleString('pt-BR',{style:'currency',currency:'BRL'});
     cardMau.innerText=mau.toLocaleString('pt-BR',{style:'currency',currency:'BRL'});
 
-    // Remove gráficos antigos
-    charts.forEach(c=>c.destroy());
-    charts=[];
+    // Atualiza gráficos
+    graficos.forEach(c=>c.destroy());
+    graficos=[];
 
-    // Filtra valores > 0 para todos os gráficos
     const equipLabels = Object.keys(equip).filter(k=>equip[k]>0);
     const equipData = equipLabels.map(k=>equip[k]);
-
     const clienteLabels = Object.keys(cliente).filter(k=>cliente[k]>0);
     const clienteData = clienteLabels.map(k=>cliente[k]);
-
     const manLabels = Object.keys(manCliente).filter(k=>manCliente[k]>0);
     const manData = manLabels.map(k=>manCliente[k]);
+    const deficitLabels = Object.keys(deficit).filter(k=>deficit[k]<0);
+    const deficitData = deficitLabels.map(k=>Math.abs(deficit[k]));
 
-    const deficitLabels = Object.keys(deficit).filter(k=>deficit[k]<0); // somente negativos
-    const deficitData = deficitLabels.map(k=>deficit[k]);
-
-    charts.push(new Chart(graficoEquipamento,{
-        type:'bar',
-        data:{labels:equipLabels,datasets:[{data:equipData}]}
-    }));
-
-    charts.push(new Chart(graficoCliente,{
-        type:'pie',
-        data:{labels:clienteLabels,datasets:[{data:clienteData}]}
-    }));
-
-    charts.push(new Chart(graficoManutencao,{
-        type:'pie',
-        data:{labels:manLabels,datasets:[{data:manData}]}
-    }));
-
-    charts.push(new Chart(graficoDeficit,{
-        type:'bar',
-        data:{labels:deficitLabels,datasets:[{data:deficitData}]}
-    }));
+    graficos.push(new Chart(graficoEquipamento,{type:'bar',data:{labels:equipLabels,datasets:[{data:equipData, backgroundColor:'blue'}]} }));
+    graficos.push(new Chart(graficoCliente,{type:'pie',data:{labels:clienteLabels,datasets:[{data:clienteData}]} }));
+    graficos.push(new Chart(graficoManutencao,{type:'pie',data:{labels:manLabels,datasets:[{data:manData}]} }));
+    graficos.push(new Chart(graficoDeficit,{type:'bar',data:{labels:deficitLabels,datasets:[{data:deficitData, backgroundColor:'red'}]}}));
 }
-
 </script>
 
 </body>
