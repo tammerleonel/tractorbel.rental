@@ -293,14 +293,24 @@ function gerarGraficos(dados){
         data:{
             labels:Object.keys(deficitCliente),
             datasets:[{
+                label: 'Déficit',
                 data:Object.values(deficitCliente).map(v=>Math.abs(v)),
-                backgroundColor:'red'
+                backgroundColor:'red',
+                borderSkipped:false
             }]
         },
         options:{
+            indexAxis:'y',
             scales:{
-                y:{ beginAtZero:true },
-                x:{ beginAtZero:true }
+                x:{
+                    beginAtZero:true,
+                    ticks:{
+                        callback:function(value){
+                            return value.toLocaleString('pt-BR',{style:'currency',currency:'BRL'});
+                        }
+                    }
+                },
+                y:{ beginAtZero:true }
             },
             plugins:{
                 legend:{ display:false },
