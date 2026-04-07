@@ -13,11 +13,6 @@ body{
     font-family: Arial, Helvetica, sans-serif;
     background:#f5f6fa;
     padding:20px;
-    margin:0;
-}
-h2{
-    text-align:center;
-    margin-bottom:20px;
 }
 .card{
     background:white;
@@ -51,24 +46,6 @@ canvas{
     width:220px;
     height:120px;
 }
-/* ---------- Filtro fixo no topo ---------- */
-.filtros-container{
-    background:#fff;
-    border-left:5px solid green;
-    padding:15px;
-    border-radius:10px;
-    box-shadow:0 2px 5px rgba(0,0,0,0.1);
-    position: sticky;
-    top:10px;
-    z-index:100;
-    display: flex;
-    flex-wrap: wrap;
-    gap:10px;
-}
-.filtros-container label{
-    font-weight:bold;
-    margin-right:5px;
-}
 </style>
 </head>
 
@@ -88,29 +65,34 @@ canvas{
     <button id="btnCarregar">Carregar</button>
     <span id="statusCarga"></span>
 
-    <div class="filtros-container">
-        <label>Mês/Ano Início</label>
-        <input type="month" id="mesInicio" disabled>
-        <label>Mês/Ano Fim</label>
-        <input type="month" id="mesFim" disabled>
+    <br><br>
 
-        <label>Filial</label>
-        <select multiple class="multi" id="filtroFilial"></select>
+    <label>Mês/Ano Início</label>
+    <input type="month" id="mesInicio" disabled>
+    <label>Mês/Ano Fim</label>
+    <input type="month" id="mesFim" disabled>
 
-        <label>Patrimônio</label>
-        <select multiple class="multi" id="filtroPatrimonio"></select>
+    <br><br>
 
-        <label>Série</label>
-        <select multiple class="multi" id="filtroSerie"></select>
+    <label>Filial</label>
+    <select multiple class="multi" id="filtroFilial"></select>
 
-        <label>Equipamento</label>
-        <select multiple class="multi" id="filtroEquipamento"></select>
+    <label>Patrimônio</label>
+    <select multiple class="multi" id="filtroPatrimonio"></select>
 
-        <label>Cliente</label>
-        <select multiple class="multi" id="filtroCliente"></select>
+    <label>Série</label>
+    <select multiple class="multi" id="filtroSerie"></select>
 
-        <button id="btnLimpar">Limpar Filtros</button>
-    </div>
+    <label>Equipamento</label>
+    <select multiple class="multi" id="filtroEquipamento"></select>
+
+    <label>Cliente</label>
+    <select multiple class="multi" id="filtroCliente"></select>
+
+    <br>
+
+    <button id="btnRelatorio" style="display:none">Gerar Relatório</button>
+    <button id="btnLimpar" style="display:none">Limpar Filtros</button>
 
     <div class="cards">
         <div class="card"><h4>Faturamento</h4><div class="total" id="cardFat">0</div></div>
@@ -144,34 +126,67 @@ canvas{
 </div>
 
 <script type="module">
-// ---------- MANTIVEI TODO LOGIN FIREBASE ----------
-// Seu código Firebase login permanece intacto
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-app.js"; 
 import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-auth.js";
 
-// ------------------- VARIÁVEIS E FUNÇÕES -------------------
+// ------------------- FIREBASE -------------------
+const firebaseConfig = {
+  apiKey: "AIzaSyAAF5FLl8xawkivYCcjQGJyb2jo1_A1V7g",
+  authDomain: "tractorbel-8ceb8.firebaseapp.com",
+  projectId: "tractorbel-8ceb8",
+  storageBucket: "tractorbel-8ceb8.firebasestorage.app",
+  messagingSenderId: "720471893475",
+  appId: "1:720471893475:web:e6eb1d64cae5f7aa27ecd6"
+};
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+
+// ------------------- LOGIN -------------------
+function mostrarConteudo(user){
+    const login = document.getElementById("login");
+    const conteudo = document.getElementById("conteudo");
+    if(!login || !conteudo) return;
+    if(user){ login.style.display="none"; conteudo.style.display="block"; }
+    else{ login.style.display="block"; conteudo.style.display="none"; }
+}
+
+window.login = function(){
+    const email = document.getElementById("email").value;
+    const senha = document.getElementById("senha").value;
+    signInWithEmailAndPassword(auth,email,senha)
+        .then(()=>mostrarConteudo(true))
+        .catch(()=>alert("Usuário ou senha incorretos"));
+};
+
+window.logout = function(){ signOut(auth); };
+onAuthStateChanged(auth, user => mostrarConteudo(user));
+
+// ------------------- VARIÁVEIS -------------------
 let dadosGlobais = [];
 let graficos = [];
+
 const mesInicio = document.getElementById("mesInicio");
 const mesFim = document.getElementById("mesFim");
 
-// Converter número
+// ------------------- FUNÇÕES -------------------
 function converterNumero(valor){
     if(valor===null||valor===undefined||valor==="") return 0;
     if(typeof valor==="number") return valor;
     return parseFloat(valor.toString().replace(/\./g,'').replace(',','.')) || 0;
 }
 
-// Carregar Excel
+// ------------------- CARREGAR EXCEL -------------------
 window.carregarDados = function(){
     const input = document.getElementById('upload');
     const file = input.files[0];
     const status = document.getElementById("statusCarga");
     const btnCarregar = document.getElementById("btnCarregar");
+    const btnRelatorio = document.getElementById("btnRelatorio");
     const btnLimpar = document.getElementById("btnLimpar");
     if(!file){ alert("Selecione um arquivo"); return; }
 
     btnCarregar.disabled = true;
+    btnRelatorio.style.display="none";
     btnLimpar.style.display="none";
     status.innerText="Carregando planilha...";
 
@@ -206,17 +221,21 @@ window.carregarDados = function(){
         const minData = new Date(Math.min(...datas));
         const maxData = new Date(Math.max(...datas));
         const formatarMes = d => `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`;
+
         mesInicio.min = formatarMes(minData);
         mesInicio.max = formatarMes(maxData);
         mesFim.min = formatarMes(minData);
         mesFim.max = formatarMes(maxData);
         mesInicio.value = formatarMes(minData);
         mesFim.value = formatarMes(maxData);
+
         mesInicio.disabled=false;
         mesFim.disabled=false;
 
         atualizarFiltros();
+
         status.innerText="Dados carregados ✔";
+        btnRelatorio.style.display="inline-block";
         btnLimpar.style.display="inline-block";
         btnCarregar.disabled=false;
 
@@ -225,7 +244,7 @@ window.carregarDados = function(){
     reader.readAsArrayBuffer(file);
 };
 
-// Atualizar filtros
+// ------------------- FILTROS -------------------
 function atualizarFiltros(){
     ["filtroFilial","filtroPatrimonio","filtroSerie","filtroEquipamento","filtroCliente"]
     .forEach(id=>{
@@ -233,9 +252,11 @@ function atualizarFiltros(){
         if(!select) return;
         select.innerHTML="";
         select.multiple = true;
+
         const campo = id.replace("filtro","").toLowerCase();
         [...new Set(dadosGlobais.map(d=>d[campo]).filter(Boolean))].sort()
             .forEach(v=>{ const opt=document.createElement("option"); opt.value=v; opt.text=v; select.appendChild(opt); });
+
         select.addEventListener("change", gerarRelatorio);
     });
 }
@@ -246,14 +267,14 @@ function getMultiValues(id){
     return [...select.selectedOptions].map(o=>o.value);
 }
 
-// Selecionar filtro ao clicar no gráfico
+// Função para selecionar filtro ao clicar no gráfico
 function selecionarFiltro(id, valor){
     const select = document.getElementById(id);
     if(!select) return;
     for(const opt of select.options){ opt.selected = (opt.value===valor); }
 }
 
-// Gerar relatório
+// ------------------- RELATÓRIO -------------------
 window.gerarRelatorio = function(){
     const mesIni = mesInicio.value;
     const mesFimVal = mesFim.value;
@@ -264,6 +285,7 @@ window.gerarRelatorio = function(){
         dtFim = new Date(ano, parseInt(mes), 0);
         dtFim.setHours(23,59,59,999);
     }
+
     const filial = getMultiValues("filtroFilial");
     const patrimonio = getMultiValues("filtroPatrimonio");
     const serie = getMultiValues("filtroSerie");
@@ -279,29 +301,138 @@ window.gerarRelatorio = function(){
         (!equipamento.length || equipamento.includes(d.equipamento)) &&
         (!cliente.length || cliente.includes(d.cliente))
     );
+
     calcularTotais(filtrado);
     gerarGraficos(filtrado);
 };
 
-// Limpar filtros
+// ------------------- LIMPAR FILTROS -------------------
 window.limparFiltros = function(){
     mesInicio.value = mesInicio.min;
     mesFim.value = mesFim.max;
+
     ["filtroFilial","filtroPatrimonio","filtroSerie","filtroEquipamento","filtroCliente"]
     .forEach(id=>{
         const select = document.getElementById(id);
         if(select) select.selectedIndex = -1;
     });
+
     gerarRelatorio();
 };
 
-// Cards e gráficos permanecem inalterados
+// ------------------- CARDS -------------------
+function calcularTotais(dados){
+    let fat=0, man=0, fin=0, imp=0, tx=0, res=0, mau=0;
+    dados.forEach(d=>{
+        fat+=d.faturamento; man+=d.manutencao; fin+=d.financiamento;
+        imp+=d.impostos; tx+=d.tx; res+=d.resultado; mau+=d.mau;
+    });
+    document.getElementById("cardFat").innerText=fat.toLocaleString('pt-BR',{style:'currency',currency:'BRL'});
+    document.getElementById("cardMan").innerText=man.toLocaleString('pt-BR',{style:'currency',currency:'BRL'});
+    document.getElementById("cardRes").innerText=res.toLocaleString('pt-BR',{style:'currency',currency:'BRL'});
+    document.getElementById("cardFin").innerText=fin.toLocaleString('pt-BR',{style:'currency',currency:'BRL'});
+    document.getElementById("cardImp").innerText=imp.toLocaleString('pt-BR',{style:'currency',currency:'BRL'});
+    document.getElementById("cardTx").innerText=tx.toLocaleString('pt-BR',{style:'currency',currency:'BRL'});
+    document.getElementById("cardMau").innerText=mau.toLocaleString('pt-BR',{style:'currency',currency:'BRL'});
+}
+
+// ------------------- GRÁFICOS -------------------
+function gerarGraficos(dados){
+    graficos.forEach(g=>g.destroy());
+    graficos=[];
+
+    const fatEquip={}, fatCliente={}, manCliente={}, deficitCliente={};
+    dados.forEach(d=>{
+        fatEquip[d.equipamento]=(fatEquip[d.equipamento]||0)+d.faturamento;
+        fatCliente[d.cliente]=(fatCliente[d.cliente]||0)+d.faturamento;
+        manCliente[d.cliente]=(manCliente[d.cliente]||0)+d.manutencao;
+        if(d.resultado<0) deficitCliente[d.cliente]=(deficitCliente[d.cliente]||0)+d.resultado;
+    });
+
+    // Equipamento - Bar
+    graficos.push(new Chart(graficoEquipamento,{
+        type:'bar',
+        data:{labels:Object.keys(fatEquip),datasets:[{data:Object.values(fatEquip),backgroundColor:'blue'}]},
+        options:{
+            scales:{y:{beginAtZero:true}},
+            plugins:{legend:{display:false}},
+            onClick:(evt, elements)=>{
+                if(elements.length>0){
+                    const idx = elements[0].index;
+                    selecionarFiltro("filtroEquipamento", Object.keys(fatEquip)[idx]);
+                    gerarRelatorio();
+                }
+            }
+        }
+    }));
+
+    // Cliente - Faturamento Bar
+    graficos.push(new Chart(graficoCliente,{
+        type:'bar',
+        data:{labels:Object.keys(fatCliente),datasets:[{data:Object.values(fatCliente),backgroundColor:'green'}]},
+        options:{
+            scales:{y:{beginAtZero:true}},
+            plugins:{legend:{display:false}},
+            onClick:(evt, elements)=>{
+                if(elements.length>0){
+                    const idx = elements[0].index;
+                    selecionarFiltro("filtroCliente", Object.keys(fatCliente)[idx]);
+                    gerarRelatorio();
+                }
+            }
+        }
+    }));
+
+    // Cliente - Manutenção Bar
+    graficos.push(new Chart(graficoManutencao,{
+        type:'bar',
+        data:{labels:Object.keys(manCliente),datasets:[{data:Object.values(manCliente),backgroundColor:'orange'}]},
+        options:{
+            scales:{y:{beginAtZero:true}},
+            plugins:{legend:{display:false}},
+            onClick:(evt, elements)=>{
+                if(elements.length>0){
+                    const idx = elements[0].index;
+                    selecionarFiltro("filtroCliente", Object.keys(manCliente)[idx]);
+                    gerarRelatorio();
+                }
+            }
+        }
+    }));
+
+    // Déficit - Bar Horizontal
+    graficos.push(new Chart(graficoDeficit,{
+        type:'bar',
+        data:{labels:Object.keys(deficitCliente),datasets:[{data:Object.values(deficitCliente).map(v=>Math.abs(v)),backgroundColor:'red'}]},
+        options:{
+            indexAxis:'y',
+            scales:{
+                x:{beginAtZero:true,ticks:{callback: v=>v.toLocaleString('pt-BR',{style:'currency',currency:'BRL'})}},
+                y:{beginAtZero:true}
+            },
+            plugins:{
+                legend:{display:false},
+                tooltip:{callbacks:{label:ctx=>Object.values(deficitCliente)[ctx.dataIndex].toLocaleString('pt-BR',{style:'currency',currency:'BRL'})}}
+            },
+            onClick:(evt,elements)=>{
+                if(elements.length>0){
+                    const idx = elements[0].index;
+                    selecionarFiltro("filtroCliente", Object.keys(deficitCliente)[idx]);
+                    gerarRelatorio();
+                }
+            }
+        }
+    }));
+}
+
 // ------------------- EVENTOS -------------------
 mesInicio.addEventListener("change", gerarRelatorio);
 mesFim.addEventListener("change", gerarRelatorio);
 document.getElementById("btnCarregar").addEventListener("click", carregarDados);
+document.getElementById("btnRelatorio").addEventListener("click", gerarRelatorio);
 document.getElementById("btnLimpar").addEventListener("click", limparFiltros);
 
 </script>
+    
 </body>
 </html>
