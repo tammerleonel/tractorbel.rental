@@ -67,8 +67,19 @@ const dataFim = document.getElementById("dataFim");
 dataInicio.disabled = true;
 dataFim.disabled = true;
 
-dataInicio.addEventListener("change", () => gerarRelatorio());
-dataFim.addEventListener("change", () => gerarRelatorio());
+// Validar intervalo de datas automaticamente
+dataInicio.addEventListener("change",()=>{
+    if(dataFim.value && new Date(dataInicio.value) > new Date(dataFim.value)){
+        dataFim.value = dataInicio.value;
+    }
+    gerarRelatorio();
+});
+dataFim.addEventListener("change",()=>{
+    if(dataInicio.value && new Date(dataFim.value) < new Date(dataInicio.value)){
+        dataInicio.value = dataFim.value;
+    }
+    gerarRelatorio();
+});
 
 window.carregarDados = function(){
 
