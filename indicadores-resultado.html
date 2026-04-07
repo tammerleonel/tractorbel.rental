@@ -48,12 +48,32 @@ canvas{
     width:220px;
     height:120px;
 }
+.nav{
+    margin-bottom:20px;
+}
+.nav button{
+    padding:10px 20px;
+    margin-right:5px;
+    cursor:pointer;
+}
+.abas{
+    display:none;
+}
+.abas.active{
+    display:block;
+}
 </style>
 </head>
 
 <body>
 
 <h2>Relatório Financeiro Rental</h2>
+
+<!-- Navegação entre abas -->
+<div class="nav">
+    <button data-aba="financeiro" class="btn-aba">KPI Financeiro</button>
+    <button data-aba="outra" class="btn-aba">Outra Aba</button>
+</div>
 
 <!-- Login -->
 <div id="login">
@@ -62,7 +82,7 @@ canvas{
     <button onclick="login()">Login</button>
 </div>
 
-<div id="conteudo" style="display:none">
+<div id="conteudo" class="abas" style="display:none">
     <input type="file" id="upload" accept=".xls,.xlsx">
     <button id="btnCarregar">Carregar</button>
     <span id="statusCarga"></span>
@@ -127,9 +147,13 @@ canvas{
     </div>
 </div>
 
+<div id="outra" class="abas">
+    <h3>Conteúdo de outra aba</h3>
+</div>
+
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-app.js"; 
-import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-auth.js";
+import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut, setPersistence, browserLocalPersistence } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-auth.js";
 
 // ------------------- FIREBASE -------------------
 const firebaseConfig = {
@@ -142,14 +166,21 @@ const firebaseConfig = {
 };
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
+setPersistence(auth, browserLocalPersistence);
 
 // ------------------- LOGIN -------------------
 function mostrarConteudo(user){
     const login = document.getElementById("login");
     const conteudo = document.getElementById("conteudo");
     if(!login || !conteudo) return;
-    if(user){ login.style.display="none"; conteudo.style.display="block"; }
-    else{ login.style.display="block"; conteudo.style.display="none"; }
+    if(user){ 
+        login.style.display="none"; 
+        conteudo.style.display="block"; 
+        document.querySelector('.btn-aba[data-aba="financeiro"]').click(); // mostra aba KPI por padrão
+    } else { 
+        login.style.display="block"; 
+        document.querySelectorAll('.abas').forEach(a=>a.style.display="none");
+    }
 }
 
 window.login = function(){
@@ -218,19 +249,17 @@ window.carregarDados = function(){
             }
         }
 
-        // Ajusta meses para filtros - agora padrão último mês da base
+        // Ajusta meses e define último mês da base
         const datas = dadosGlobais.map(d=>d.data);
         const minData = new Date(Math.min(...datas));
         const maxData = new Date(Math.max(...datas));
         const formatarMes = d => `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`;
+        const ultimoMes = new Date(maxData.getFullYear(), maxData.getMonth(), 1);
 
         mesInicio.min = formatarMes(minData);
         mesInicio.max = formatarMes(maxData);
         mesFim.min = formatarMes(minData);
         mesFim.max = formatarMes(maxData);
-
-        // **AQUI**: seleciona por padrão o último mês da base
-        const ultimoMes = new Date(maxData.getFullYear(), maxData.getMonth(), 1);
         mesInicio.value = formatarMes(ultimoMes);
         mesFim.value = formatarMes(ultimoMes);
 
@@ -312,14 +341,8 @@ window.gerarRelatorio = function(){
 
 // ------------------- LIMPAR FILTROS -------------------
 window.limparFiltros = function(){
-    // redefinir para último mês da base
-    const datas = dadosGlobais.map(d=>d.data);
-    const maxData = new Date(Math.max(...datas));
-    const ultimoMes = new Date(maxData.getFullYear(), maxData.getMonth(), 1);
-    const formatarMes = d => `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`;
-
-    mesInicio.value = formatarMes(ultimoMes);
-    mesFim.value = formatarMes(ultimoMes);
+    mesInicio.value = mesInicio.min;
+    mesFim.value = mesFim.max;
 
     ["filtroFilial","filtroPatrimonio","filtroSerie","filtroEquipamento","filtroCliente"]
     .forEach(id=>{
@@ -417,13 +440,4 @@ function gerarGraficos(dados){
         options:{
             indexAxis:'y',
             scales:{
-                x:{beginAtZero:true,ticks:{callback: v=>v.toLocaleString('pt-BR',{style:'currency',currency:'BRL'})}},
-                y:{beginAtZero:true}
-            },
-            plugins:{
-                legend:{display:false},
-                tooltip:{callbacks:{label:ctx=>Object.values(deficitCliente)[ctx.dataIndex].toLocaleString('pt-BR',{style:'currency',currency:'BRL'})}}
-            },
-            onClick:(evt,elements)=>{
-                if(elements.length>0){
-                    const idx = elements[0].
+                x:{beginAtZero:true,ticks:{callback: v=>v.toLocaleString('pt-BR',{style:'currency',currency
