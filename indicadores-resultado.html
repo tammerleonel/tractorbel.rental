@@ -87,14 +87,7 @@ canvas{
 </div>
 
 <div id="conteudo" style="display:none">
-    <input type="file" id="upload" accept=".xls,.xlsx">
-    <button id="btnCarregar">Carregar</button>
-    <span id="statusCarga"></span>
-
- <button id="btnLimpar" style="display:none; float:right;">Limpar Filtros</button>
-
-    <br>
-    <div class="card">
+<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; align-items: end; margin-bottom: 10px;">
     <div>
         <label>Mês/Ano Início</label>
         <input type="month" id="mesInicio" disabled>
@@ -103,6 +96,21 @@ canvas{
         <label>Mês/Ano Fim</label>
         <input type="month" id="mesFim" disabled>
     </div>
+    <div>
+        <input type="file" id="upload" accept=".xls,.xlsx">
+    </div>
+    <div>
+        <button id="btnCarregar">Carregar</button>
+    </div>
+    <div style="align-self: center;">
+        <span id="statusCarga"></span>
+    </div>
+</div>
+
+ <button id="btnLimpar" style="display:none; float:right;">Limpar Filtros</button>
+
+    <br>
+    <div class="card">
     <div>
         <label>Filial</label>
         <select multiple class="multi" id="filtroFilial"></select>
@@ -135,6 +143,7 @@ canvas{
         <label>Ano</label>
         <select multiple class="multi" id="filtroAno"></select>
     </div>
+</div>
 </div>
     <br>
 
