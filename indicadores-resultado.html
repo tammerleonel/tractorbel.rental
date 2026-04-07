@@ -480,6 +480,13 @@ function calcularTotais(dados){
     document.getElementById("cardMau").innerText=mau.toLocaleString('pt-BR',{style:'currency',currency:'BRL'});
 }
 
+
+function exibirOuOcultarGrafico(cardId, dados) {
+    const card = document.getElementById(cardId).closest(".card");
+    const temValor = Object.values(dados).some(v => v !== 0 && v !== null && v !== undefined);
+    card.style.display = temValor ? "block" : "none";
+    return temValor;
+}
 // GRÁFICOS (não exibe valores = 0)
 function gerarGraficos(dados){
     graficos.forEach(g=>g.destroy());
@@ -512,19 +519,65 @@ cardGraficoEquip.style.display = ocultarGraficoEquip ? "none" : "block";
         return res;
     }
 
-    const fatEquipFiltrado = filtrarZero(fatEquip);
-    const fatClienteFiltrado = filtrarZero(fatCliente);
-    const manClienteFiltrado = filtrarZero(manCliente);
-    const deficitClienteFiltrado = filtrarZero(deficitCliente);
+const fatEquipFiltrado = filtrarZero(fatEquip);
+const fatClienteFiltrado = filtrarZero(fatCliente);
+const manClienteFiltrado = filtrarZero(manCliente);
+const deficitClienteFiltrado = filtrarZero(deficitCliente);
 
-    if(!ocultarGraficoEquip){
-        graficos.push(new Chart(graficoEquipamento,{
+// Equipamento
+if(exibirOuOcultarGrafico("graficoEquipamento", fatEquipFiltrado)) {
+    graficos.push(new Chart(graficoEquipamento,{
         type:'bar',
         data:{labels:Object.keys(fatEquipFiltrado),datasets:[{data:Object.values(fatEquipFiltrado),backgroundColor:'blue'}]},
         options:{scales:{y:{beginAtZero:true}},plugins:{legend:{display:false}},onClick:(evt, e)=>{
             if(e.length>0){const idx=e[0].index; selecionarFiltro("filtroEquipamento",Object.keys(fatEquipFiltrado)[idx]); gerarRelatorio();}
         }}
-    }))}
+    }));
+}
+
+// Cliente
+if(exibirOuOcultarGrafico("graficoCliente", fatClienteFiltrado)) {
+    graficos.push(new Chart(graficoCliente,{
+        type:'bar',
+        data:{labels:Object.keys(fatClienteFiltrado),datasets:[{data:Object.values(fatClienteFiltrado),backgroundColor:'green'}]},
+        options:{scales:{y:{beginAtZero:true}},plugins:{legend:{display:false}},onClick:(evt, e)=>{
+            if(e.length>0){const idx=e[0].index; selecionarFiltro("filtroCliente",Object.keys(fatClienteFiltrado)[idx]); gerarRelatorio();}
+        }}
+    }));
+}
+
+// Manutenção
+if(exibirOuOcultarGrafico("graficoManutencao", manClienteFiltrado)) {
+    graficos.push(new Chart(graficoManutencao,{
+        type:'bar',
+        data:{labels:Object.keys(manClienteFiltrado),datasets:[{data:Object.values(manClienteFiltrado),backgroundColor:'orange'}]},
+        options:{scales:{y:{beginAtZero:true}},plugins:{legend:{display:false}},onClick:(evt, e)=>{
+            if(e.length>0){const idx=e[0].index; selecionarFiltro("filtroCliente",Object.keys(manClienteFiltrado)[idx]); gerarRelatorio();}
+        }}
+    }));
+}
+
+// Déficit
+if(exibirOuOcultarGrafico("graficoDeficit", deficitClienteFiltrado)) {
+    graficos.push(new Chart(graficoDeficit,{
+        type:'bar',
+        data:{labels:Object.keys(deficitClienteFiltrado),datasets:[{data:Object.values(deficitClienteFiltrado).map(v=>Math.abs(v)),backgroundColor:'red'}]},
+        options:{
+            indexAxis:'y',
+            scales:{
+                x:{beginAtZero:true,ticks:{callback:v=>v.toLocaleString('pt-BR',{style:'currency',currency:'BRL'})}},
+                y:{beginAtZero:true}
+            },
+            plugins:{
+                legend:{display:false},
+                tooltip:{callbacks:{label:ctx=>Object.values(deficitClienteFiltrado)[ctx.dataIndex].toLocaleString('pt-BR',{style:'currency',currency:'BRL'})}}
+            },
+            onClick:(evt,elements)=>{
+                if(elements.length>0){const idx=elements[0].index; selecionarFiltro("filtroCliente", Object.keys(deficitClienteFiltrado)[idx]); gerarRelatorio();}
+            }
+        }
+    }));
+}
 
     graficos.push(new Chart(graficoCliente,{
         type:'bar',
