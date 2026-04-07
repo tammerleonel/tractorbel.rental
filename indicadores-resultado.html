@@ -46,10 +46,10 @@ canvas{
     border-radius:5px;
 }
 .multi{
-    width: auto;       /* largura ajusta ao conteúdo */
-    max-width: 100%;   /* não ultrapassa o container */
-    height:90px;     /* mantém altura para seleção múltipla */
-    min-width: 90px;  /* evita ficar muito pequeno */
+    width: auto;       
+    max-width: 100%;   
+    height:90px;     
+    min-width: 90px;  
 }
 </style>
 </head>
@@ -184,7 +184,7 @@ window.carregarDados = function(){
     const file = input.files[0];
     const status = document.getElementById("statusCarga");
     const btnCarregar = document.getElementById("btnCarregar");
-      const btnLimpar = document.getElementById("btnLimpar");
+    const btnLimpar = document.getElementById("btnLimpar");
     if(!file){ alert("Selecione um arquivo"); return; }
 
     btnCarregar.disabled = true;
@@ -217,7 +217,6 @@ window.carregarDados = function(){
             }
         }
 
-        // Ajusta meses
         const datas = dadosGlobais.map(d=>d.data);
         const minData = new Date(Math.min(...datas));
         const maxData = new Date(Math.max(...datas));
@@ -329,7 +328,7 @@ function calcularTotais(dados){
     document.getElementById("cardMau").innerText=mau.toLocaleString('pt-BR',{style:'currency',currency:'BRL'});
 }
 
-// GRÁFICOS
+// GRÁFICOS (não exibe valores = 0)
 function gerarGraficos(dados){
     graficos.forEach(g=>g.destroy());
     graficos=[];
@@ -342,33 +341,47 @@ function gerarGraficos(dados){
         if(d.resultado<0) deficitCliente[d.cliente]=(deficitCliente[d.cliente]||0)+d.resultado;
     });
 
+    // Filtra apenas valores > 0
+    const filtrarZero = obj=>{
+        const res = {};
+        Object.keys(obj).forEach(k=>{
+            if(obj[k] !== 0) res[k] = obj[k];
+        });
+        return res;
+    }
+
+    const fatEquipFiltrado = filtrarZero(fatEquip);
+    const fatClienteFiltrado = filtrarZero(fatCliente);
+    const manClienteFiltrado = filtrarZero(manCliente);
+    const deficitClienteFiltrado = filtrarZero(deficitCliente);
+
     graficos.push(new Chart(graficoEquipamento,{
         type:'bar',
-        data:{labels:Object.keys(fatEquip),datasets:[{data:Object.values(fatEquip),backgroundColor:'blue'}]},
+        data:{labels:Object.keys(fatEquipFiltrado),datasets:[{data:Object.values(fatEquipFiltrado),backgroundColor:'blue'}]},
         options:{scales:{y:{beginAtZero:true}},plugins:{legend:{display:false}},onClick:(evt, e)=>{
-            if(e.length>0){const idx=e[0].index; selecionarFiltro("filtroEquipamento",Object.keys(fatEquip)[idx]); gerarRelatorio();}
+            if(e.length>0){const idx=e[0].index; selecionarFiltro("filtroEquipamento",Object.keys(fatEquipFiltrado)[idx]); gerarRelatorio();}
         }}
     }));
 
     graficos.push(new Chart(graficoCliente,{
         type:'bar',
-        data:{labels:Object.keys(fatCliente),datasets:[{data:Object.values(fatCliente),backgroundColor:'green'}]},
+        data:{labels:Object.keys(fatClienteFiltrado),datasets:[{data:Object.values(fatClienteFiltrado),backgroundColor:'green'}]},
         options:{scales:{y:{beginAtZero:true}},plugins:{legend:{display:false}},onClick:(evt, e)=>{
-            if(e.length>0){const idx=e[0].index; selecionarFiltro("filtroCliente",Object.keys(fatCliente)[idx]); gerarRelatorio();}
+            if(e.length>0){const idx=e[0].index; selecionarFiltro("filtroCliente",Object.keys(fatClienteFiltrado)[idx]); gerarRelatorio();}
         }}
     }));
 
     graficos.push(new Chart(graficoManutencao,{
         type:'bar',
-        data:{labels:Object.keys(manCliente),datasets:[{data:Object.values(manCliente),backgroundColor:'orange'}]},
+        data:{labels:Object.keys(manClienteFiltrado),datasets:[{data:Object.values(manClienteFiltrado),backgroundColor:'orange'}]},
         options:{scales:{y:{beginAtZero:true}},plugins:{legend:{display:false}},onClick:(evt, e)=>{
-            if(e.length>0){const idx=e[0].index; selecionarFiltro("filtroCliente",Object.keys(manCliente)[idx]); gerarRelatorio();}
+            if(e.length>0){const idx=e[0].index; selecionarFiltro("filtroCliente",Object.keys(manClienteFiltrado)[idx]); gerarRelatorio();}
         }}
     }));
 
     graficos.push(new Chart(graficoDeficit,{
         type:'bar',
-        data:{labels:Object.keys(deficitCliente),datasets:[{data:Object.values(deficitCliente).map(v=>Math.abs(v)),backgroundColor:'red'}]},
+        data:{labels:Object.keys(deficitClienteFiltrado),datasets:[{data:Object.values(deficitClienteFiltrado).map(v=>Math.abs(v)),backgroundColor:'red'}]},
         options:{
             indexAxis:'y',
             scales:{
@@ -377,10 +390,10 @@ function gerarGraficos(dados){
             },
             plugins:{
                 legend:{display:false},
-                tooltip:{callbacks:{label:ctx=>Object.values(deficitCliente)[ctx.dataIndex].toLocaleString('pt-BR',{style:'currency',currency:'BRL'})}}
+                tooltip:{callbacks:{label:ctx=>Object.values(deficitClienteFiltrado)[ctx.dataIndex].toLocaleString('pt-BR',{style:'currency',currency:'BRL'})}}
             },
             onClick:(evt,elements)=>{
-                if(elements.length>0){const idx=elements[0].index; selecionarFiltro("filtroCliente", Object.keys(deficitCliente)[idx]); gerarRelatorio();}
+                if(elements.length>0){const idx=elements[0].index; selecionarFiltro("filtroCliente", Object.keys(deficitClienteFiltrado)[idx]); gerarRelatorio();}
             }
         }
     }));
