@@ -168,7 +168,6 @@ function preencherSelect(id,campo){
     const select = document.getElementById(id);
     if(!select) return;
 
-    // ativa seleção múltipla
     select.multiple = true;
 
     const valores = [...new Set(dadosGlobais.map(d=>d[campo]).filter(Boolean))];
@@ -273,7 +272,7 @@ function gerarGraficos(dados){
     // Gráfico Faturamento x Equipamento
     graficos.push(new Chart(graficoEquipamento,{
         type:'bar',
-        data:{labels:Object.keys(fatEquip),datasets:[{data:Object.values(fatEquip)}]}
+        data:{labels:Object.keys(fatEquip),datasets:[{data:Object.values(fatEquip), backgroundColor:'blue'}]}
     }));
 
     // Gráfico Faturamento x Cliente
