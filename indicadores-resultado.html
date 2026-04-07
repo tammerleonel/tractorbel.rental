@@ -125,11 +125,6 @@ canvas{
         <h3>Déficit x Cliente</h3>
         <canvas id="graficoDeficit"></canvas>
     </div>
-
-    <div class="card" id="cardFatMesContainer" style="display:none">
-        <h3>Faturamento x Mês</h3>
-        <canvas id="graficoFatMes"></canvas>
-    </div>
 </div>
 
 <script type="module">
@@ -274,16 +269,22 @@ function getMultiValues(id){
     return [...select.selectedOptions].map(o=>o.value);
 }
 
+// Função para selecionar filtro ao clicar no gráfico
+function selecionarFiltro(id, valor){
+    const select = document.getElementById(id);
+    if(!select) return;
+    for(const opt of select.options){ opt.selected = (opt.value===valor); }
+}
+
 // ------------------- RELATÓRIO -------------------
 window.gerarRelatorio = function(){
-    // FILTRO POR MÊS/ANO
     const mesIni = mesInicio.value;
     const mesFimVal = mesFim.value;
-    let dtIni = mesIni ? new Date(mesIni+"-01") : null;
+    let dtIni = mesIni ? new Date(mesIni + "-01") : null;
     let dtFim = null;
     if(mesFimVal){
         const [ano, mes] = mesFimVal.split("-");
-        dtFim = new Date(ano, parseInt(mes), 0); 
+        dtFim = new Date(ano, parseInt(mes), 0);
         dtFim.setHours(23,59,59,999);
     }
 
@@ -304,7 +305,7 @@ window.gerarRelatorio = function(){
     );
 
     calcularTotais(filtrado);
-    gerarGraficos(filtrado, cliente, dtIni, dtFim);
+    gerarGraficos(filtrado);
 };
 
 // ------------------- LIMPAR FILTROS -------------------
@@ -338,7 +339,7 @@ function calcularTotais(dados){
 }
 
 // ------------------- GRÁFICOS -------------------
-function gerarGraficos(dados, clientesSelecionados, dtIni, dtFim){
+function gerarGraficos(dados){
     graficos.forEach(g=>g.destroy());
     graficos=[];
 
@@ -350,50 +351,88 @@ function gerarGraficos(dados, clientesSelecionados, dtIni, dtFim){
         if(d.resultado<0) deficitCliente[d.cliente]=(deficitCliente[d.cliente]||0)+d.resultado;
     });
 
-    // Gráfico Faturamento x Equipamento
+    // Equipamento - Bar
     graficos.push(new Chart(graficoEquipamento,{
         type:'bar',
         data:{labels:Object.keys(fatEquip),datasets:[{data:Object.values(fatEquip),backgroundColor:'blue'}]},
         options:{
             scales:{y:{beginAtZero:true}},
             plugins:{legend:{display:false}},
-            onClick: (evt, el) => {
-                if(el.length>0) filtrarPorEquipamento(Object.keys(fatEquip)[el[0].index]);
+            onClick:(evt, elements)=>{
+                if(elements.length>0){
+                    const idx = elements[0].index;
+                    selecionarFiltro("filtroEquipamento", Object.keys(fatEquip)[idx]);
+                    gerarRelatorio();
+                }
             }
         }
     }));
 
-    // Gráfico Faturamento x Cliente (sem legenda)
+    // Cliente - Faturamento Pie (legenda desativada)
     graficos.push(new Chart(graficoCliente,{
         type:'pie',
-        data:{labels:Object.keys(fatCliente),datasets:[{data:Object.values(fatCliente),backgroundColor:Object.keys(fatCliente).map((_,i)=>`hsl(${i*40%360},70%,50%)`)}]},
-        options:{plugins:{legend:{display:false}}, onClick:(evt, el)=>{if(el.length>0) filtrarPorCliente(Object.keys(fatCliente)[el[0].index]);}}
+        data:{labels:Object.keys(fatCliente),datasets:[{data:Object.values(fatCliente)}]},
+        options:{
+            plugins:{legend:{display:false}},
+            onClick:(evt, elements)=>{
+                if(elements.length>0){
+                    const idx = elements[0].index;
+                    selecionarFiltro("filtroCliente", Object.keys(fatCliente)[idx]);
+                    gerarRelatorio();
+                }
+            }
+        }
     }));
 
-    // Gráfico Manutenção x Cliente (sem legenda)
+    // Cliente - Manutenção Pie (legenda desativada)
     graficos.push(new Chart(graficoManutencao,{
         type:'pie',
-        data:{labels:Object.keys(manCliente),datasets:[{data:Object.values(manCliente),backgroundColor:Object.keys(manCliente).map((_,i)=>`hsl(${i*40%360},70%,50%)`)}]},
-        options:{plugins:{legend:{display:false}}, onClick:(evt, el)=>{if(el.length>0) filtrarPorCliente(Object.keys(manCliente)[el[0].index]);}}
+        data:{labels:Object.keys(manCliente),datasets:[{data:Object.values(manCliente)}]},
+        options:{
+            plugins:{legend:{display:false}},
+            onClick:(evt, elements)=>{
+                if(elements.length>0){
+                    const idx = elements[0].index;
+                    selecionarFiltro("filtroCliente", Object.keys(manCliente)[idx]);
+                    gerarRelatorio();
+                }
+            }
+        }
     }));
 
-    // Gráfico Déficit x Cliente
+    // Déficit - Bar Horizontal
     graficos.push(new Chart(graficoDeficit,{
         type:'bar',
         data:{labels:Object.keys(deficitCliente),datasets:[{data:Object.values(deficitCliente).map(v=>Math.abs(v)),backgroundColor:'red'}]},
         options:{
             indexAxis:'y',
-            scales:{x:{beginAtZero:true,ticks:{callback:v=>v.toLocaleString('pt-BR',{style:'currency',currency:'BRL'})}},y:{beginAtZero:true}},
-            plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>Object.values(deficitCliente)[ctx.dataIndex].toLocaleString('pt-BR',{style:'currency',currency:'BRL'})}}},
-            onClick: (evt, el)=>{if(el.length>0) filtrarPorCliente(Object.keys(deficitCliente)[el[0].index]);}
+            scales:{
+                x:{beginAtZero:true,ticks:{callback: v=>v.toLocaleString('pt-BR',{style:'currency',currency:'BRL'})}},
+                y:{beginAtZero:true}
+            },
+            plugins:{
+                legend:{display:false},
+                tooltip:{callbacks:{label:ctx=>Object.values(deficitCliente)[ctx.dataIndex].toLocaleString('pt-BR',{style:'currency',currency:'BRL'})}}
+            },
+            onClick:(evt,elements)=>{
+                if(elements.length>0){
+                    const idx = elements[0].index;
+                    selecionarFiltro("filtroCliente", Object.keys(deficitCliente)[idx]);
+                    gerarRelatorio();
+                }
+            }
         }
     }));
+}
 
-    // Faturamento x Mês (só se 1 cliente e período>1 mês)
-    const cardMes = document.getElementById("cardFatMesContainer");
-    if(clientesSelecionados.length===1 && (dtFim-dtIni)/(1000*60*60*24)>=28){
-        cardMes.style.display="block";
-        const clienteSelecionado = clientesSelecionados[0];
-        const fatMes = {};
-        dados.filter(d=>d.cliente===clienteSelecionado).forEach(d=>{
-            const key = `${d.data.getFullYear()}-${String(d.data.getMonth()+1).padStart(
+// ------------------- EVENTOS -------------------
+mesInicio.addEventListener("change", gerarRelatorio);
+mesFim.addEventListener("change", gerarRelatorio);
+document.getElementById("btnCarregar").addEventListener("click", carregarDados);
+document.getElementById("btnRelatorio").addEventListener("click", gerarRelatorio);
+document.getElementById("btnLimpar").addEventListener("click", limparFiltros);
+
+</script>
+
+</body>
+</html>
