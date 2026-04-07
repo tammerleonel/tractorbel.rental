@@ -436,7 +436,18 @@ function calcularTotais(dados){
 function gerarGraficos(dados){
     graficos.forEach(g=>g.destroy());
     graficos=[];
+const patrimonioSelecionado = getMultiValues("filtroPatrimonio");
+const serieSelecionada = getMultiValues("filtroSerie");
 
+const ocultarGraficoEquip =
+    patrimonioSelecionado.length === 1 ||
+    serieSelecionada.length === 1;
+
+const cardGraficoEquip = document
+    .getElementById("graficoEquipamento")
+    .closest(".card");
+
+cardGraficoEquip.style.display = ocultarGraficoEquip ? "none" : "block";
     const fatEquip={}, fatCliente={}, manCliente={}, deficitCliente={};
     dados.forEach(d=>{
         fatEquip[d.equipamento]=(fatEquip[d.equipamento]||0)+d.faturamento;
@@ -458,13 +469,14 @@ function gerarGraficos(dados){
     const manClienteFiltrado = filtrarZero(manCliente);
     const deficitClienteFiltrado = filtrarZero(deficitCliente);
 
-    graficos.push(new Chart(graficoEquipamento,{
+    if(!ocultarGraficoEquip){
+        graficos.push(new Chart(graficoEquipamento,{
         type:'bar',
         data:{labels:Object.keys(fatEquipFiltrado),datasets:[{data:Object.values(fatEquipFiltrado),backgroundColor:'blue'}]},
         options:{scales:{y:{beginAtZero:true}},plugins:{legend:{display:false}},onClick:(evt, e)=>{
             if(e.length>0){const idx=e[0].index; selecionarFiltro("filtroEquipamento",Object.keys(fatEquipFiltrado)[idx]); gerarRelatorio();}
         }}
-    }));
+    }))};
 
     graficos.push(new Chart(graficoCliente,{
         type:'bar',
