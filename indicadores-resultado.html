@@ -293,13 +293,16 @@ function atualizarFiltros(){
             select.appendChild(opt);
         });
 
-        select.addEventListener("change", (e)=>{
-            if(e.ctrlKey){
-                ctrlSelecionando = true;
-                return;
-            }
-            gerarRelatorio();
-        });
+    select.addEventListener("mousedown", (e)=>{
+    ctrlSelecionando = e.ctrlKey;
+});
+
+select.addEventListener("change", ()=>{
+    if(!ctrlSelecionando){
+        gerarRelatorio();
+    }
+});
+
     });
 }
 
@@ -311,7 +314,7 @@ document.addEventListener("keyup", (e)=>{
     }
 });
 
-function atualizarFiltrosDinamicos(dados){  
+function atualizarFiltrosDinamicos(dados){
 
     atualizandoFiltros = true;
 
