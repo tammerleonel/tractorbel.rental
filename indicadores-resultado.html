@@ -476,7 +476,7 @@ cardGraficoEquip.style.display = ocultarGraficoEquip ? "none" : "block";
         options:{scales:{y:{beginAtZero:true}},plugins:{legend:{display:false}},onClick:(evt, e)=>{
             if(e.length>0){const idx=e[0].index; selecionarFiltro("filtroEquipamento",Object.keys(fatEquipFiltrado)[idx]); gerarRelatorio();}
         }}
-    }))};
+    }))}
 
     graficos.push(new Chart(graficoCliente,{
         type:'bar',
