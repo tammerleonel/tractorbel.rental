@@ -102,7 +102,7 @@ canvas{
         <div class="card"><h4>Faturamento</h4><div class="total" id="cardFat">0</div></div>
         <div class="card"><h4>Financiamento</h4><div class="total" id="cardFin">0</div></div>
         <div class="card"><h4>Impostos</h4><div class="total" id="cardImp">0</div></div>
-        <div class="card"><h4>Custo de Manutenção</h4><div class="total" id="cardMan">0</div></div>
+        <div class="card"><h4>Manutenção</h4><div class="total" id="cardMan">0</div></div>
         <div class="card"><h4>Taxa Administrativa</h4><div class="total" id="cardTx">0</div></div>
         <div class="card"><h4>Resultado</h4><div class="total" id="cardRes">0</div></div>
         <div class="card"><h4>Faturamento Avaria</h4><div class="total" id="cardMau">0</div></div>
@@ -226,7 +226,9 @@ window.carregarDados = function(){
         mesInicio.max = formatarMes(maxData);
         mesFim.min = formatarMes(minData);
         mesFim.max = formatarMes(maxData);
-        mesInicio.value = formatarMes(minData);
+
+        // ALTERAÇÃO: define Mês/Ano Início = último mês da base
+        mesInicio.value = formatarMes(maxData);
         mesFim.value = formatarMes(maxData);
 
         mesInicio.disabled=false;
@@ -302,7 +304,7 @@ window.gerarRelatorio = function(){
     gerarGraficos(filtrado);
 };
 
-// LIMPAR FILTROS (não altera data)
+// LIMPAR FILTROS
 window.limparFiltros = function(){
     ["filtroFilial","filtroPatrimonio","filtroSerie","filtroEquipamento","filtroCliente"]
     .forEach(id=>{
@@ -341,7 +343,6 @@ function gerarGraficos(dados){
         if(d.resultado<0) deficitCliente[d.cliente]=(deficitCliente[d.cliente]||0)+d.resultado;
     });
 
-    // Filtra apenas valores > 0
     const filtrarZero = obj=>{
         const res = {};
         Object.keys(obj).forEach(k=>{
