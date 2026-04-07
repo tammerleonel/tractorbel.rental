@@ -330,12 +330,6 @@ window.gerarRelatorio = function(){
         (!cliente.length || cliente.includes(d.cliente))
     );
 
-    atualizarFiltrosDinamicos(filtrado); // <-- ADICIONADO
-
-    calcularTotais(filtrado);
-    gerarGraficos(filtrado);
-};
-
     calcularTotais(filtrado);
     gerarGraficos(filtrado);
 };
