@@ -269,23 +269,49 @@ dadosGlobais.push({
     reader.readAsArrayBuffer(file);
 };
 
+let ctrlSelecionando = false;
+
 // FILTROS
 function atualizarFiltros(){
     ["filtroFilial","filtroPatrimonio","filtroSerie","filtroEquipamento",
- "filtroMarca","filtroModelo","filtroAno","filtroCliente"]
+     "filtroMarca","filtroModelo","filtroAno","filtroCliente"]
     .forEach(id=>{
         const select = document.getElementById(id);
         if(!select) return;
+
         select.innerHTML="";
         select.multiple = true;
+
         const campo = id.replace("filtro","").toLowerCase();
-        [...new Set(dadosGlobais.map(d=>d[campo]).filter(Boolean))].sort()
-            .forEach(v=>{ const opt=document.createElement("option"); opt.value=v; opt.text=v; select.appendChild(opt); });
-        select.addEventListener("change", gerarRelatorio);
+
+        [...new Set(dadosGlobais.map(d=>d[campo]).filter(Boolean))]
+        .sort()
+        .forEach(v=>{
+            const opt=document.createElement("option");
+            opt.value=v;
+            opt.text=v;
+            select.appendChild(opt);
+        });
+
+        select.addEventListener("change", (e)=>{
+            if(e.ctrlKey){
+                ctrlSelecionando = true;
+                return;
+            }
+            gerarRelatorio();
+        });
     });
 }
 
-function atualizarFiltrosDinamicos(dados){
+// filtra ao soltar CTRL
+document.addEventListener("keyup", (e)=>{
+    if(e.key === "Control" && ctrlSelecionando){
+        ctrlSelecionando = false;
+        gerarRelatorio();
+    }
+});
+
+function atualizarFiltrosDinamicos(dados){  
 
     atualizandoFiltros = true;
 
