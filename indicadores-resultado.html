@@ -69,10 +69,10 @@ canvas{
 
     <br><br>
 
-    <label>Data Inicio</label>
-    <input type="date" id="dataInicio" disabled>
-    <label>Data Fim</label>
-    <input type="date" id="dataFim" disabled>
+    <label>Mês/Ano Início</label>
+    <input type="month" id="mesInicio" disabled>
+    <label>Mês/Ano Fim</label>
+    <input type="month" id="mesFim" disabled>
 
     <br><br>
 
@@ -167,8 +167,8 @@ onAuthStateChanged(auth, user => mostrarConteudo(user));
 let dadosGlobais = [];
 let graficos = [];
 
-const dataInicio = document.getElementById("dataInicio");
-const dataFim = document.getElementById("dataFim");
+const mesInicio = document.getElementById("mesInicio");
+const mesFim = document.getElementById("mesFim");
 
 // ------------------- FUNÇÕES -------------------
 function converterNumero(valor){
@@ -218,21 +218,21 @@ window.carregarDados = function(){
             }
         }
 
-        // Ajusta datas
+        // Ajusta meses
         const datas = dadosGlobais.map(d=>d.data);
         const minData = new Date(Math.min(...datas));
         const maxData = new Date(Math.max(...datas));
-        const formatar = d => `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+        const formatarMes = d => `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`;
 
-        dataInicio.min = formatar(minData);
-        dataInicio.max = formatar(maxData);
-        dataFim.min = formatar(minData);
-        dataFim.max = formatar(maxData);
-        dataInicio.value = formatar(minData);
-        dataFim.value = formatar(maxData);
+        mesInicio.min = formatarMes(minData);
+        mesInicio.max = formatarMes(maxData);
+        mesFim.min = formatarMes(minData);
+        mesFim.max = formatarMes(maxData);
+        mesInicio.value = formatarMes(minData);
+        mesFim.value = formatarMes(maxData);
 
-        dataInicio.disabled=false;
-        dataFim.disabled=false;
+        mesInicio.disabled=false;
+        mesFim.disabled=false;
 
         atualizarFiltros();
 
@@ -271,10 +271,16 @@ function getMultiValues(id){
 
 // ------------------- RELATÓRIO -------------------
 window.gerarRelatorio = function(){
-    const dtIni = dataInicio.value ? new Date(dataInicio.value) : null;
-    const dtFim = dataFim.value ? new Date(dataFim.value) : null;
-    if(dtIni) dtIni.setHours(0,0,0,0);
-    if(dtFim) dtFim.setHours(23,59,59,999);
+    // ---------------- FILTRO POR MÊS/ANO ----------------
+    const mesIni = document.getElementById("mesInicio").value;
+    const mesFim = document.getElementById("mesFim").value;
+    let dtIni = mesIni ? new Date(mesIni + "-01") : null;
+    let dtFim = null;
+    if(mesFim){
+        const [ano, mes] = mesFim.split("-");
+        dtFim = new Date(ano, parseInt(mes), 0); // último dia do mês
+        dtFim.setHours(23,59,59,999);
+    }
 
     const filial = getMultiValues("filtroFilial");
     const patrimonio = getMultiValues("filtroPatrimonio");
@@ -298,8 +304,8 @@ window.gerarRelatorio = function(){
 
 // ------------------- LIMPAR FILTROS -------------------
 window.limparFiltros = function(){
-    dataInicio.value = dataInicio.min;
-    dataFim.value = dataFim.max;
+    mesInicio.value = mesInicio.min;
+    mesFim.value = mesFim.max;
 
     ["filtroFilial","filtroPatrimonio","filtroSerie","filtroEquipamento","filtroCliente"]
     .forEach(id=>{
@@ -346,8 +352,8 @@ function gerarGraficos(dados){
 }
 
 // ------------------- EVENTOS -------------------
-dataInicio.addEventListener("change", gerarRelatorio);
-dataFim.addEventListener("change", gerarRelatorio);
+mesInicio.addEventListener("change", gerarRelatorio);
+mesFim.addEventListener("change", gerarRelatorio);
 document.getElementById("btnCarregar").addEventListener("click", carregarDados);
 document.getElementById("btnRelatorio").addEventListener("click", gerarRelatorio);
 document.getElementById("btnLimpar").addEventListener("click", limparFiltros);
