@@ -96,7 +96,6 @@ canvas{
 
     <br>
 
-    <button id="btnRelatorio" style="display:none">Gerar Relatório</button>
     <button id="btnLimpar" style="display:none">Limpar Filtros</button>
 
     <div class="cards">
@@ -185,12 +184,10 @@ window.carregarDados = function(){
     const file = input.files[0];
     const status = document.getElementById("statusCarga");
     const btnCarregar = document.getElementById("btnCarregar");
-    const btnRelatorio = document.getElementById("btnRelatorio");
-    const btnLimpar = document.getElementById("btnLimpar");
+      const btnLimpar = document.getElementById("btnLimpar");
     if(!file){ alert("Selecione um arquivo"); return; }
 
     btnCarregar.disabled = true;
-    btnRelatorio.style.display="none";
     btnLimpar.style.display="none";
     status.innerText="Carregando planilha...";
 
@@ -239,7 +236,6 @@ window.carregarDados = function(){
         atualizarFiltros();
 
         status.innerText="Dados carregados ✔";
-        btnRelatorio.style.display="inline-block";
         btnLimpar.style.display="inline-block";
         btnCarregar.disabled=false;
 
@@ -394,7 +390,6 @@ function gerarGraficos(dados){
 mesInicio.addEventListener("change", gerarRelatorio);
 mesFim.addEventListener("change", gerarRelatorio);
 document.getElementById("btnCarregar").addEventListener("click", carregarDados);
-document.getElementById("btnRelatorio").addEventListener("click", gerarRelatorio);
 document.getElementById("btnLimpar").addEventListener("click", limparFiltros);
 
 </script>
