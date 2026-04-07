@@ -368,11 +368,12 @@ function gerarGraficos(dados){
         }
     }));
 
-    // Cliente - Faturamento Pie (legenda desativada)
+    // Cliente - Faturamento Bar
     graficos.push(new Chart(graficoCliente,{
-        type:'pie',
-        data:{labels:Object.keys(fatCliente),datasets:[{data:Object.values(fatCliente)}]},
+        type:'bar',
+        data:{labels:Object.keys(fatCliente),datasets:[{data:Object.values(fatCliente),backgroundColor:'green'}]},
         options:{
+            scales:{y:{beginAtZero:true}},
             plugins:{legend:{display:false}},
             onClick:(evt, elements)=>{
                 if(elements.length>0){
@@ -384,11 +385,12 @@ function gerarGraficos(dados){
         }
     }));
 
-    // Cliente - Manutenção Pie (legenda desativada)
+    // Cliente - Manutenção Bar
     graficos.push(new Chart(graficoManutencao,{
-        type:'pie',
-        data:{labels:Object.keys(manCliente),datasets:[{data:Object.values(manCliente)}]},
+        type:'bar',
+        data:{labels:Object.keys(manCliente),datasets:[{data:Object.values(manCliente),backgroundColor:'orange'}]},
         options:{
+            scales:{y:{beginAtZero:true}},
             plugins:{legend:{display:false}},
             onClick:(evt, elements)=>{
                 if(elements.length>0){
