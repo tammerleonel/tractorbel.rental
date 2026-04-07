@@ -177,6 +177,19 @@ function converterNumero(valor){
     return parseFloat(valor.toString().replace(/\./g,'').replace(',','.')) || 0;
 }
 
+function selecionarFiltro(idSelect, valor, toggle=false){
+    const select = document.getElementById(idSelect);
+    if(!select) return;
+    for(let opt of select.options){
+        if(opt.value === valor){
+            if(toggle) opt.selected = !opt.selected;
+            else opt.selected = true;
+        } else if(!toggle){
+            opt.selected = false;
+        }
+    }
+}
+
 // ------------------- CARREGAR EXCEL -------------------
 window.carregarDados = function(){
     const input = document.getElementById('upload');
@@ -271,14 +284,13 @@ function getMultiValues(id){
 
 // ------------------- RELATÓRIO -------------------
 window.gerarRelatorio = function(){
-    // ---------------- FILTRO POR MÊS/ANO ----------------
-    const mesIni = document.getElementById("mesInicio").value;
-    const mesFim = document.getElementById("mesFim").value;
+    const mesIni = mesInicio.value;
+    const mesFimVal = mesFim.value;
     let dtIni = mesIni ? new Date(mesIni + "-01") : null;
     let dtFim = null;
-    if(mesFim){
-        const [ano, mes] = mesFim.split("-");
-        dtFim = new Date(ano, parseInt(mes), 0); // último dia do mês
+    if(mesFimVal){
+        const [ano, mes] = mesFimVal.split("-");
+        dtFim = new Date(ano, parseInt(mes), 0);
         dtFim.setHours(23,59,59,999);
     }
 
@@ -332,7 +344,7 @@ function calcularTotais(dados){
     document.getElementById("cardMau").innerText=mau.toLocaleString('pt-BR',{style:'currency',currency:'BRL'});
 }
 
-// ------------------- GRÁFICOS -------------------
+// ------------------- GRÁFICOS INTERATIVOS -------------------
 function gerarGraficos(dados){
     graficos.forEach(g=>g.destroy());
     graficos=[];
@@ -345,10 +357,70 @@ function gerarGraficos(dados){
         if(d.resultado<0) deficitCliente[d.cliente]=(deficitCliente[d.cliente]||0)+d.resultado;
     });
 
-    graficos.push(new Chart(graficoEquipamento,{type:'bar',data:{labels:Object.keys(fatEquip),datasets:[{data:Object.values(fatEquip),backgroundColor:'blue'}]},options:{scales:{y:{beginAtZero:true}},plugins:{legend:{display:false}}}}));
-    graficos.push(new Chart(graficoCliente,{type:'pie',data:{labels:Object.keys(fatCliente),datasets:[{data:Object.values(fatCliente)}]}}));
-    graficos.push(new Chart(graficoManutencao,{type:'pie',data:{labels:Object.keys(manCliente),datasets:[{data:Object.values(manCliente)}]}}));
-    graficos.push(new Chart(graficoDeficit,{type:'bar',data:{labels:Object.keys(deficitCliente),datasets:[{data:Object.values(deficitCliente).map(v=>Math.abs(v)),backgroundColor:'red'}]},options:{indexAxis:'y',scales:{x:{beginAtZero:true,ticks:{callback: v=>v.toLocaleString('pt-BR',{style:'currency',currency:'BRL'})}},y:{beginAtZero:true}},plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>Object.values(deficitCliente)[ctx.dataIndex].toLocaleString('pt-BR',{style:'currency',currency:'BRL'})}}}}}));
+    // Gráfico Equipamento
+    graficos.push(new Chart(graficoEquipamento,{
+        type:'bar',
+        data:{labels:Object.keys(fatEquip),datasets:[{data:Object.values(fatEquip),backgroundColor:'blue'}]},
+        options:{
+            scales:{y:{beginAtZero:true}},
+            plugins:{legend:{display:false}},
+            onClick:(evt, elements)=>{
+                if(elements.length>0){
+                    const idx = elements[0].index;
+                    selecionarFiltro("filtroEquipamento", Object.keys(fatEquip)[idx]);
+                    gerarRelatorio();
+                }
+            }
+        }
+    }));
+
+    // Gráfico Cliente (Faturamento)
+    graficos.push(new Chart(graficoCliente,{
+        type:'pie',
+        data:{labels:Object.keys(fatCliente),datasets:[{data:Object.values(fatCliente)}]},
+        options:{
+            onClick:(evt, elements)=>{
+                if(elements.length>0){
+                    const idx = elements[0].index;
+                    selecionarFiltro("filtroCliente", Object.keys(fatCliente)[idx]);
+                    gerarRelatorio();
+                }
+            }
+        }
+    }));
+
+    // Gráfico Manutenção
+    graficos.push(new Chart(graficoManutencao,{
+        type:'pie',
+        data:{labels:Object.keys(manCliente),datasets:[{data:Object.values(manCliente)}]},
+        options:{
+            onClick:(evt, elements)=>{
+                if(elements.length>0){
+                    const idx = elements[0].index;
+                    selecionarFiltro("filtroCliente", Object.keys(manCliente)[idx]);
+                    gerarRelatorio();
+                }
+            }
+        }
+    }));
+
+    // Gráfico Déficit
+    graficos.push(new Chart(graficoDeficit,{
+        type:'bar',
+        data:{labels:Object.keys(deficitCliente),datasets:[{data:Object.values(deficitCliente).map(v=>Math.abs(v)),backgroundColor:'red'}]},
+        options:{
+            indexAxis:'y',
+            scales:{x:{beginAtZero:true,ticks:{callback:v=>v.toLocaleString('pt-BR',{style:'currency',currency:'BRL'})}},y:{beginAtZero:true}},
+            plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>Object.values(deficitCliente)[ctx.dataIndex].toLocaleString('pt-BR',{style:'currency',currency:'BRL'})}}},
+            onClick:(evt, elements)=>{
+                if(elements.length>0){
+                    const idx = elements[0].index;
+                    selecionarFiltro("filtroCliente", Object.keys(deficitCliente)[idx]);
+                    gerarRelatorio();
+                }
+            }
+        }
+    }));
 }
 
 // ------------------- EVENTOS -------------------
