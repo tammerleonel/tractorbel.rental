@@ -93,6 +93,15 @@ canvas{
 
     <label>Cliente</label>
     <select multiple class="multi" id="filtroCliente"></select>
+    
+    <label>Marca</label>
+    <select multiple class="multi" id="filtroMarca"></select>
+
+    <label>Modelo</label>
+    <select multiple class="multi" id="filtroModelo"></select>
+
+    <label>Ano</label>
+    <select multiple class="multi" id="filtroAno"></select>
 
     <br>
 
@@ -207,13 +216,27 @@ window.carregarDados = function(){
 
             if(!isNaN(dataLinha)){
                 dataLinha.setHours(0,0,0,0);
-                dadosGlobais.push({
-                    filial: l[0], patrimonio: l[1], serie: l[2], equipamento: l[3],
-                    faturamento: converterNumero(l[7]), manutencao: converterNumero(l[8]),
-                    financiamento: converterNumero(l[9]), impostos: converterNumero(l[10]),
-                    tx: converterNumero(l[11]), resultado: converterNumero(l[12]),
-                    mau: converterNumero(l[13]), cliente: l[14], data: dataLinha
-                });
+
+dadosGlobais.push({
+    filial: l[0],
+    patrimonio: l[1],
+    serie: l[2],
+    equipamento: l[3],
+
+    marca: l[4],
+    modelo: l[5],
+    ano: l[6],
+
+    faturamento: converterNumero(l[7]),
+    manutencao: converterNumero(l[8]),
+    financiamento: converterNumero(l[9]),
+    impostos: converterNumero(l[10]),
+    tx: converterNumero(l[11]),
+    resultado: converterNumero(l[12]),
+    mau: converterNumero(l[13]),
+    cliente: l[14],
+    data: dataLinha
+});
             }
         }
 
@@ -247,7 +270,8 @@ window.carregarDados = function(){
 
 // FILTROS
 function atualizarFiltros(){
-    ["filtroFilial","filtroPatrimonio","filtroSerie","filtroEquipamento","filtroCliente"]
+    ["filtroFilial","filtroPatrimonio","filtroSerie","filtroEquipamento",
+ "filtroMarca","filtroModelo","filtroAno","filtroCliente"]
     .forEach(id=>{
         const select = document.getElementById(id);
         if(!select) return;
@@ -306,7 +330,8 @@ window.gerarRelatorio = function(){
 
 // LIMPAR FILTROS
 window.limparFiltros = function(){
-    ["filtroFilial","filtroPatrimonio","filtroSerie","filtroEquipamento","filtroCliente"]
+    ["filtroFilial","filtroPatrimonio","filtroSerie","filtroEquipamento",
+ "filtroMarca","filtroModelo","filtroAno","filtroCliente"]
     .forEach(id=>{
         const select = document.getElementById(id);
         if(select) select.selectedIndex = -1;
