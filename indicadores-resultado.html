@@ -12,7 +12,12 @@
 body{
     font-family: Arial, Helvetica, sans-serif;
     background:#f5f6fa;
-    padding:20px;
+    margin:0;
+    padding:0;
+}
+h2{
+    text-align:center;
+    margin-top:20px;
 }
 .card{
     background:white;
@@ -20,20 +25,20 @@ body{
     padding:20px;
     border-radius:10px;
     box-shadow:0 2px 5px rgba(0,0,0,0.1);
+    margin-bottom:20px;
 }
 .cards{
     display:grid;
     grid-template-columns: repeat(auto-fit,minmax(220px,1fr));
     gap:15px;
-    margin-bottom:20px;
+    margin-top:20px;
 }
 .total{
     font-size:22px;
     font-weight:bold;
     color:green;
-    text-align: center;
 }
-select, button, input{
+select, input{
     margin-right:10px;
     margin-bottom:10px;
 }
@@ -46,6 +51,28 @@ canvas{
     width:220px;
     height:120px;
 }
+#filtros{
+    position:sticky;
+    top:0;
+    background:#e6f2e6;
+    padding:15px;
+    border-bottom:2px solid green;
+    z-index:1000;
+    display:flex;
+    flex-wrap:wrap;
+    align-items:center;
+    gap:10px;
+}
+#statusCarga{
+    margin-left:10px;
+    font-weight:bold;
+}
+#conteudo{
+    padding:15px;
+}
+#upload{
+    margin-bottom:10px;
+}
 </style>
 </head>
 
@@ -54,45 +81,41 @@ canvas{
 <h2>Relatório Financeiro Rental</h2>
 
 <!-- Login -->
-<div id="login">
+<div id="login" style="text-align:center; margin-top:20px;">
     <input type="email" id="email" placeholder="Email">
     <input type="password" id="senha" placeholder="Senha">
     <button onclick="login()">Login</button>
 </div>
 
 <div id="conteudo" style="display:none">
-    <input type="file" id="upload" accept=".xls,.xlsx">
-    <button id="btnCarregar">Carregar</button>
-    <span id="statusCarga"></span>
 
-    <br><br>
+    <div id="filtros">
+        <input type="file" id="upload" accept=".xls,.xlsx">
+        <button id="btnCarregar">Carregar</button>
+        <span id="statusCarga"></span>
 
-    <label>Mês/Ano Início</label>
-    <input type="month" id="mesInicio" disabled>
-    <label>Mês/Ano Fim</label>
-    <input type="month" id="mesFim" disabled>
+        <label>Mês/Ano Início</label>
+        <input type="month" id="mesInicio" disabled>
+        <label>Mês/Ano Fim</label>
+        <input type="month" id="mesFim" disabled>
 
-    <br><br>
+        <label>Filial</label>
+        <select multiple class="multi" id="filtroFilial"></select>
 
-    <label>Filial</label>
-    <select multiple class="multi" id="filtroFilial"></select>
+        <label>Patrimônio</label>
+        <select multiple class="multi" id="filtroPatrimonio"></select>
 
-    <label>Patrimônio</label>
-    <select multiple class="multi" id="filtroPatrimonio"></select>
+        <label>Série</label>
+        <select multiple class="multi" id="filtroSerie"></select>
 
-    <label>Série</label>
-    <select multiple class="multi" id="filtroSerie"></select>
+        <label>Equipamento</label>
+        <select multiple class="multi" id="filtroEquipamento"></select>
 
-    <label>Equipamento</label>
-    <select multiple class="multi" id="filtroEquipamento"></select>
+        <label>Cliente</label>
+        <select multiple class="multi" id="filtroCliente"></select>
 
-    <label>Cliente</label>
-    <select multiple class="multi" id="filtroCliente"></select>
-
-    <br>
-
-    <button id="btnRelatorio" style="display:none">Gerar Relatório</button>
-    <button id="btnLimpar" style="display:none">Limpar Filtros</button>
+        <button id="btnLimpar">Limpar Filtros</button>
+    </div>
 
     <div class="cards">
         <div class="card"><h4>Faturamento</h4><div class="total" id="cardFat">0</div></div>
@@ -181,13 +204,10 @@ window.carregarDados = function(){
     const file = input.files[0];
     const status = document.getElementById("statusCarga");
     const btnCarregar = document.getElementById("btnCarregar");
-    const btnRelatorio = document.getElementById("btnRelatorio");
     const btnLimpar = document.getElementById("btnLimpar");
     if(!file){ alert("Selecione um arquivo"); return; }
 
     btnCarregar.disabled = true;
-    btnRelatorio.style.display="none";
-    btnLimpar.style.display="none";
     status.innerText="Carregando planilha...";
 
     const reader = new FileReader();
@@ -216,7 +236,6 @@ window.carregarDados = function(){
             }
         }
 
-        // Ajusta meses
         const datas = dadosGlobais.map(d=>d.data);
         const minData = new Date(Math.min(...datas));
         const maxData = new Date(Math.max(...datas));
@@ -235,11 +254,9 @@ window.carregarDados = function(){
         atualizarFiltros();
 
         status.innerText="Dados carregados ✔";
-        btnRelatorio.style.display="inline-block";
-        btnLimpar.style.display="inline-block";
-        btnCarregar.disabled=false;
 
         gerarRelatorio();
+        btnCarregar.disabled=false;
     };
     reader.readAsArrayBuffer(file);
 };
@@ -337,6 +354,7 @@ function calcularTotais(dados){
 }
 
 // ------------------- GRÁFICOS -------------------
+// Mesma lógica de gráficos já existente
 function gerarGraficos(dados){
     graficos.forEach(g=>g.destroy());
     graficos=[];
@@ -428,11 +446,4 @@ function gerarGraficos(dados){
 // ------------------- EVENTOS -------------------
 mesInicio.addEventListener("change", gerarRelatorio);
 mesFim.addEventListener("change", gerarRelatorio);
-document.getElementById("btnCarregar").addEventListener("click", carregarDados);
-document.getElementById("btnRelatorio").addEventListener("click", gerarRelatorio);
-document.getElementById("btnLimpar").addEventListener("click", limparFiltros);
-
-</script>
-    
-</body>
-</html>
+document.get
