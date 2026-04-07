@@ -269,10 +269,20 @@ function gerarGraficos(dados){
         }
     });
 
+    // --- FILTRAR EQUIPAMENTOS INVÁLIDOS OU ZERO ---
+    const fatEquipValid = {};
+    Object.entries(fatEquip).forEach(([equip, valor])=>{
+        if(equip && valor) fatEquipValid[equip] = valor;
+    });
+
     // Gráfico Faturamento x Equipamento
     graficos.push(new Chart(graficoEquipamento,{
         type:'bar',
-        data:{labels:Object.keys(fatEquip),datasets:[{data:Object.values(fatEquip), backgroundColor:'blue'}]}
+        data:{labels:Object.keys(fatEquipValid),datasets:[{data:Object.values(fatEquipValid), backgroundColor:'blue'}]},
+        options:{
+            scales:{ y:{ beginAtZero:true }, x:{ beginAtZero:true } },
+            plugins:{ legend:{ display:false } }
+        }
     }));
 
     // Gráfico Faturamento x Cliente
@@ -293,7 +303,7 @@ function gerarGraficos(dados){
         data:{
             labels:Object.keys(deficitCliente),
             datasets:[{
-                label: 'Déficit',
+                label:'Déficit',
                 data:Object.values(deficitCliente).map(v=>Math.abs(v)),
                 backgroundColor:'red',
                 borderSkipped:false
@@ -305,9 +315,7 @@ function gerarGraficos(dados){
                 x:{
                     beginAtZero:true,
                     ticks:{
-                        callback:function(value){
-                            return value.toLocaleString('pt-BR',{style:'currency',currency:'BRL'});
-                        }
+                        callback:function(value){ return value.toLocaleString('pt-BR',{style:'currency',currency:'BRL'}); }
                     }
                 },
                 y:{ beginAtZero:true }
