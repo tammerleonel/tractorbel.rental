@@ -218,7 +218,7 @@ window.carregarDados = function(){
             }
         }
 
-        // Ajusta meses
+        // Ajusta meses para filtros - agora padrão último mês da base
         const datas = dadosGlobais.map(d=>d.data);
         const minData = new Date(Math.min(...datas));
         const maxData = new Date(Math.max(...datas));
@@ -228,8 +228,11 @@ window.carregarDados = function(){
         mesInicio.max = formatarMes(maxData);
         mesFim.min = formatarMes(minData);
         mesFim.max = formatarMes(maxData);
-        mesInicio.value = formatarMes(minData);
-        mesFim.value = formatarMes(maxData);
+
+        // **AQUI**: seleciona por padrão o último mês da base
+        const ultimoMes = new Date(maxData.getFullYear(), maxData.getMonth(), 1);
+        mesInicio.value = formatarMes(ultimoMes);
+        mesFim.value = formatarMes(ultimoMes);
 
         mesInicio.disabled=false;
         mesFim.disabled=false;
@@ -269,7 +272,6 @@ function getMultiValues(id){
     return [...select.selectedOptions].map(o=>o.value);
 }
 
-// Função para selecionar filtro ao clicar no gráfico
 function selecionarFiltro(id, valor){
     const select = document.getElementById(id);
     if(!select) return;
@@ -310,8 +312,14 @@ window.gerarRelatorio = function(){
 
 // ------------------- LIMPAR FILTROS -------------------
 window.limparFiltros = function(){
-    mesInicio.value = mesInicio.min;
-    mesFim.value = mesFim.max;
+    // redefinir para último mês da base
+    const datas = dadosGlobais.map(d=>d.data);
+    const maxData = new Date(Math.max(...datas));
+    const ultimoMes = new Date(maxData.getFullYear(), maxData.getMonth(), 1);
+    const formatarMes = d => `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`;
+
+    mesInicio.value = formatarMes(ultimoMes);
+    mesFim.value = formatarMes(ultimoMes);
 
     ["filtroFilial","filtroPatrimonio","filtroSerie","filtroEquipamento","filtroCliente"]
     .forEach(id=>{
@@ -418,23 +426,4 @@ function gerarGraficos(dados){
             },
             onClick:(evt,elements)=>{
                 if(elements.length>0){
-                    const idx = elements[0].index;
-                    selecionarFiltro("filtroCliente", Object.keys(deficitCliente)[idx]);
-                    gerarRelatorio();
-                }
-            }
-        }
-    }));
-}
-
-// ------------------- EVENTOS -------------------
-mesInicio.addEventListener("change", gerarRelatorio);
-mesFim.addEventListener("change", gerarRelatorio);
-document.getElementById("btnCarregar").addEventListener("click", carregarDados);
-document.getElementById("btnRelatorio").addEventListener("click", gerarRelatorio);
-document.getElementById("btnLimpar").addEventListener("click", limparFiltros);
-
-</script>
-
-</body>
-</html>
+                    const idx = elements[0].
