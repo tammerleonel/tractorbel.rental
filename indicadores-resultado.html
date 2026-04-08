@@ -61,9 +61,11 @@ canvas{
 /* Ajuste mínimo para filtros responsivos */
 #conteudo .card {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(10px, 10fr));
-    gap: 2px;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); /* largura flexível */
+    gap: 10px;
     text-align: center;
+    height: 300px; /* altura fixa conforme solicitado */
+    align-items: start; /* garante que os elementos fiquem no topo */
 }
 
 #conteudo .card label {
@@ -75,8 +77,8 @@ canvas{
 #conteudo .card select,
 #conteudo .card input[type="month"] {
     box-sizing: border-box;
-    height: auto;        /* remove altura fixa */
-    flex: 1;           /* permite expandir para preencher o espaço */
+    width: 100%; /* ocupa toda a largura disponível da coluna */
+    height: auto; /* ajusta altura automaticamente */
 }
 
 /* Apenas para multiselects */
