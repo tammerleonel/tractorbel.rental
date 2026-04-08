@@ -74,23 +74,24 @@ canvas{
 
 <div id="conteudo" style="display:none">
 <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; align-items: end; margin-bottom: 10px;">
-    <div>
-        <label>Mês/Ano Início</label>
-        <input type="month" id="mesInicio" disabled>
-    </div>
-    <div>
-        <label>Mês/Ano Fim</label>
-        <input type="month" id="mesFim" disabled>
-    </div>
-    <div>
-        <input type="file" id="upload" accept=".xls,.xlsx">
-    </div>
-    <div>
-        <button id="btnCarregar">Carregar</button>
-            </div>
-    <div style="align-self: center;">
-        <span id="statusCarga"></span>
-    </div>
+    <div class="filtros-grid">
+  <div class="filtro">
+      <label>Mês/Ano Início</label>
+      <input type="month" id="mesInicio" disabled>
+  </div>
+  <div class="filtro">
+      <label>Mês/Ano Fim</label>
+      <input type="month" id="mesFim" disabled>
+  </div>
+  <div class="filtro">
+      <input type="file" id="upload" accept=".xls,.xlsx">
+  </div>
+  <div class="filtro">
+      <button id="btnCarregar">Carregar</button>
+  </div>
+  <div class="filtro-status">
+      <span id="statusCarga"></span>
+  </div>
 </div>
 
     <br>
