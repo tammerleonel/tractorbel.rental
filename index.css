@@ -234,17 +234,13 @@ label.btn-label {
 /* ===== Labels dos filtros normais ===== */
 #conteudo .card label,
 #conteudo > div > div label {
-    display: inline-block;
-    padding: 10px 20px;
-    border: 2px solid #34A853;
-    border-radius: 24px;
-    background-color: white;
-    color: #34A853;
-    font-weight: 500;
-    font-size: 0.9em;
-    cursor: pointer;
-    transition: all 0.2s ease;
-    box-shadow: 0 1px 2px rgba(0,0,0,0.2);
+    display: block;
+    padding: 2px 4px;
+    border: none;
+    background: none;
+    color: black;
+    font-weight: normal;
+    box-shadow: none;
 }
 
 /* ===== Botões estilo Google branco e verde ===== */
@@ -271,11 +267,4 @@ button.btn-google:hover {
 button.btn-google:active {
     transform: scale(0.98);
     box-shadow: 0 1px 2px rgba(0,0,0,0.2);
-}
-#conteudo .card{
-    background: #f0f0f0;
-    padding: 20px;
-    margin-bottom: 20px;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-    border-radius: 8px;
 }
