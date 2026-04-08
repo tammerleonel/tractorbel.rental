@@ -284,11 +284,24 @@ body{
 }
 h2{margin-bottom:10px;}
 #login input, #login button{margin-right:5px; margin-bottom:5px;}
+.card{
+    background:white;
+    text-align:center;
+    padding:10px;
+    border-radius:5px;
+    box-shadow:0 1px 3px rgba(0,0,0,0.1);
+    margin-bottom:10px;
+}
 .cards{
     display:grid;
     grid-template-columns: repeat(auto-fit,minmax(150px,1fr));
     gap:10px;
     margin-bottom:10px;
+}
+.total{
+    font-size:18px;
+    font-weight:bold;
+    color:green;
 }
 select, input{
     margin-right:5px;
@@ -331,29 +344,4 @@ canvas{
     width: 100%;
     max-width: 100%;
     height: 90px; /* mantém altura das multi-selects */
-}
-/* ===== CARDS DE RESUMO VERDE ===== */
-.cards .card {
-    background-color: green;      /* fundo verde */
-    color: white;                 /* texto branco */
-    padding: 10px;
-    border-radius: 5px;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.2);
-    text-align: center;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    min-height: 80px;
-}
-
-.cards .card h4 {
-    margin: 0 0 5px 0;
-    font-size: 1em;
-}
-
-.total {
-    font-size: 18px;
-    font-weight: bold;
-    color: white; /* texto total branco */
 }
