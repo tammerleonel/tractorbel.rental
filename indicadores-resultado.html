@@ -75,9 +75,15 @@ canvas{
 #conteudo .card select,
 #conteudo .card input[type="month"] {
     width: 100%;
-    max-width: 100%;
+    min-width: 0;        /* permite encolher proporcionalmente */
     box-sizing: border-box;
-    height: auto; /* deixa altura ajustável automaticamente */
+    height: auto;        /* remove altura fixa */
+}
+
+/* Apenas para multiselects */
+#conteudo .card select.multi {
+    min-height: 90px;    /* mantém altura visual para múltiplas opções */
+    width: 100%;         /* força ocupar toda a coluna */
 }
 
 </style>
