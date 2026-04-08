@@ -74,14 +74,14 @@ canvas{
 
 #conteudo .card select,
 #conteudo .card input[type="month"] {
-    width: 50%;
     box-sizing: border-box;
     height: auto;        /* remove altura fixa */
+    flex: 1;           /* permite expandir para preencher o espaço */
 }
 
 /* Apenas para multiselects */
 #conteudo .card select.multi {
-      width: 50%;         /* força ocupar toda a coluna */
+height: 35px;
 }
 
 </style>
