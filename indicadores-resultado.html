@@ -43,7 +43,8 @@
 </div>
 
     <br>
-    <div class="card">
+<!-- BLOCO DE FILTROS -->
+<div class="filtros-container" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; align-items: end; margin-bottom: 10px;">
     <div>
         <label>Filial</label>
         <select multiple class="multi" id="filtroFilial"></select>
@@ -77,22 +78,20 @@
         <select multiple class="multi" id="filtroAno"></select>
     </div>
     <div style="text-align:right; margin-top:10px;">
-    <button id="btnLimpar" class="btn-google" style="display:none;">Limpar Filtros</button>
-</div>
-
-</div>
-</div>
-    <br>
-
-       <div class="cards">
-        <div class="card"><h4>Faturamento</h4><div class="total" id="cardFat">0</div></div>
-        <div class="card"><h4>Financiamento</h4><div class="total" id="cardFin">0</div></div>
-        <div class="card"><h4>Impostos</h4><div class="total" id="cardImp">0</div></div>
-        <div class="card"><h4>Manutenção</h4><div class="total" id="cardMan">0</div></div>
-        <div class="card"><h4>Taxa Administrativa</h4><div class="total" id="cardTx">0</div></div>
-        <div class="card"><h4>Resultado</h4><div class="total" id="cardRes">0</div></div>
-        <div class="card"><h4>Faturamento Avaria</h4><div class="total" id="cardMau">0</div></div>
+        <button id="btnLimpar" class="btn-google" style="display:none;">Limpar Filtros</button>
     </div>
+</div>
+
+<!-- CARDS DE RESUMO -->
+<div class="cards" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; margin-bottom: 10px;">
+    <div class="card"><h4>Faturamento</h4><div class="total" id="cardFat">0</div></div>
+    <div class="card"><h4>Financiamento</h4><div class="total" id="cardFin">0</div></div>
+    <div class="card"><h4>Impostos</h4><div class="total" id="cardImp">0</div></div>
+    <div class="card"><h4>Manutenção</h4><div class="total" id="cardMan">0</div></div>
+    <div class="card"><h4>Taxa Administrativa</h4><div class="total" id="cardTx">0</div></div>
+    <div class="card"><h4>Resultado</h4><div class="total" id="cardRes">0</div></div>
+    <div class="card"><h4>Faturamento Avaria</h4><div class="total" id="cardMau">0</div></div>
+</div>
 
 <div class="card" id="cardGraficoMes" style="display:none;">
     <h3>Faturamento x Mês</h3>

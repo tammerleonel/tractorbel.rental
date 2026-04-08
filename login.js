@@ -263,3 +263,4 @@ dataInicio.addEventListener("change", gerarRelatorio);
 dataFim.addEventListener("change", gerarRelatorio);
 document.getElementById("btnCarregar").addEventListener("click", carregarDados);
 document.getElementById("btnRelatorio").addEventListener("click", gerarRelatorio);
+
