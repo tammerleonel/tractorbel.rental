@@ -58,26 +58,24 @@ canvas{
     min-width: 90px;  
 }
 
-/* Ajuste mínimo para filtros responsivos */
-#conteudo .card {
+#conteudo .card{
+    text-align:left;
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-    gap: 10px;
-    text-align: left;
+    gap: 10px; /* espaçamento entre filtros */
 }
 
-#conteudo .card label {
-    display: block; /* label acima do input/select */
+#conteudo .card label{
+    display: block;   /* label acima do select */
     margin-bottom: 4px;
     font-size: 0.85em;
 }
 
 #conteudo .card select,
-#conteudo .card input[type="month"] {
+#conteudo .card input[type="month"]{
     width: 100%;
     max-width: 100%;
-    box-sizing: border-box;
-    height: auto; /* deixa altura ajustável automaticamente */
+    height: 90px; /* mantém altura das multi-selects */
 }
 
 </style>
