@@ -588,50 +588,45 @@ function gerarGraficos(dados){
         }));
     }
 
-    // --- NOVO: Gráfico "Faturamento x Mês" para 1 Patrimônio ou 1 Série ---
-    const patrimonioSelecionadoMes = getMultiValues("filtroPatrimonio");
-    const serieSelecionadaMes = getMultiValues("filtroSerie");
+ // --- NOVO: Gráfico "Faturamento x Mês" para 1 Patrimônio ou 1 Série ---
+const patrimonioSelecionadoMes = getMultiValues("filtroPatrimonio");
+const serieSelecionadaMes = getMultiValues("filtroSerie");
 
-    const mesInicioVal = mesInicio.value;
-    const mesFimVal = mesFim.value;
+const mesInicioVal = mesInicio.value;
+const mesFimVal = mesFim.value;
 
-    if((patrimonioSelecionadoMes.length===1 || serieSelecionadaMes.length===1) && mesInicioVal && mesFimVal){
-        const dtIni = new Date(mesInicioVal + "-01");
-        const dtFim = new Date(mesFimVal + "-01");
-        const intervaloMeses = (dtFim.getFullYear() - dtIni.getFullYear())*12 + (dtFim.getMonth() - dtIni.getMonth()) + 1;
+const cardGraficoMes = document.getElementById("cardGraficoMes");
 
-        if(intervaloMeses > 1){
-            const faturamentoMes = {};
-            dados.forEach(d=>{
-                if(d.data>=dtIni && d.data<=dtFim){
-                    const key = `${d.data.getFullYear()}-${String(d.data.getMonth()+1).padStart(2,'0')}`;
-                    faturamentoMes[key] = (faturamentoMes[key]||0)+d.faturamento;
-                }
-            });
+if((patrimonioSelecionadoMes.length===1 || serieSelecionadaMes.length===1) && mesInicioVal && mesFimVal){
+    const dtIni = new Date(mesInicioVal + "-01");
+    const dtFim = new Date(mesFimVal + "-01");
+    dtFim.setMonth(dtFim.getMonth() + 1); // inclui o mês final
 
-            const fatMesFiltrado = filtrarZero(faturamentoMes);
-
-            if(Object.keys(fatMesFiltrado).length>0){
-                // Cria canvas dinamicamente se não existir
-                let canvasMes = document.getElementById("graficoMes");
-                if(!canvasMes){
-                    const card = document.createElement("div");
-                    card.className="card";
-                    card.innerHTML=`<h3>Faturamento x Mês</h3><canvas id="graficoMes"></canvas>`;
-                    document.getElementById("conteudo").appendChild(card);
-                    canvasMes = document.getElementById("graficoMes");
-                }
-
-                graficos.push(new Chart(canvasMes,{
-                    type:'bar',
-                    data:{labels:Object.keys(fatMesFiltrado), datasets:[{data:Object.values(fatMesFiltrado), backgroundColor:'purple'}]},
-                    options:{scales:{y:{beginAtZero:true}},plugins:{legend:{display:false}}}
-                }));
-            }
+    const faturamentoMes = {};
+    dados.forEach(d=>{
+        if(d.data>=dtIni && d.data<=dtFim){
+            const key = `${d.data.getFullYear()}-${String(d.data.getMonth()+1).padStart(2,'0')}`;
+            faturamentoMes[key] = (faturamentoMes[key]||0)+d.faturamento;
         }
-    }
-}
+    });
 
+    const fatMesFiltrado = filtrarZero(faturamentoMes);
+
+    if(Object.keys(fatMesFiltrado).length>0){
+        cardGraficoMes.style.display = "block"; // mostra o card existente
+
+        graficos.push(new Chart(document.getElementById("graficoMes"),{
+            type:'bar',
+            data:{labels:Object.keys(fatMesFiltrado), datasets:[{data:Object.values(fatMesFiltrado), backgroundColor:'purple'}]},
+            options:{scales:{y:{beginAtZero:true}},plugins:{legend:{display:false}}}
+        }));
+    } else {
+        cardGraficoMes.style.display = "none"; // oculta se não houver dados
+    }
+} else {
+    cardGraficoMes.style.display = "none"; // oculta se filtro não tiver 1 patrimônio ou 1 série
+}
+}
 // EVENTOS
 mesInicio.addEventListener("change", gerarRelatorio);
 mesFim.addEventListener("change", gerarRelatorio);
