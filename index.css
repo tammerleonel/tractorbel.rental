@@ -213,28 +213,29 @@ h3{
 }
 
 /* Labels que são estilo botão (upload, etc) */
+/* ===== Labels estilo botão (upload, etc) ===== */
 label.btn-label {
-    display: inline-block;
-    width: auto;
-    margin-right: 5px;
-    margin-bottom: 5px;
-    font-size: 0.9em;
-    border: 2px solid #34A853;
-    border-radius: 24px;
-    background-color: white;
-    color: #34A853; 
-    padding: 10px 20px;
-    font-weight: 500;
-    cursor: pointer;
-    transition: all 0.2s ease;
-    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+    display: inline-block !important;
+    width: auto !important;
+    margin-right: 5px !important;
+    margin-bottom: 5px !important;
+    font-size: 0.9em !important;
+    border: 2px solid #34A853 !important;
+    border-radius: 24px !important;
+    background-color: white !important;
+    color: #34A853 !important; 
+    padding: 10px 20px !important;
+    font-weight: 500 !important;
+    cursor: pointer !important;
+    transition: all 0.2s ease !important;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2) !important;
 }
 
-/* Labels dos filtros normais */
+/* ===== Labels dos filtros normais ===== */
 #conteudo .card label,
 #conteudo > div > div label {
-    display: block;   /* label acima do input/select */
-    padding: 2px 4px; /* padding menor */
+    display: block;
+    padding: 2px 4px;
     border: none;
     background: none;
     color: black;
@@ -242,45 +243,14 @@ label.btn-label {
     box-shadow: none;
 }
 
-.multi option:checked {
-    background: #27ae60;
-    color: white;
-}
-.btn-file {
-    display:inline-block;
-    padding:10px 20px;
-    border:2px solid #34A853;
-    border-radius:24px;
-    background:white;
-    color:#34A853;
-    font-weight:500;
-    cursor:pointer;
-    font-size:0.9em;
-    box-shadow: 0 1px 2px rgba(0,0,0,0.2);
-    transition: all 0.2s ease;
-}
-
-.btn-file:hover {
-    background-color: #34A853;
-    color: white;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.3);
-}
-
-.btn-file:active {
-    transform: scale(0.98);
-    box-shadow: 0 1px 2px rgba(0,0,0,0.2);
-}
-#btnCarregar {
-    align-self: start; /* força iniciar no topo da célula do grid */
-}
 /* ===== Botões estilo Google branco e verde ===== */
-button, .btn-google {
+button.btn-google {
     display: inline-block;
     padding: 10px 20px;
-    border: 2px solid #34A853;       /* verde da borda */
-    border-radius: 24px;             /* arredondado como Google */
-    background-color: white;          /* fundo branco */
-    color: #34A853;                  /* texto verde */
+    border: 2px solid #34A853;
+    border-radius: 24px;
+    background-color: white;
+    color: #34A853;
     font-weight: 500;
     font-size: 0.9em;
     cursor: pointer;
@@ -288,15 +258,13 @@ button, .btn-google {
     box-shadow: 0 1px 2px rgba(0,0,0,0.2);
 }
 
-/* Hover: fundo verde, texto branco */
-button:hover, .btn-google:hover {
+button.btn-google:hover {
     background-color: #34A853;
     color: white;
     box-shadow: 0 2px 4px rgba(0,0,0,0.3);
 }
 
-/* Active: efeito de clique */
-button:active, .btn-google:active {
+button.btn-google:active {
     transform: scale(0.98);
     box-shadow: 0 1px 2px rgba(0,0,0,0.2);
 }
