@@ -58,6 +58,28 @@ canvas{
     min-width: 90px;  
 }
 
+/* Ajuste mínimo para filtros responsivos */
+#conteudo .card {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 10px;
+    text-align: left;
+}
+
+#conteudo .card label {
+    display: block; /* label acima do input/select */
+    margin-bottom: 4px;
+    font-size: 0.85em;
+}
+
+#conteudo .card select,
+#conteudo .card input[type="month"] {
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
+    height: auto; /* deixa altura ajustável automaticamente */
+}
+
 </style>
 </head>
 
@@ -74,27 +96,27 @@ canvas{
 
 <div id="conteudo" style="display:none">
 <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; align-items: end; margin-bottom: 10px;">
-    <div class="filtros-grid">
-  <div class="filtro">
-      <label>Mês/Ano Início</label>
-      <input type="month" id="mesInicio" disabled>
-  </div>
-  <div class="filtro">
-      <label>Mês/Ano Fim</label>
-      <input type="month" id="mesFim" disabled>
-  </div>
-  <div class="filtro">
-      <input type="file" id="upload" accept=".xls,.xlsx">
-  </div>
-  <div class="filtro">
-      <button id="btnCarregar">Carregar</button>
-  </div>
-  <div class="filtro-status">
-      <span id="statusCarga"></span>
-  </div>
+    <div>
+        <label>Mês/Ano Início</label>
+        <input type="month" id="mesInicio" disabled>
+    </div>
+    <div>
+        <label>Mês/Ano Fim</label>
+        <input type="month" id="mesFim" disabled>
+    </div>
+    <div>
+        <input type="file" id="upload" accept=".xls,.xlsx">
+    </div>
+    <div>
+        <button id="btnCarregar">Carregar</button>
+            </div>
+    <div style="align-self: center;">
+        <span id="statusCarga"></span>
+    </div>
 </div>
 
     <br>
+    <div class="card">
     <div>
         <label>Filial</label>
         <select multiple class="multi" id="filtroFilial"></select>
@@ -118,9 +140,6 @@ canvas{
     <div>
         <label>Marca</label>
         <select multiple class="multi" id="filtroMarca"></select>
-    <div>
-        <label>Modelo</label>
-        <select multiple class="multi" id="filtroModelo"></select>
     </div>
     <div>
         <label>Modelo</label>
