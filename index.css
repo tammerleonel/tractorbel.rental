@@ -225,16 +225,18 @@ label {
 }
 .topo{
     display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 10px; /* mesma margem que tinha antes do h2 */
+    align-items: center;   /* alinha verticalmente */
+    gap: 15px;             /* espaço entre logo e título */
+    margin-bottom: 10px;
 }
 
 .topo h2{
-    margin: 0; /* remove margem extra do h2 */
+    margin: 0;
+    font-size: 1.5em; /* ajuste do tamanho do título */
 }
 
 .topo .logo{
-    height: 20px; /* ajuste a altura do logo como quiser */
+    height: 60px;       /* altura do logo */
+    width: auto;        /* largura proporcional para manter retangular */
     object-fit: contain;
 }
