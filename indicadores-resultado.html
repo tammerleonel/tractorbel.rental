@@ -52,7 +52,7 @@ button, input[type="file"] {
     border-radius: 24px;         /* cantos arredondados estilo Google */
     background-color: white;     /* fundo branco */
     color: #34A853;              /* texto verde */
-    padding: 10px 10px;
+    padding: 10px 20px;
     font-weight: 500;
     cursor: pointer;
     transition: all 0.2s ease;
@@ -131,17 +131,18 @@ canvas{
     <div>
         <label>Mês/Ano Início</label>
         <input type="month" id="mesInicio" disabled>
-
+        
     </div>
-   <div style="display:flex; gap:5px; align-items:center;">
-    <label class="btn-file" style="position: relative; display: inline-block;">
-        Upload Planilha.xlsx
+    <div style="display:flex; gap:5px; align-items:center;">
+    <label class="btn-file" for="upload" style="position: relative; display: inline-block;">
+        Escolher arquivo
         <input type="file" id="upload" accept=".xls,.xlsx" style="opacity:0; position:absolute; left:0; top:0; width:100%; height:100%; cursor:pointer;">
     </label>
-</div>
+    <button id="btnCarregar">Carregar</button>
+    </div>
 
     <div>
-        <button id="btnCarregar">Carregar dados para os filtros</button>
+        <button id="btnCarregar">Carregar</button>
     </div>
     <div style="align-self: center;">
         <span id="statusCarga"></span>
