@@ -272,3 +272,9 @@ button.btn-google:active {
     transform: scale(0.98);
     box-shadow: 0 1px 2px rgba(0,0,0,0.2);
 }
+#conteudo .card{
+    display: flex;       /* troca de grid para flex */
+    flex-wrap: wrap;     /* quebra linhas quando necessário */
+    gap: 10px;           /* espaçamento entre filtros */
+    align-items: flex-start; /* alinhamento dos labels no topo */
+}
