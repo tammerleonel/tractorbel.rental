@@ -235,6 +235,7 @@ label {
 }
 
 .topo .logo{
-    height: 50px; /* ajuste a altura do logo como quiser */
+    height: 20px; /* ajuste a altura do logo como quiser */
     object-fit: contain;
+    text-align: right;
 }
