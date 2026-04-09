@@ -595,6 +595,18 @@ window.addEventListener("DOMContentLoaded", () => {
         if (file) carregarDados(file);
     });
 });
+function getMultiValues(id){
+    const el = document.getElementById(id);
+    if(!el) return [];
+    return Array.from(el.selectedOptions || []).map(o => o.value);
+}
+
+function gerarRelatorio(){
+    if(!dadosGlobais.length) return;
+
+    calcularTotais(dadosGlobais);
+    gerarGraficos(dadosGlobais);
+}
 
 </script>
 </body>
