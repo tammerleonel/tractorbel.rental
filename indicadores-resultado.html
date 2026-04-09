@@ -58,7 +58,7 @@
     margin-top:0;
 }
 /* ===== Botões estilo Google branco e verde ===== */
-button.btn-google {
+.btn-google {
     display: inline-block;
     padding: 10px 20px;
     border: 2px solid #34A853;
@@ -70,17 +70,16 @@ button.btn-google {
     cursor: pointer;
     transition: all 0.2s ease;
     box-shadow: 0 1px 2px rgba(0,0,0,0.2);
+    text-align: center;
 }
 
-button.btn-google:hover {
+.btn-google:hover {
     background-color: #34A853;
     color: white;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.3);
 }
 
-button.btn-google:active {
+.btn-google:active {
     transform: scale(0.98);
-    box-shadow: 0 1px 2px rgba(0,0,0,0.2);
 }
 /* CARDS */
 .cards{
@@ -173,37 +172,12 @@ canvas{
     background:#fff;
     padding-bottom:6px;
 }  
-/* botão escolher arquivo usando o label */
-input[type="file"] + label.btn-google {
-    display: inline-block;
-    padding: 10px 20px;
-    border: 2px solid #34A853;
-    border-radius: 24px;
-    background-color: white;
-    color: #34A853;
-    font-weight: 500;
-    font-size: 0.9em;
-    cursor: pointer;
-    transition: all 0.2s ease;
-    text-align: center;
-}
 
 input[type="file"] + label.btn-google:hover {
     background-color: #34A853;
     color: white;
 }
-#filtroPatrimonio,
-#filtroEquipamento,
-#filtroCliente {
-    min-width: 180px;
-}
 
-#filtroFilial,
-#filtroMarca,
-#filtroModelo,
-#filtroAno {
-    min-width: 100px;
-}
 
 </style>
 </head>
