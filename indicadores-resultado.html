@@ -378,14 +378,17 @@ dadosGlobais.push({
         if(!el) return;
 
         if(!el.choices){
-            el.choices = new Choices(el,{
-                removeItemButton:false,
-                searchEnabled:true,
-                searchPlaceholderValue:"Digite para buscar...",
-                noResultsText:"Nenhum resultado",
-                itemSelectText:"",
-                shouldSort:false
-            });
+el.choices = new Choices(el,{
+    removeItemButton:false,
+    searchEnabled:true,
+    searchPlaceholderValue:"Digite para buscar...",
+    noResultsText:"Nenhum resultado",
+    itemSelectText:"",
+    shouldSort:false,
+    callbackOnInit: function() {
+        this.showDropdown();
+    }
+});
 
             // <<< ESTE É O FIX
             el.addEventListener('change', () => {
