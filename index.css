@@ -320,7 +320,7 @@ canvas{
     border-radius:5px;
 }
 .multi{
-    width: auto;       
+    width: 100%;       
     max-width: 100%;   
     height:90px;     
     min-width: 90px;  
