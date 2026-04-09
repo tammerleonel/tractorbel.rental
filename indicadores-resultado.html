@@ -264,9 +264,7 @@ input[type="file"] + label.btn-google:hover {
         <label>Ano</label>
         <select multiple class="multi" id="filtroAno"></select>
     </div>
-    <div style="text-align:right; margin-top:10px;">
-        <button id="btnLimpar" class="btn-google" style="display:none;">Limpar Filtros</button>
-    </div>
+
 </div>
 
 <!-- CARDS DE RESUMO -->
@@ -485,6 +483,9 @@ setTimeout(() => {
        
 // MOSTRAR APÓS UPLOAD
 document.querySelector(".filtros-container").style.display = "grid";
+    <div style="text-align:right; margin-top:10px;">
+        <button id="btnLimpar" class="btn-google" style="display:none;">Limpar Filtros</button>
+    </div>
 document.querySelector(".cards").style.display = "grid";
 
 document.querySelectorAll(".cards .card").forEach(c=>{
