@@ -330,6 +330,10 @@ setTimeout(() => {
 document.querySelector(".filtros-container").style.display = "grid";
 document.querySelector(".cards").style.display = "grid";
 
+document.querySelectorAll(".cards .card").forEach(c=>{
+    c.style.display = "block";
+});
+
 document.querySelectorAll("#conteudo > .card").forEach(c=>{
     c.style.display = "block";
 });
