@@ -214,12 +214,7 @@ label.btn-google {
 <div>
     <label for="upload" class="btn-google">Escolher Planilha</label>
     <input type="file" id="upload" accept=".xls,.xlsx" style="display:none;">
-</div>
-    <div>
-        <button id="btnCarregar" class="btn-google" style="display:none;">
-            Carregar dados da planilha para os filtros
-        </button>
-            </div>
+    </div>
     <div style="align-self: center;">
         <span id="statusCarga"></span>
     </div>
@@ -358,13 +353,13 @@ function converterNumero(valor){
 window.carregarDados = function(){
     const input = document.getElementById('upload');
     const file = input.files[0];
-    const btnCarregar = document.getElementById("btnCarregar");
-      const status = document.getElementById("statusCarga");
+    if(!file) return; // <- importante
+
+         const status = document.getElementById("statusCarga");
         const btnLimpar = document.getElementById("btnLimpar");
     if(!file){ alert("Selecione um arquivo"); return; }
 
-    btnCarregar.style.display = "none"; // oculta o botão ao clicar
-    btnLimpar.style.display="none";
+        btnLimpar.style.display="none";
     status.innerText="Carregando planilha...";
 
     const reader = new FileReader();
@@ -373,6 +368,7 @@ window.carregarDados = function(){
         const workbook = XLSX.read(data,{type:'array'});
         const sheet = workbook.Sheets[workbook.SheetNames[0]];
         const json = XLSX.utils.sheet_to_json(sheet,{header:1});
+        document.getElementById("upload").value = "";
         dadosGlobais=[];
 
         for(let i=1;i<json.length;i++){
@@ -475,8 +471,7 @@ el.addEventListener('change', ()=>{
         status.innerText = "Dados carregados ✔";
         status.style.visibility = "visible";
         btnLimpar.style.display="inline-block";
-        btnCarregar.disabled=false;
-
+       
 setTimeout(() => {
     status.style.visibility = "hidden";
 }, 1500); // oculta texto após 1,5 segundos
@@ -855,7 +850,9 @@ mesInicio.addEventListener("change", gerarRelatorio);
 mesFim.addEventListener("change", gerarRelatorio);
 document.getElementById("btnCarregar").addEventListener("click", carregarDados);
 document.getElementById("btnLimpar").addEventListener("click", limparFiltros);
-
+document.getElementById("upload").addEventListener("change", function () {
+    carregarDados();
+});
 </script>
 </body>
 </html>
