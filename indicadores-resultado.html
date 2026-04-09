@@ -55,7 +55,7 @@
 
 /* botão limpar alinhado */
 #btnLimpar{
-    margin-top:18px;
+    margin-top:0;
 }
 /* ===== Botões estilo Google branco e verde ===== */
 button.btn-google {
@@ -233,6 +233,11 @@ input[type="file"] + label.btn-google:hover {
 <!-- BLOCO DE FILTROS -->
 <div class="filtros-container" style="display:none; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; align-items: end; margin-bottom: 10px;">
     <div>
+
+    <div style="text-align:right; margin-top:10px;">
+        <button id="btnLimpar" class="btn-google" style="display:none;">Limpar Filtros</button>
+    </div>
+
         <label>Filial</label>
         <select multiple class="multi" id="filtroFilial"></select>
     </div>
@@ -483,9 +488,6 @@ setTimeout(() => {
        
 // MOSTRAR APÓS UPLOAD
 document.querySelector(".filtros-container").style.display = "grid";
-    <div style="text-align:right; margin-top:10px;">
-        <button id="btnLimpar" class="btn-google" style="display:none;">Limpar Filtros</button>
-    </div>
 document.querySelector(".cards").style.display = "grid";
 
 document.querySelectorAll(".cards .card").forEach(c=>{
