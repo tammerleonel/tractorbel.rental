@@ -210,7 +210,9 @@ label.btn-google {
     <input type="file" id="upload" accept=".xls,.xlsx" style="display:none;">
 </div>
     <div>
-        <button id="btnCarregar" class="btn-google">Carregar dados da planilha para os filtros</button>
+        <button id="btnCarregar" class="btn-google" style="display:none;">
+            Carregar dados da planilha para os filtros
+        </button>
             </div>
     <div style="align-self: center;">
         <span id="statusCarga"></span>
@@ -350,9 +352,9 @@ function converterNumero(valor){
 window.carregarDados = function(){
     const input = document.getElementById('upload');
     const file = input.files[0];
-    const status = document.getElementById("statusCarga");
     const btnCarregar = document.getElementById("btnCarregar");
-    const btnLimpar = document.getElementById("btnLimpar");
+      const status = document.getElementById("statusCarga");
+        const btnLimpar = document.getElementById("btnLimpar");
     if(!file){ alert("Selecione um arquivo"); return; }
 
     btnCarregar.style.display = "none"; // oculta o botão ao clicar
