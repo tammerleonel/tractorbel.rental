@@ -485,21 +485,41 @@ function atualizarFiltrosDinamicos(dados){
         const select=document.getElementById(id);
         if(!select) return;
 
-        const selecionados=[...select.selectedOptions].map(o=>o.value);
+        const selecionados = getMultiValues(id);
 
         const valores=[...new Set(
             dados.map(d=>d[mapa[id]]).filter(Boolean)
         )].sort();
 
-        select.innerHTML="";
+        if(select.choices){
 
-        valores.forEach(v=>{
-            const opt=document.createElement("option");
-            opt.value=v;
-            opt.text=v;
-            if(selecionados.includes(v)) opt.selected=true;
-            select.appendChild(opt);
-        });
+            select.choices.clearStore();
+
+            select.choices.setChoices(
+                valores.map(v => ({
+                    value:v,
+                    label:v,
+                    selected:selecionados.includes(v)
+                })),
+                'value',
+                'label',
+                true
+            );
+
+        }else{
+
+            select.innerHTML="";
+
+            valores.forEach(v=>{
+                const opt=document.createElement("option");
+                opt.value=v;
+                opt.text=v;
+                if(selecionados.includes(v)) opt.selected=true;
+                select.appendChild(opt);
+            });
+
+        }
+
     });
 
     atualizandoFiltros = false;
