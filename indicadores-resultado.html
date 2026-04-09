@@ -283,6 +283,33 @@ dadosGlobais.push({
         mesFim.disabled=false;
 
         atualizarFiltros();
+        ativarBuscaFiltros();
+        function ativarBuscaFiltros(){
+
+    [
+        "filtroFilial",
+        "filtroPatrimonio",
+        "filtroSerie",
+        "filtroEquipamento",
+        "filtroCliente",
+        "filtroMarca",
+        "filtroModelo",
+        "filtroAno"
+    ].forEach(id=>{
+        const el = document.getElementById(id);
+        if(!el) return;
+
+        new Choices(el,{
+            removeItemButton:true,
+            searchEnabled:true,
+            searchPlaceholderValue:"Digite para buscar...",
+            noResultsText:"Nenhum resultado",
+            itemSelectText:"",
+            shouldSort:false
+        });
+    });
+
+}
 
         status.innerText = "Dados carregados ✔";
         status.style.visibility = "visible";
