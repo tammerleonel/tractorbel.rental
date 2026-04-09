@@ -424,10 +424,15 @@ el.choices.setChoices(
     true
 );
 
-            // <<< ESTE É O FIX
-            el.addEventListener('change', () => {
-                gerarRelatorio();
-            });
+el.addEventListener('mousedown', (e)=>{
+    ctrlSelecionando = e.ctrlKey;
+});
+
+el.addEventListener('change', ()=>{
+    if(!ctrlSelecionando){
+        gerarRelatorio();
+    }
+});
         }
     });
 
