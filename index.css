@@ -251,32 +251,6 @@ label.btn-label {
     transition: all 0.2s ease;
     box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
 }
-
-/* ===== Botões estilo Google branco e verde ===== */
-button.btn-google {
-    display: inline-block;
-    padding: 10px 20px;
-    border: 2px solid #34A853;
-    border-radius: 24px;
-    background-color: white;
-    color: #34A853;
-    font-weight: 500;
-    font-size: 0.9em;
-    cursor: pointer;
-    transition: all 0.2s ease;
-    box-shadow: 0 1px 2px rgba(0,0,0,0.2);
-}
-
-button.btn-google:hover {
-    background-color: #34A853;
-    color: white;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.3);
-}
-
-button.btn-google:active {
-    transform: scale(0.98);
-    box-shadow: 0 1px 2px rgba(0,0,0,0.2);
-}
 body{
     font-family: Arial, Helvetica, sans-serif;
     background:#f5f6fa;
@@ -353,4 +327,29 @@ canvas{
 
 .cards .card .total {
     color: white;
+}
+/* ===== Botões estilo Google branco e verde ===== */
+button.btn-google {
+    display: inline-block;
+    padding: 10px 20px;
+    border: 2px solid #34A853;
+    border-radius: 24px;
+    background-color: white;
+    color: #34A853;
+    font-weight: 500;
+    font-size: 0.9em;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.2);
+}
+
+button.btn-google:hover {
+    background-color: #34A853;
+    color: white;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+}
+
+button.btn-google:active {
+    transform: scale(0.98);
+    box-shadow: 0 1px 2px rgba(0,0,0,0.2);
 }
