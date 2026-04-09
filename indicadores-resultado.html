@@ -350,12 +350,9 @@ function converterNumero(valor){
 }
 
 // CARREGAR EXCEL
-window.carregarDados = function(){
-    const input = document.getElementById('upload');
-    const file = input.files[0];
+window.carregarDados = function(file){
     if(!file) return; // <- importante
-
-         const status = document.getElementById("statusCarga");
+        const status = document.getElementById("statusCarga");
         const btnLimpar = document.getElementById("btnLimpar");
     if(!file){ alert("Selecione um arquivo"); return; }
 
@@ -850,8 +847,10 @@ mesInicio.addEventListener("change", gerarRelatorio);
 mesFim.addEventListener("change", gerarRelatorio);
 document.getElementById("btnCarregar").addEventListener("click", carregarDados);
 document.getElementById("btnLimpar").addEventListener("click", limparFiltros);
-document.getElementById("upload").addEventListener("change", function () {
-    carregarDados();
+document.getElementById("upload").addEventListener("change", (e) => {
+    if (e.target.files && e.target.files.length > 0) {
+        carregarDados(e.target.files[0]);
+    }
 });
 </script>
 </body>
