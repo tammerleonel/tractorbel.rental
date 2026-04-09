@@ -491,12 +491,20 @@ gerarGraficos(filtrado);
 
 // LIMPAR FILTROS
 window.limparFiltros = function(){
-    ["filtroFilial","filtroPatrimonio","filtroSerie","filtroEquipamento",
- "filtroMarca","filtroModelo","filtroAno","filtroCliente"]
-    .forEach(id=>{
+    [
+        "filtroFilial","filtroPatrimonio","filtroSerie","filtroEquipamento",
+        "filtroMarca","filtroModelo","filtroAno","filtroCliente"
+    ].forEach(id=>{
         const select = document.getElementById(id);
-        if(select) select.selectedIndex = -1;
+        if(!select) return;
+
+        if(select.choices){
+            select.choices.removeActiveItems(); // limpa no Choices
+        }else{
+            select.selectedIndex = -1;
+        }
     });
+
     gerarRelatorio();
 };
 
