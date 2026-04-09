@@ -413,14 +413,13 @@ window.carregarDados = function(file){
         atualizarFiltros();
         gerarRelatorio();
 
-        status.innerText = "Dados carregados ✔";
-
-        setTimeout(() => {
+                setTimeout(() => {
             status.innerText = "";
         }, 1500);
     };
 
     reader.readAsArrayBuffer(file);
+    status.innerText = "Dados carregados ✔";
 };
 
 // CARDS
