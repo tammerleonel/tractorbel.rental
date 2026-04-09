@@ -587,15 +587,14 @@ if(mesesNoPeriodo > 1){  // só mostra se for mais de 1 mês
 mesInicio.addEventListener("change", gerarRelatorio);
 mesFim.addEventListener("change", gerarRelatorio);
 document.getElementById("btnLimpar").addEventListener("click", limparFiltros);
-const upload = document.getElementById("upload");
+window.addEventListener("DOMContentLoaded", () => {
+    const upload = document.getElementById("upload");
 
-if (upload) {
     upload.addEventListener("change", (e) => {
-        if (e.target.files && e.target.files.length > 0) {
-            carregarDados(e.target.files[0]);
-        }
+        const file = e.target.files?.[0];
+        if (file) carregarDados(file);
     });
-}
+});
 </script>
 </body>
 </html>
