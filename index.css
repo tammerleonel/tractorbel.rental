@@ -283,11 +283,6 @@ select, input{
     font-size:0.9em;
 }
 
-button:not(.btn-google) {
-    margin-right:5px;
-    margin-bottom:5px;
-    font-size:0.9em;
-}
 canvas{
     background:white;
     padding:10px;
