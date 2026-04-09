@@ -8,29 +8,6 @@
 <script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
-<style>
-.cards .card{
-    background: white;
-    border-radius: 8px;
-    padding: 10px;
-    text-align: center;
-    box-shadow: 0 2px 6px rgba(0,0,0,0.1);
-}
-
-.cards .card h4{
-    margin: 0 0 5px 0;
-    font-size: 14px;
-    color: #555;
-}
-
-.cards .card .total{
-    font-size: 18px;
-    font-weight: bold;
-    color: green;
-    text-align: center;
-}
-</style>
-
 </head>
 
 <body>
@@ -67,7 +44,7 @@
 
     <br>
 <!-- BLOCO DE FILTROS -->
-<div class="filtros-container" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; align-items: end; margin-bottom: 10px;">
+<div class="filtros-container" style="display:none; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; align-items: end; margin-bottom: 10px;"></div>
     <div>
         <label>Filial</label>
         <select multiple class="multi" id="filtroFilial"></select>
@@ -106,14 +83,14 @@
 </div>
 
 <!-- CARDS DE RESUMO -->
-<div class="cards" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; margin-bottom: 10px;">
-    <div class="card"><h4>Faturamento</h4><div class="total" id="cardFat">0</div></div>
-    <div class="card"><h4>Financiamento</h4><div class="total" id="cardFin">0</div></div>
-    <div class="card"><h4>Impostos</h4><div class="total" id="cardImp">0</div></div>
-    <div class="card"><h4>Manutenção</h4><div class="total" id="cardMan">0</div></div>
-    <div class="card"><h4>Taxa Administrativa</h4><div class="total" id="cardTx">0</div></div>
-    <div class="card"><h4>Resultado</h4><div class="total" id="cardRes">0</div></div>
-    <div class="card"><h4>Faturamento Avaria</h4><div class="total" id="cardMau">0</div></div>
+<div class="cards" style="display:none; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; margin-bottom: 10px;"></div>
+    <div class="card" style="display:none;"><h4>Faturamento</h4><div class="total" id="cardFat">0</div></div>
+    <div class="card" style="display:none;"><h4>Financiamento</h4><div class="total" id="cardFin">0</div></div>
+    <div class="card" style="display:none;"><h4>Impostos</h4><div class="total" id="cardImp">0</div></div>
+    <div class="card" style="display:none;"><h4>Manutenção</h4><div class="total" id="cardMan">0</div></div>
+    <div class="card" style="display:none;"><h4>Taxa Administrativa</h4><div class="total" id="cardTx">0</div></div>
+    <div class="card" style="display:none;"><h4>Resultado</h4><div class="total" id="cardRes">0</div></div>
+    <div class="card" style="display:none;"><h4>Faturamento Avaria</h4><div class="total" id="cardMau">0</div></div>
 </div>
 
 <div class="card" id="cardGraficoMes" style="display:none;">
@@ -121,22 +98,22 @@
     <canvas id="graficoMes"></canvas>
 </div>
 
-    <div class="card">
+    <div class="card" style="display:none;">
         <h3>Faturamento x Equipamento</h3>
         <canvas id="graficoEquipamento"></canvas>
     </div>
 
-    <div class="card">
+    <div class="card" style="display:none;">
         <h3>Faturamento x Cliente</h3>
         <canvas id="graficoCliente"></canvas>
     </div>
 
-    <div class="card">
+    <div class="card" style="display:none;">
         <h3>Manutenção x Cliente</h3>
         <canvas id="graficoManutencao"></canvas>
     </div>
 
-    <div class="card">
+    <div class="card" style="display:none;">
         <h3>Déficit x Cliente</h3>
         <canvas id="graficoDeficit"></canvas>
     </div>
@@ -272,8 +249,14 @@ dadosGlobais.push({
 setTimeout(() => {
     status.style.visibility = "hidden";
 }, 1500); // oculta texto após 1,5 segundos
-        
+       
+// MOSTRAR APÓS UPLOAD
+document.querySelector(".filtros-container").style.display = "grid";
+document.querySelector(".cards").style.display = "grid";
 
+document.querySelectorAll("#conteudo > .card").forEach(c=>{
+    c.style.display = "block";
+});
         gerarRelatorio();
     };
     reader.readAsArrayBuffer(file);
