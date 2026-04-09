@@ -263,37 +263,37 @@ label.btn-google {
     </button>
 </div>
 <!-- CARDS DE RESUMO -->
-<div class="cards" style="display:none; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; margin-bottom: 10px;">
-    <div class="card" style="display:none;"><h4>Faturamento</h4><div class="total" id="cardFat">0</div></div>
-    <div class="card" style="display:none;"><h4>Financiamento</h4><div class="total" id="cardFin">0</div></div>
-    <div class="card" style="display:none;"><h4>Impostos</h4><div class="total" id="cardImp">0</div></div>
-    <div class="card" style="display:none;"><h4>Manutenção</h4><div class="total" id="cardMan">0</div></div>
-    <div class="card" style="display:none;"><h4>Taxa Administrativa</h4><div class="total" id="cardTx">0</div></div>
-    <div class="card" style="display:none;"><h4>Resultado</h4><div class="total" id="cardRes">0</div></div>
-    <div class="card" style="display:none;"><h4>Faturamento Avaria</h4><div class="total" id="cardMau">0</div></div>
+<div class="cards"grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; margin-bottom: 10px;">
+    <div class="card" ><h4>Faturamento</h4><div class="total" id="cardFat">0</div></div>
+    <div class="card" ><h4>Financiamento</h4><div class="total" id="cardFin">0</div></div>
+    <div class="card" ><h4>Impostos</h4><div class="total" id="cardImp">0</div></div>
+    <div class="card" ><h4>Manutenção</h4><div class="total" id="cardMan">0</div></div>
+    <div class="card" ><h4>Taxa Administrativa</h4><div class="total" id="cardTx">0</div></div>
+    <div class="card" ><h4>Resultado</h4><div class="total" id="cardRes">0</div></div>
+    <div class="card" ><h4>Faturamento Avaria</h4><div class="total" id="cardMau">0</div></div>
 </div>
 
-<div class="card" id="cardGraficoMes" style="display:none;">
+<div class="card" id="cardGraficoMes">
     <h3>Faturamento x Mês</h3>
     <canvas id="graficoMes"></canvas>
 </div>
 
-    <div class="card" style="display:none;">
+    <div class="card">
         <h3>Faturamento x Equipamento</h3>
         <canvas id="graficoEquipamento"></canvas>
     </div>
 
-    <div class="card" style="display:none;">
+    <div class="card">
         <h3>Faturamento x Cliente</h3>
         <canvas id="graficoCliente"></canvas>
     </div>
 
-    <div class="card" style="display:none;">
+    <div class="card" >
         <h3>Manutenção x Cliente</h3>
         <canvas id="graficoManutencao"></canvas>
     </div>
 
-    <div class="card" style="display:none;">
+    <div class="card">
         <h3>Déficit x Cliente</h3>
         <canvas id="graficoDeficit"></canvas>
     </div>
@@ -608,7 +608,21 @@ function gerarRelatorio(){
     calcularTotais(dadosGlobais);
     gerarGraficos(dadosGlobais);
 }
+function atualizarFiltros(){
+    document.querySelector(".filtros-container").style.display = "grid";
+    document.querySelector(".cards").style.display = "grid";
+    document.querySelectorAll(".card").forEach(c=>{
+        if(!c.id.includes("grafico")) c.style.display = "block";
+    });
+}
 
+function selecionarFiltro(id, valor){
+    const el = document.getElementById(id);
+    if(!el) return;
+    Array.from(el.options).forEach(o=>{
+        if(o.value === valor) o.selected = true;
+    });
+}
 </script>
 </body>
 </html>
