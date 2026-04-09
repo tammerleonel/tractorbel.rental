@@ -485,12 +485,13 @@ function atualizarFiltrosDinamicos(dados){
         const select=document.getElementById(id);
         if(!select) return;
 
-        const selecionados=[...select.selectedOptions].map(o=>o.value);
+        const selecionados = getMultiValues(id);
 
         const valores=[...new Set(
             dados.map(d=>d[mapa[id]]).filter(Boolean)
         )].sort();
 
+        // limpa select
         select.innerHTML="";
 
         valores.forEach(v=>{
@@ -500,6 +501,17 @@ function atualizarFiltrosDinamicos(dados){
             if(selecionados.includes(v)) opt.selected=true;
             select.appendChild(opt);
         });
+
+        // <<< AQUI ESTÁ O FIX PRINCIPAL
+        if(select.choices){
+            select.choices.clearChoices();
+            select.choices.setChoices(
+                valores.map(v => ({value:v,label:v,selected:selecionados.includes(v)})),
+                'value',
+                'label',
+                true
+            );
+        }
     });
 
     atualizandoFiltros = false;
