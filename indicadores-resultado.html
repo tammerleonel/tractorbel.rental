@@ -646,7 +646,7 @@ window.gerarRelatorio = function(){
         (!cliente.length || cliente.includes(d.cliente))
     );
 
-atualizarFiltrosDinamicos(filtrado);
+if(!ctrlSelecionando) atualizarFiltrosDinamicos(filtrado);
 calcularTotais(filtrado);
 gerarGraficos(filtrado);
 };
