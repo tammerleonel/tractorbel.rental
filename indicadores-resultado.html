@@ -173,6 +173,25 @@ canvas{
     background:#fff;
     padding-bottom:6px;
 }  
+/* botão escolher arquivo */
+input[type="file"]::file-selector-button{
+    padding: 10px 20px;
+    border: 2px solid #34A853;
+    border-radius: 24px;
+    background-color: white;
+    color: #34A853;
+    font-weight: 500;
+    font-size: 0.9em;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    margin-right:10px;
+}
+
+input[type="file"]::file-selector-button:hover{
+    background-color:#34A853;
+    color:white;
+}
+
 </style>
 </head>
 
@@ -197,9 +216,10 @@ canvas{
         <label>Mês/Ano Fim</label>
         <input type="month" id="mesFim" disabled>
     </div>
-    <div>
-        <input type="file" id="upload" accept=".xls,.xlsx">
-    </div>
+<div>
+    <label for="upload" class="btn-google">Escolher arquivo</label>
+    <input type="file" id="upload" accept=".xls,.xlsx">
+</div>
     <div>
         <button id="btnCarregar">Carregar</button>
             </div>
