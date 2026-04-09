@@ -378,7 +378,7 @@ window.carregarDados = function(file){
             if(typeof dataLinha==="number"){ dataLinha = new Date((dataLinha-25569)*86400*1000); }
             else {
     dataLinha = new Date(dataLinha);
-    if (isNaN(dataLinha)) return; // IGNORA LINHA INVÁLIDA
+    if (isNaN(dataLinha)) continue; // IGNORA LINHA INVÁLIDA
 }
 
             if(!isNaN(dataLinha)){
