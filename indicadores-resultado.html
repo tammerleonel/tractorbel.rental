@@ -822,10 +822,13 @@ const mesFimVal = mesFim.value;
 const cardGraficoMes = document.getElementById("cardGraficoMes");
 
 if((patrimonioSelecionadoMes.length===1 || serieSelecionadaMes.length===1) && mesInicioVal && mesFimVal){
-    const dtIni = new Date(mesInicioVal + "-01");
-    const dtFim = new Date(mesFimVal + "-01");
-    dtFim.setMonth(dtFim.getMonth() + 1); // inclui o mês final
+const dtIni = new Date(mesInicioVal + "-01");
+const dtFim = new Date(mesFimVal + "-01");
 
+// Calcula diferença em meses
+const mesesNoPeriodo = (dtFim.getFullYear() - dtIni.getFullYear()) * 12 + (dtFim.getMonth() - dtIni.getMonth()) + 1;
+
+if(mesesNoPeriodo > 1){  // só mostra se for mais de 1 mês
     const faturamentoMes = {};
     dados.forEach(d=>{
         if(d.data>=dtIni && d.data<=dtFim){
@@ -846,9 +849,9 @@ if((patrimonioSelecionadoMes.length===1 || serieSelecionadaMes.length===1) && me
         }));
     } else {
         cardGraficoMes.style.display = "none"; // oculta se não houver dados
-    }
+    }}
 } else {
-    cardGraficoMes.style.display = "none"; // oculta se filtro não tiver 1 patrimônio ou 1 série
+    cardGraficoMes.style.display = "none"; // oculta se só tiver 1 mês
 }
 }
 // EVENTOS
