@@ -412,6 +412,7 @@ window.carregarDados = function(file){
         // inicializa filtros + gráfico
         atualizarFiltros();
         gerarRelatorio();
+            status.innerText = "Dados carregados ✔";
 
                 setTimeout(() => {
             status.innerText = "";
@@ -419,7 +420,7 @@ window.carregarDados = function(file){
     };
 
     reader.readAsArrayBuffer(file);
-    status.innerText = "Dados carregados ✔";
+
 };
 
 // CARDS
