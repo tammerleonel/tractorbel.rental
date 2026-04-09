@@ -521,7 +521,16 @@ function getMultiValues(id){
 function selecionarFiltro(id, valor){
     const select = document.getElementById(id);
     if(!select) return;
-    for(const opt of select.options){ opt.selected = (opt.value===valor); }
+
+    // se estiver usando Choices
+    if(select.choices){
+        select.choices.removeActiveItems();
+        select.choices.setChoiceByValue(valor);
+    }else{
+        for(const opt of select.options){
+            opt.selected = (opt.value === valor);
+        }
+    }
 }
 
 // RELATÓRIO
