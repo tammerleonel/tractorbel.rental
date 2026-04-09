@@ -491,6 +491,49 @@ function atualizarFiltrosDinamicos(dados){
             dados.map(d=>d[mapa[id]]).filter(Boolean)
         )].sort();
 
+        // se estiver usando Choices
+        if(select.choices){
+
+            select.choices.clearStore(); // limpa tudo
+
+            select.choices.setChoices(
+                valores.map(v => ({
+                    value:v,
+                    label:v,
+                    selected:selecionados.includes(v)
+                })),
+                'value',
+                'label',
+                true
+            );
+
+        }else{
+            // fallback sem choices
+            select.innerHTML="";
+            valores.forEach(v=>{
+                const opt=document.createElement("option");
+                opt.value=v;
+                opt.text=v;
+                if(selecionados.includes(v)) opt.selected=true;
+                select.appendChild(opt);
+            });
+        }
+
+    });
+
+    atualizandoFiltros = false;
+}
+
+    Object.keys(mapa).forEach(id=>{
+        const select=document.getElementById(id);
+        if(!select) return;
+
+        const selecionados = getMultiValues(id);
+
+        const valores=[...new Set(
+            dados.map(d=>d[mapa[id]]).filter(Boolean)
+        )].sort();
+
         // limpa select
         select.innerHTML="";
 
