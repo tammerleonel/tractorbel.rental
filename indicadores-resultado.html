@@ -390,6 +390,12 @@ el.choices = new Choices(el,{
         this.showDropdown();
     }
 });
+el.choices.setChoices(
+    [...el.options].map(o => ({ value:o.value, label:o.text })),
+    'value',
+    'label',
+    true
+);
 
             // <<< ESTE É O FIX
             el.addEventListener('change', () => {
