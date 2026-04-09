@@ -263,7 +263,7 @@ label.btn-google {
     </button>
 </div>
 <!-- CARDS DE RESUMO -->
-<div class="cards">
+<div class="cards"grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; margin-bottom: 10px;">
     <div class="card" ><h4>Faturamento</h4><div class="total" id="cardFat">0</div></div>
     <div class="card" ><h4>Financiamento</h4><div class="total" id="cardFin">0</div></div>
     <div class="card" ><h4>Impostos</h4><div class="total" id="cardImp">0</div></div>
@@ -522,7 +522,7 @@ function gerarGraficos(dados){
 
     // Déficit
     if(exibirOuOcultarGrafico("graficoDeficit", deficitClienteFiltrado)) {
-        graficos.push(new Chart(document.getElementById("graficoDeficit"),{
+        graficos.push(new Chart(graficoDeficit,{
             type:'bar',
             data:{labels:Object.keys(deficitClienteFiltrado),datasets:[{data:Object.values(deficitClienteFiltrado).map(v=>Math.abs(v)),backgroundColor:'red'}]},
             options:{
@@ -622,12 +622,6 @@ function selecionarFiltro(id, valor){
     Array.from(el.options).forEach(o=>{
         if(o.value === valor) o.selected = true;
     });
-}
-function limparFiltros(){
-    document.querySelectorAll(".multi").forEach(el=>{
-        Array.from(el.options).forEach(o => o.selected = false);
-    });
-    gerarRelatorio();
 }
 </script>
 </body>
