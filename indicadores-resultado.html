@@ -433,6 +433,13 @@ function atualizarFiltrosDinamicos(dados){
 function getMultiValues(id){
     const select = document.getElementById(id);
     if(!select) return [];
+
+    // se estiver usando Choices.js
+    if(select.choices){
+        return select.choices.getValue(true);
+    }
+
+    // fallback normal
     return [...select.selectedOptions].map(o=>o.value);
 }
 
