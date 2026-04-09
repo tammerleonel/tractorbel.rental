@@ -8,6 +8,49 @@
 <script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
+<style>
+
+/* container filtros */
+.filtros-container{
+    display:grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap:12px;
+}
+
+/* bloco individual */
+.filtros-container > div{
+    display:flex;
+    flex-direction:column;
+}
+
+/* label */
+.filtros-container label{
+    font-size:13px;
+    font-weight:600;
+    margin-bottom:4px;
+}
+
+/* select filtros */
+.filtros-container select{
+    width:100%;
+    min-height:90px;
+    padding:4px;
+    border:1px solid #ccc;
+    border-radius:6px;
+    font-size:13px;
+}
+
+/* opções */
+.filtros-container option{
+    white-space:normal;
+}
+
+/* botão limpar alinhado */
+#btnLimpar{
+    margin-top:18px;
+}
+
+</style>
 </head>
 
 <body>
