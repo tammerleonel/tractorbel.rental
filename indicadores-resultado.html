@@ -365,17 +365,25 @@ window.carregarDados = function(file){
         const workbook = XLSX.read(data,{type:'array'});
         const sheet = workbook.Sheets[workbook.SheetNames[0]];
         const json = XLSX.utils.sheet_to_json(sheet,{header:1});
+        console.log("Planilha carregada:", json.length);
         document.getElementById("upload").value = "";
+        reader.onerror = function () {
+    alert("Erro ao ler a planilha");
+};
         dadosGlobais=[];
 
         for(let i=1;i<json.length;i++){
             const l = json[i];
-            let dataLinha = l[15];
+            let dataLinha = l[15] || l[14] || l[13];
             if(typeof dataLinha==="number"){ dataLinha = new Date((dataLinha-25569)*86400*1000); }
-            else{ dataLinha = new Date(dataLinha); }
+            else {
+    dataLinha = new Date(dataLinha);
+    if (isNaN(dataLinha)) return; // IGNORA LINHA INVÁLIDA
+}
 
             if(!isNaN(dataLinha)){
                 dataLinha.setHours(0,0,0,0);
+                console.log("Registros válidos:", dadosGlobais.length);
 
 dadosGlobais.push({
     filial: l[0],
