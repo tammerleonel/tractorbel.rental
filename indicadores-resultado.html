@@ -489,7 +489,7 @@ function gerarGraficos(dados){
 
     // Equipamento
     if(exibirOuOcultarGrafico("graficoEquipamento", fatEquipFiltrado)) {
-        graficos.push(new Chart(graficoEquipamento,{
+        new Chart(document.getElementById("graficoEquipamento"),{
             type:'bar',
             data:{labels:Object.keys(fatEquipFiltrado),datasets:[{data:Object.values(fatEquipFiltrado),backgroundColor:'blue'}]},
             options:{scales:{y:{beginAtZero:true}},plugins:{legend:{display:false}},onClick:(evt, e)=>{
@@ -500,7 +500,7 @@ function gerarGraficos(dados){
 
     // Cliente
     if(exibirOuOcultarGrafico("graficoCliente", fatClienteFiltrado)) {
-        graficos.push(new Chart(graficoCliente,{
+        graficos.push(new Chart(document.getElementById("graficoCliente"),{
             type:'bar',
             data:{labels:Object.keys(fatClienteFiltrado),datasets:[{data:Object.values(fatClienteFiltrado),backgroundColor:'green'}]},
             options:{scales:{y:{beginAtZero:true}},plugins:{legend:{display:false}},onClick:(evt, e)=>{
@@ -511,7 +511,7 @@ function gerarGraficos(dados){
 
     // Manutenção
     if(exibirOuOcultarGrafico("graficoManutencao", manClienteFiltrado)) {
-        graficos.push(new Chart(graficoManutencao,{
+        graficos.push(new Chart(document.getElementById("graficoCliente"),{
             type:'bar',
             data:{labels:Object.keys(manClienteFiltrado),datasets:[{data:Object.values(manClienteFiltrado),backgroundColor:'orange'}]},
             options:{scales:{y:{beginAtZero:true}},plugins:{legend:{display:false}},onClick:(evt, e)=>{
@@ -522,7 +522,7 @@ function gerarGraficos(dados){
 
     // Déficit
     if(exibirOuOcultarGrafico("graficoDeficit", deficitClienteFiltrado)) {
-        graficos.push(new Chart(graficoDeficit,{
+        graficos.push(new Chart(document.getElementById("graficoDeficit"),{
             type:'bar',
             data:{labels:Object.keys(deficitClienteFiltrado),datasets:[{data:Object.values(deficitClienteFiltrado).map(v=>Math.abs(v)),backgroundColor:'red'}]},
             options:{
@@ -622,6 +622,12 @@ function selecionarFiltro(id, valor){
     Array.from(el.options).forEach(o=>{
         if(o.value === valor) o.selected = true;
     });
+}
+function limparFiltros(){
+    document.querySelectorAll(".multi").forEach(el=>{
+        Array.from(el.options).forEach(o => o.selected = false);
+    });
+    gerarRelatorio();
 }
 </script>
 </body>
