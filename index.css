@@ -72,7 +72,7 @@ h1{
 
 /* ===== H3 PADRÃO ===== */
 h3{
-    text-align: left;
+    text-align: center;
     white-space: pre-wrap;
     color: #696969;
     margin:0;
@@ -298,13 +298,6 @@ h2{margin-bottom:10px;}
     gap:10px;   
     margin-bottom:10px;
 }
-.cardGraficoMes{
-    display:grid;
-    grid-template-columns: repeat(auto-fit,minmax(150px,1fr));
-    gap:10px;   
-    margin-bottom:10px;
-}
-
 .total{
     font-size:18px;
     font-weight:bold;
