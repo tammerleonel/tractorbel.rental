@@ -127,6 +127,35 @@ button.btn-google:active {
 .choices__list--multiple .choices__item .choices__button{
     border-left:1px solid rgba(255,255,255,0.4);
 }
+.choices{
+    position:relative;
+}
+
+.choices__list--dropdown,
+.choices__list[aria-expanded]{
+    position:relative !important;
+    top:0 !important;
+    display:block !important;
+    opacity:1 !important;
+    visibility:visible !important;
+    max-height:120px;
+    overflow-y:auto;
+}
+
+.choices__inner{
+    min-height:auto !important;
+    max-height:140px;
+    overflow:hidden;
+}
+
+.choices__list--dropdown::-webkit-scrollbar{
+    width:6px;
+}
+
+.choices__list--dropdown::-webkit-scrollbar-thumb{
+    background:#ccc;
+    border-radius:4px;
+}
 
 </style>
 </head>
@@ -386,9 +415,6 @@ el.choices = new Choices(el,{
     noChoicesText:"",   // <-- adiciona isso
     itemSelectText:"",
     shouldSort:false,
-    callbackOnInit: function() {
-        this.showDropdown();
-    }
 });
 el.choices.setChoices(
     [...el.options].map(o => ({ value:o.value, label:o.text })),
@@ -516,8 +542,6 @@ function atualizarFiltrosDinamicos(dados){
                 true
             );
 
-            select.choices.showDropdown();
-            select.choices._render();
 
         }else{
 
