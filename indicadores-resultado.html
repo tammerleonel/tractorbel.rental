@@ -485,56 +485,12 @@ function atualizarFiltrosDinamicos(dados){
         const select=document.getElementById(id);
         if(!select) return;
 
-        const selecionados = getMultiValues(id);
+        const selecionados=[...select.selectedOptions].map(o=>o.value);
 
         const valores=[...new Set(
             dados.map(d=>d[mapa[id]]).filter(Boolean)
         )].sort();
 
-        // se estiver usando Choices
-        if(select.choices){
-
-            select.choices.clearStore(); // limpa tudo
-
-            select.choices.setChoices(
-                valores.map(v => ({
-                    value:v,
-                    label:v,
-                    selected:selecionados.includes(v)
-                })),
-                'value',
-                'label',
-                true
-            );
-
-        }else{
-            // fallback sem choices
-            select.innerHTML="";
-            valores.forEach(v=>{
-                const opt=document.createElement("option");
-                opt.value=v;
-                opt.text=v;
-                if(selecionados.includes(v)) opt.selected=true;
-                select.appendChild(opt);
-            });
-        }
-
-    });
-
-    atualizandoFiltros = false;
-}
-
-    Object.keys(mapa).forEach(id=>{
-        const select=document.getElementById(id);
-        if(!select) return;
-
-        const selecionados = getMultiValues(id);
-
-        const valores=[...new Set(
-            dados.map(d=>d[mapa[id]]).filter(Boolean)
-        )].sort();
-
-        // limpa select
         select.innerHTML="";
 
         valores.forEach(v=>{
@@ -544,21 +500,10 @@ function atualizarFiltrosDinamicos(dados){
             if(selecionados.includes(v)) opt.selected=true;
             select.appendChild(opt);
         });
-
-        // <<< AQUI ESTÁ O FIX PRINCIPAL
-        if(select.choices){
-            select.choices.clearChoices();
-            select.choices.setChoices(
-                valores.map(v => ({value:v,label:v,selected:selecionados.includes(v)})),
-                'value',
-                'label',
-                true
-            );
-        }
     });
 
     atualizandoFiltros = false;
-
+}
 
 function getMultiValues(id){
     const select = document.getElementById(id);
