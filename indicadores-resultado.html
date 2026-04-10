@@ -51,7 +51,7 @@
     .filtro-box {
       display: flex;
       flex-direction: column;
-      height: 190px;
+      height: 220px;
       border: 1px solid #e0e0e0;
       border-radius: 8px;
       padding: 8px;
@@ -60,7 +60,7 @@
       overflow: hidden;
     }
 
-    .filtro-box label {
+    .filtro-box label.titulo-filtro {
       font-size: 13px;
       font-weight: 600;
       margin-bottom: 6px;
@@ -69,28 +69,59 @@
       text-overflow: ellipsis;
     }
 
-    .filtro-box select {
+    .filtro-busca {
       width: 100%;
-      flex: 1;
-      min-height: 0;
+      padding: 6px 8px;
       border: 1px solid #cfcfcf;
       border-radius: 6px;
-      padding: 4px;
       font-size: 12px;
-      background: #fff;
-      overflow: auto;
+      margin-bottom: 6px;
+      flex-shrink: 0;
     }
 
-    .filtro-box select option {
+    .filtro-lista {
+      flex: 1;
+      overflow-y: auto;
+      overflow-x: hidden;
+      border: 1px solid #d8d8d8;
+      border-radius: 6px;
+      padding: 4px;
+      background: #fff;
+    }
+
+    .filtro-item {
+      display: flex;
+      align-items: center;
+      gap: 6px;
       padding: 4px 6px;
-      white-space: nowrap;
+      border-radius: 4px;
+      font-size: 12px;
+      cursor: pointer;
+      min-width: 0;
+    }
+
+    .filtro-item:hover {
+      background: #f1f8f2;
+    }
+
+    .filtro-item input {
+      margin: 0;
+      flex-shrink: 0;
+      accent-color: #2e7d32;
+    }
+
+    .filtro-item span {
+      display: block;
+      min-width: 0;
       overflow: hidden;
       text-overflow: ellipsis;
+      white-space: nowrap;
     }
 
-    .filtro-box select option:checked {
-      background: #2e7d32;
-      color: #fff;
+    .filtro-vazio {
+      font-size: 12px;
+      color: #777;
+      padding: 6px;
     }
 
     .btn-google {
@@ -179,12 +210,6 @@
       display: none;
     }
 
-    .hint-filtro {
-      font-size: 11px;
-      color: #666;
-      margin-top: 4px;
-    }
-
     @media (max-width: 1200px) {
       .filtros-container {
         grid-template-columns: repeat(4, minmax(160px, 1fr));
@@ -229,7 +254,7 @@
 
       <div>
         <label for="upload" class="btn-google">Escolher Planilha</label>
-        <input type="file" id="upload" accept=".xls,.xlsx" style="display:none;" />
+        <input type="file" id="upload" accept=".xls,.xlsx" style="display:none;">
       </div>
 
       <div style="align-self:center;">
@@ -239,51 +264,51 @@
 
     <div class="filtros-container">
       <div class="filtro-box">
-        <label>Filial</label>
-        <select multiple size="8" id="filtroFilial"></select>
-        <div class="hint-filtro">Use Ctrl para múltipla seleção</div>
+        <label class="titulo-filtro">Filial</label>
+        <input class="filtro-busca" id="buscaFiltroFilial" placeholder="Buscar..." />
+        <div class="filtro-lista" id="filtroFilial"></div>
       </div>
 
       <div class="filtro-box">
-        <label>Patrimônio</label>
-        <select multiple size="8" id="filtroPatrimonio"></select>
-        <div class="hint-filtro">Use Ctrl para múltipla seleção</div>
+        <label class="titulo-filtro">Patrimônio</label>
+        <input class="filtro-busca" id="buscaFiltroPatrimonio" placeholder="Buscar..." />
+        <div class="filtro-lista" id="filtroPatrimonio"></div>
       </div>
 
       <div class="filtro-box">
-        <label>Série</label>
-        <select multiple size="8" id="filtroSerie"></select>
-        <div class="hint-filtro">Use Ctrl para múltipla seleção</div>
+        <label class="titulo-filtro">Série</label>
+        <input class="filtro-busca" id="buscaFiltroSerie" placeholder="Buscar..." />
+        <div class="filtro-lista" id="filtroSerie"></div>
       </div>
 
       <div class="filtro-box">
-        <label>Equipamento</label>
-        <select multiple size="8" id="filtroEquipamento"></select>
-        <div class="hint-filtro">Use Ctrl para múltipla seleção</div>
+        <label class="titulo-filtro">Equipamento</label>
+        <input class="filtro-busca" id="buscaFiltroEquipamento" placeholder="Buscar..." />
+        <div class="filtro-lista" id="filtroEquipamento"></div>
       </div>
 
       <div class="filtro-box">
-        <label>Cliente</label>
-        <select multiple size="8" id="filtroCliente"></select>
-        <div class="hint-filtro">Use Ctrl para múltipla seleção</div>
+        <label class="titulo-filtro">Cliente</label>
+        <input class="filtro-busca" id="buscaFiltroCliente" placeholder="Buscar..." />
+        <div class="filtro-lista" id="filtroCliente"></div>
       </div>
 
       <div class="filtro-box">
-        <label>Marca</label>
-        <select multiple size="8" id="filtroMarca"></select>
-        <div class="hint-filtro">Use Ctrl para múltipla seleção</div>
+        <label class="titulo-filtro">Marca</label>
+        <input class="filtro-busca" id="buscaFiltroMarca" placeholder="Buscar..." />
+        <div class="filtro-lista" id="filtroMarca"></div>
       </div>
 
       <div class="filtro-box">
-        <label>Modelo</label>
-        <select multiple size="8" id="filtroModelo"></select>
-        <div class="hint-filtro">Use Ctrl para múltipla seleção</div>
+        <label class="titulo-filtro">Modelo</label>
+        <input class="filtro-busca" id="buscaFiltroModelo" placeholder="Buscar..." />
+        <div class="filtro-lista" id="filtroModelo"></div>
       </div>
 
       <div class="filtro-box">
-        <label>Ano</label>
-        <select multiple size="8" id="filtroAno"></select>
-        <div class="hint-filtro">Use Ctrl para múltipla seleção</div>
+        <label class="titulo-filtro">Ano</label>
+        <input class="filtro-busca" id="buscaFiltroAno" placeholder="Buscar..." />
+        <div class="filtro-lista" id="filtroAno"></div>
       </div>
     </div>
 
@@ -395,28 +420,63 @@
     }
 
     function getMultiValues(id) {
-      const el = document.getElementById(id);
-      if (!el) return [];
-      return Array.from(el.selectedOptions).map((o) => o.value).filter(Boolean);
+      return Array.from(document.querySelectorAll(`#${id} input[type="checkbox"]:checked`)).map(el => el.value);
     }
 
     function existeFiltroAtivo() {
       return filtrosIds.some((id) => getMultiValues(id).length > 0);
     }
 
-    function preencherSelect(id, valores, selecionados = []) {
-      const el = document.getElementById(id);
-      if (!el) return;
+    function getTextoBusca(id) {
+      const busca = document.getElementById("busca" + id.charAt(0).toUpperCase() + id.slice(1));
+      return busca ? busca.value.trim().toLowerCase() : "";
+    }
 
-      el.innerHTML = "";
+    function preencherFiltroLista(id, valores, selecionados = []) {
+      const container = document.getElementById(id);
+      if (!container) return;
 
-      valores.forEach((valor) => {
-        const option = document.createElement("option");
-        option.value = valor;
-        option.textContent = valor;
-        option.selected = selecionados.includes(valor);
-        el.appendChild(option);
+      const busca = getTextoBusca(id);
+      const filtrados = busca
+        ? valores.filter(v => v.toLowerCase().includes(busca))
+        : valores;
+
+      container.innerHTML = "";
+
+      if (!filtrados.length) {
+        container.innerHTML = `<div class="filtro-vazio">Nenhum item</div>`;
+        return;
+      }
+
+      const fragment = document.createDocumentFragment();
+
+      filtrados.forEach((valor, index) => {
+        const itemId = `${id}_${index}_${valor.replace(/\s+/g, "_")}`;
+
+        const label = document.createElement("label");
+        label.className = "filtro-item";
+        label.setAttribute("for", itemId);
+
+        const checkbox = document.createElement("input");
+        checkbox.type = "checkbox";
+        checkbox.id = itemId;
+        checkbox.value = valor;
+        checkbox.checked = selecionados.includes(valor);
+
+        checkbox.addEventListener("change", () => {
+          if (atualizandoFiltros) return;
+          gerarRelatorio();
+        });
+
+        const span = document.createElement("span");
+        span.textContent = valor;
+
+        label.appendChild(checkbox);
+        label.appendChild(span);
+        fragment.appendChild(label);
       });
+
+      container.appendChild(fragment);
     }
 
     function filtrarDados(excluirFiltroId = null) {
@@ -462,7 +522,7 @@
         ].sort();
 
         const listaFinal = [...new Set([...selecionados, ...valoresDisponiveis])].sort();
-        preencherSelect(id, listaFinal, selecionados);
+        preencherFiltroLista(id, listaFinal, selecionados);
       });
 
       atualizandoFiltros = false;
@@ -475,11 +535,12 @@
     }
 
     function selecionarFiltro(id, valor) {
-      const el = document.getElementById(id);
-      if (!el) return;
+      const container = document.getElementById(id);
+      if (!container) return;
 
-      Array.from(el.options).forEach((o) => {
-        o.selected = o.value === valor;
+      const checks = container.querySelectorAll('input[type="checkbox"]');
+      checks.forEach(check => {
+        check.checked = check.value === valor;
       });
 
       atualizarFiltrosDinamicamente();
@@ -487,11 +548,8 @@
 
     function limparFiltros() {
       filtrosIds.forEach((id) => {
-        const el = document.getElementById(id);
-        if (!el) return;
-
-        Array.from(el.options).forEach((o) => {
-          o.selected = false;
+        document.querySelectorAll(`#${id} input[type="checkbox"]`).forEach(el => {
+          el.checked = false;
         });
       });
 
@@ -500,13 +558,7 @@
     }
 
     function calcularTotais(dados) {
-      let fat = 0;
-      let man = 0;
-      let fin = 0;
-      let imp = 0;
-      let tx = 0;
-      let res = 0;
-      let mau = 0;
+      let fat = 0, man = 0, fin = 0, imp = 0, tx = 0, res = 0, mau = 0;
 
       dados.forEach((d) => {
         fat += d.faturamento;
@@ -539,43 +591,29 @@
         type: "bar",
         data: {
           labels,
-          datasets: [{
-            data: valores,
-            backgroundColor: cor
-          }]
+          datasets: [{ data: valores, backgroundColor: cor }]
         },
         options: {
           responsive: true,
           maintainAspectRatio: false,
           indexAxis: horizontal ? "y" : "x",
           scales: {
-            y: horizontal
-              ? { beginAtZero: true }
-              : {
-                  beginAtZero: true,
-                  ticks: {
-                    callback: (v) => formatarMoeda(v)
-                  }
-                },
-            x: horizontal
-              ? {
-                  beginAtZero: true,
-                  ticks: {
-                    callback: (v) => formatarMoeda(v)
-                  }
-                }
-              : {}
+            y: horizontal ? { beginAtZero: true } : {
+              beginAtZero: true,
+              ticks: { callback: (v) => formatarMoeda(v) }
+            },
+            x: horizontal ? {
+              beginAtZero: true,
+              ticks: { callback: (v) => formatarMoeda(v) }
+            } : {}
           },
           plugins: {
             legend: { display: false },
             tooltip: {
               callbacks: {
-                label: (ctx) => {
-                  if (tooltipOriginal) {
-                    return formatarMoeda(tooltipOriginal[ctx.dataIndex]);
-                  }
-                  return formatarMoeda(ctx.raw);
-                }
+                label: (ctx) => tooltipOriginal
+                  ? formatarMoeda(tooltipOriginal[ctx.dataIndex])
+                  : formatarMoeda(ctx.raw)
               }
             }
           },
@@ -598,10 +636,7 @@
       const serieSelecionada = getMultiValues("filtroSerie");
       const ocultarGraficoEquip = patrimonioSelecionado.length === 1 || serieSelecionada.length === 1;
 
-      const fatEquip = {};
-      const fatCliente = {};
-      const manCliente = {};
-      const deficitCliente = {};
+      const fatEquip = {}, fatCliente = {}, manCliente = {}, deficitCliente = {};
 
       dados.forEach((d) => {
         if (d.equipamento) {
@@ -611,7 +646,6 @@
         if (d.cliente) {
           fatCliente[d.cliente] = (fatCliente[d.cliente] || 0) + d.faturamento;
           manCliente[d.cliente] = (manCliente[d.cliente] || 0) + d.manutencao;
-
           if (d.resultado < 0) {
             deficitCliente[d.cliente] = (deficitCliente[d.cliente] || 0) + d.resultado;
           }
@@ -630,44 +664,26 @@
 
       if (!ocultarGraficoEquip && exibirOuOcultarGrafico("cardGraficoEquipamento", fatEquipFiltrado)) {
         const labels = Object.keys(fatEquipFiltrado);
-        criarGraficoBarra(
-          "graficoEquipamento",
-          labels,
-          Object.values(fatEquipFiltrado),
-          "#1e88e5",
-          (idx) => {
-            selecionarFiltro("filtroEquipamento", labels[idx]);
-            gerarRelatorio();
-          }
-        );
+        criarGraficoBarra("graficoEquipamento", labels, Object.values(fatEquipFiltrado), "#1e88e5", (idx) => {
+          selecionarFiltro("filtroEquipamento", labels[idx]);
+          gerarRelatorio();
+        });
       }
 
       if (exibirOuOcultarGrafico("cardGraficoCliente", fatClienteFiltrado)) {
         const labels = Object.keys(fatClienteFiltrado);
-        criarGraficoBarra(
-          "graficoCliente",
-          labels,
-          Object.values(fatClienteFiltrado),
-          "#2e7d32",
-          (idx) => {
-            selecionarFiltro("filtroCliente", labels[idx]);
-            gerarRelatorio();
-          }
-        );
+        criarGraficoBarra("graficoCliente", labels, Object.values(fatClienteFiltrado), "#2e7d32", (idx) => {
+          selecionarFiltro("filtroCliente", labels[idx]);
+          gerarRelatorio();
+        });
       }
 
       if (exibirOuOcultarGrafico("cardGraficoManutencao", manClienteFiltrado)) {
         const labels = Object.keys(manClienteFiltrado);
-        criarGraficoBarra(
-          "graficoManutencao",
-          labels,
-          Object.values(manClienteFiltrado),
-          "#fb8c00",
-          (idx) => {
-            selecionarFiltro("filtroCliente", labels[idx]);
-            gerarRelatorio();
-          }
-        );
+        criarGraficoBarra("graficoManutencao", labels, Object.values(manClienteFiltrado), "#fb8c00", (idx) => {
+          selecionarFiltro("filtroCliente", labels[idx]);
+          gerarRelatorio();
+        });
       }
 
       if (exibirOuOcultarGrafico("cardGraficoDeficit", deficitClienteFiltrado)) {
@@ -675,18 +691,10 @@
         const valoresOriginais = Object.values(deficitClienteFiltrado);
         const valoresAbsolutos = valoresOriginais.map((v) => Math.abs(v));
 
-        criarGraficoBarra(
-          "graficoDeficit",
-          labels,
-          valoresAbsolutos,
-          "#e53935",
-          (idx) => {
-            selecionarFiltro("filtroCliente", labels[idx]);
-            gerarRelatorio();
-          },
-          true,
-          valoresOriginais
-        );
+        criarGraficoBarra("graficoDeficit", labels, valoresAbsolutos, "#e53935", (idx) => {
+          selecionarFiltro("filtroCliente", labels[idx]);
+          gerarRelatorio();
+        }, true, valoresOriginais);
       }
 
       const mesInicioVal = mesInicio.value;
@@ -714,12 +722,7 @@
           const fatMesFiltrado = filtrarPositivos(faturamentoMes);
 
           if (exibirOuOcultarGrafico("cardGraficoMes", fatMesFiltrado)) {
-            criarGraficoBarra(
-              "graficoMes",
-              Object.keys(fatMesFiltrado),
-              Object.values(fatMesFiltrado),
-              "#8e24aa"
-            );
+            criarGraficoBarra("graficoMes", Object.keys(fatMesFiltrado), Object.values(fatMesFiltrado), "#8e24aa");
           }
         }
       }
@@ -727,7 +730,7 @@
 
     function gerarRelatorio() {
       if (!dadosGlobais.length) return;
-      if (!atualizandoFiltros) atualizarFiltrosDinamicamente();
+      atualizarFiltrosDinamicamente();
       const dadosFiltrados = filtrarDados();
       calcularTotais(dadosFiltrados);
       gerarGraficos(dadosFiltrados);
@@ -737,11 +740,7 @@
     function sugerirPeriodoInicial() {
       if (!dadosGlobais.length) return;
 
-      const datas = dadosGlobais
-        .map((d) => d.data)
-        .filter(Boolean)
-        .sort((a, b) => a - b);
-
+      const datas = dadosGlobais.map((d) => d.data).filter(Boolean).sort((a, b) => a - b);
       if (!datas.length) return;
 
       const ultimaData = datas[datas.length - 1];
@@ -814,6 +813,16 @@
 
           sugerirPeriodoInicial();
           atualizarFiltros();
+
+          filtrosIds.forEach((id) => {
+            const buscaId = "busca" + id.charAt(0).toUpperCase() + id.slice(1);
+            const inputBusca = document.getElementById(buscaId);
+            if (inputBusca && !inputBusca.dataset.binded) {
+              inputBusca.addEventListener("input", () => atualizarFiltrosDinamicamente());
+              inputBusca.dataset.binded = "1";
+            }
+          });
+
           gerarRelatorio();
 
           statusCarga.innerText = "Dados carregados com sucesso.";
@@ -828,13 +837,6 @@
 
       reader.readAsArrayBuffer(file);
     }
-
-    filtrosIds.forEach((id) => {
-      document.getElementById(id).addEventListener("change", () => {
-        if (atualizandoFiltros) return;
-        gerarRelatorio();
-      });
-    });
 
     mesInicio.addEventListener("change", gerarRelatorio);
     mesFim.addEventListener("change", gerarRelatorio);
