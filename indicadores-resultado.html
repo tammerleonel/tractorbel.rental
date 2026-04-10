@@ -442,7 +442,7 @@ function calcularTotais(dados){
 
 function exibirOuOcultarGrafico(cardId, dados) {
     const card = document.getElementById(cardId).closest(".card");
-    const temValor = Object.values(dados).some(v => v !== 0 && v !== null && v !== undefined);
+    const temValor = Object.values(dados).some(v => v > 0);
     card.style.display = temValor ? "block" : "none";
     return temValor;
 }
