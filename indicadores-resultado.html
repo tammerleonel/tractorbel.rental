@@ -483,7 +483,9 @@ function gerarGraficos(dados){
     }
 
     const fatEquipFiltrado = filtrarZero(fatEquip);
-    const fatClienteFiltrado = filtrarZero(fatCliente);
+    const fatClienteFiltrado = Object.fromEntries(
+    Object.entries(fatCliente).filter(([k,v]) => v > 0)
+);
     const manClienteFiltrado = filtrarZero(manCliente);
     const deficitClienteFiltrado = filtrarZero(deficitCliente);
 
