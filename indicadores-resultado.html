@@ -477,7 +477,7 @@ function gerarGraficos(dados){
     const filtrarZero = obj=>{
         const res = {};
         Object.keys(obj).forEach(k=>{
-            if(obj[k] !== 0) res[k] = obj[k];
+            if(obj[k] !== 0 && !isNaN(obj[k])) res[k] = obj[k];
         });
         return res;
     }
