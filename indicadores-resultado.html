@@ -1,267 +1,890 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Relatório Financeiro Rental</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Relatório Financeiro Rental</title>
 
-<script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
-<style>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/choices.js/public/assets/styles/choices.min.css" />
+  <script src="https://cdn.jsdelivr.net/npm/choices.js/public/assets/scripts/choices.min.js"></script>
 
-/* filtros */
-.filtros-container{
-    display:grid;
-    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-    gap:12px;
-}
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 20px;
+      background: #f5f7f9;
+      color: #222;
+    }
 
-.filtros-container > div{
-    display:flex;
-    flex-direction:column;
-    height:170px;
-    border:1px solid #e0e0e0;
-    border-radius:8px;
-    padding:6px;
-    background:#fff;
-}
+    h2 {
+      margin-bottom: 16px;
+    }
 
-.filtros-container label{
-    font-size:13px;
-    font-weight:600;
-    margin-bottom:4px;
-}
+    #login,
+    #conteudo {
+      background: #fff;
+      border-radius: 12px;
+      padding: 16px;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+    }
 
-/* cards */
-.cards{
-    display:grid;
-    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-    gap:10px;
-    position:sticky;
-    top:0;
-    z-index:999;
-    background:#fff;
-    padding-bottom:6px;
-}
+    #conteudo {
+      display: none;
+    }
 
-.card{
-    background:#fff;
-    border-radius:10px;
-    padding:12px;
-    box-shadow:0 2px 6px rgba(0,0,0,0.08);
-    border-left:6px solid #2e7d32;
-}
+    #login {
+      max-width: 420px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
 
-.card h4{margin:0;font-size:13px;color:#555;}
-.card .total{font-size:18px;font-weight:bold;color:#2e7d32;margin-top:4px;}
+    #login input {
+      padding: 10px;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+    }
 
-.btn-google{
-    padding:10px 20px;
-    border:2px solid #34A853;
-    border-radius:24px;
-    background:#fff;
-    color:#34A853;
-    cursor:pointer;
-}
+    .topo-controles {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 10px;
+      align-items: end;
+      margin-bottom: 14px;
+    }
 
-.btn-google:hover{
-    background:#34A853;
-    color:#fff;
-}
+    .filtros-container {
+      display: none;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 12px;
+      margin-bottom: 10px;
+    }
 
-canvas{max-height:260px;}
+    .filtros-container > div {
+      display: flex;
+      flex-direction: column;
+      min-height: 160px;
+      border: 1px solid #e0e0e0;
+      border-radius: 8px;
+      padding: 8px;
+      background: #fff;
+    }
 
-</style>
+    .filtros-container label {
+      font-size: 13px;
+      font-weight: 600;
+      margin-bottom: 6px;
+    }
+
+    .filtros-container select {
+      width: 100%;
+      font-size: 13px;
+    }
+
+    .btn-google {
+      display: inline-block;
+      padding: 10px 20px;
+      border: 2px solid #34a853;
+      border-radius: 24px;
+      background-color: white;
+      color: #34a853;
+      font-weight: 600;
+      font-size: 0.9em;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.15);
+      text-align: center;
+    }
+
+    .btn-google:hover {
+      background-color: #34a853;
+      color: white;
+    }
+
+    .btn-google:active {
+      transform: scale(0.98);
+    }
+
+    input[type="file"] + label.btn-google:hover {
+      background-color: #34a853;
+      color: white;
+    }
+
+    label.btn-google {
+      display: inline-block;
+      cursor: pointer;
+    }
+
+    .cards {
+      display: none;
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      gap: 10px;
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      background: #f5f7f9;
+      padding-bottom: 8px;
+      margin-bottom: 14px;
+    }
+
+    .card {
+      background: #ffffff;
+      border-radius: 10px;
+      padding: 12px;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+      border-left: 6px solid #2e7d32;
+      margin-bottom: 12px;
+    }
+
+    .card h3,
+    .card h4 {
+      margin: 0 0 8px 0;
+    }
+
+    .card h4 {
+      font-size: 13px;
+      color: #555;
+    }
+
+    .card .total {
+      font-size: 18px;
+      font-weight: bold;
+      color: #2e7d32;
+      margin-top: 4px;
+    }
+
+    .choices__item--selectable.is-highlighted {
+      background-color: #e8f5e9 !important;
+      color: #1b5e20 !important;
+    }
+
+    .choices__item--choice.is-selected {
+      background-color: #2e7d32 !important;
+      border-color: #2e7d32 !important;
+      color: #fff !important;
+    }
+
+    .choices__list--multiple .choices__item {
+      background-color: #2e7d32 !important;
+      border: 1px solid #2e7d32 !important;
+      color: #fff !important;
+    }
+
+    .choices__list--multiple .choices__item .choices__button {
+      border-left: 1px solid rgba(255, 255, 255, 0.4);
+    }
+
+    .choices__inner {
+      min-height: 38px !important;
+    }
+
+    canvas {
+      max-height: 280px;
+    }
+
+    #acoes-filtros {
+      text-align: right;
+      margin: 10px 0 16px;
+    }
+
+    #statusCarga {
+      font-size: 14px;
+      font-weight: 600;
+      color: #2e7d32;
+    }
+
+    .grafico-card {
+      display: none;
+    }
+
+    @media (max-width: 768px) {
+      body {
+        margin: 12px;
+      }
+
+      .cards {
+        position: static;
+      }
+    }
+  </style>
 </head>
-
 <body>
+  <h2>Relatório Financeiro Rental</h2>
 
-<h2>Relatório Financeiro Rental</h2>
-
-<!-- LOGIN -->
-<div id="login">
-    <input type="email" id="email" placeholder="Email">
-    <input type="password" id="senha" placeholder="Senha">
+  <div id="login">
+    <input type="email" id="email" placeholder="Email" />
+    <input type="password" id="senha" placeholder="Senha" />
     <button class="btn-google" onclick="login()">Login</button>
-</div>
+  </div>
 
-<div id="conteudo" style="display:none">
+  <div id="conteudo">
+    <div class="topo-controles">
+      <div>
+        <label for="mesInicio">Mês/Ano Início</label>
+        <input type="month" id="mesInicio" disabled />
+      </div>
 
-<!-- upload -->
-<div>
-    <input type="file" id="upload" accept=".xls,.xlsx">
-</div>
+      <div>
+        <label for="mesFim">Mês/Ano Fim</label>
+        <input type="month" id="mesFim" disabled />
+      </div>
 
-<!-- filtros -->
-<div class="filtros-container" style="display:none">
-    <div><label>Filial</label><select multiple id="filtroFilial"></select></div>
-    <div><label>Patrimônio</label><select multiple id="filtroPatrimonio"></select></div>
-    <div><label>Cliente</label><select multiple id="filtroCliente"></select></div>
-    <div><label>Equipamento</label><select multiple id="filtroEquipamento"></select></div>
-</div>
+      <div>
+        <label for="upload" class="btn-google">Escolher Planilha</label>
+        <input type="file" id="upload" accept=".xls,.xlsx" style="display:none;" />
+      </div>
 
-<button id="btnLimpar" class="btn-google" style="display:none">Limpar Filtros</button>
+      <div style="align-self:center;">
+        <span id="statusCarga"></span>
+      </div>
+    </div>
 
-<!-- CARDS -->
-<div class="cards">
-    <div class="card"><h4>Faturamento</h4><div class="total" id="cardFat">0</div></div>
-    <div class="card"><h4>Manutenção</h4><div class="total" id="cardMan">0</div></div>
-    <div class="card"><h4>Resultado</h4><div class="total" id="cardRes">0</div></div>
-</div>
+    <div class="filtros-container">
+      <div>
+        <label>Filial</label>
+        <select multiple class="multi" id="filtroFilial"></select>
+      </div>
+      <div>
+        <label>Patrimônio</label>
+        <select multiple class="multi" id="filtroPatrimonio"></select>
+      </div>
+      <div>
+        <label>Série</label>
+        <select multiple class="multi" id="filtroSerie"></select>
+      </div>
+      <div>
+        <label>Equipamento</label>
+        <select multiple class="multi" id="filtroEquipamento"></select>
+      </div>
+      <div>
+        <label>Cliente</label>
+        <select multiple class="multi" id="filtroCliente"></select>
+      </div>
+      <div>
+        <label>Marca</label>
+        <select multiple class="multi" id="filtroMarca"></select>
+      </div>
+      <div>
+        <label>Modelo</label>
+        <select multiple class="multi" id="filtroModelo"></select>
+      </div>
+      <div>
+        <label>Ano</label>
+        <select multiple class="multi" id="filtroAno"></select>
+      </div>
+    </div>
 
-<!-- GRÁFICOS -->
-<div class="card"><h3>Equipamento</h3><canvas id="graficoEquipamento"></canvas></div>
-<div class="card"><h3>Cliente</h3><canvas id="graficoCliente"></canvas></div>
+    <div id="acoes-filtros">
+      <button id="btnLimpar" class="btn-google" style="display:none;">Limpar Filtros</button>
+    </div>
 
-</div>
+    <div class="cards">
+      <div class="card"><h4>Faturamento</h4><div class="total" id="cardFat">R$ 0,00</div></div>
+      <div class="card"><h4>Financiamento</h4><div class="total" id="cardFin">R$ 0,00</div></div>
+      <div class="card"><h4>Impostos</h4><div class="total" id="cardImp">R$ 0,00</div></div>
+      <div class="card"><h4>Manutenção</h4><div class="total" id="cardMan">R$ 0,00</div></div>
+      <div class="card"><h4>Taxa Administrativa</h4><div class="total" id="cardTx">R$ 0,00</div></div>
+      <div class="card"><h4>Resultado</h4><div class="total" id="cardRes">R$ 0,00</div></div>
+      <div class="card"><h4>Faturamento Avaria</h4><div class="total" id="cardMau">R$ 0,00</div></div>
+    </div>
 
-<script type="module">
+    <div class="card grafico-card" id="cardGraficoMes">
+      <h3>Faturamento x Mês</h3>
+      <canvas id="graficoMes"></canvas>
+    </div>
 
-let dadosGlobais = [];
-let graficos = [];
+    <div class="card grafico-card" id="cardGraficoEquipamento">
+      <h3>Faturamento x Equipamento</h3>
+      <canvas id="graficoEquipamento"></canvas>
+    </div>
 
-// LOGIN SIMPLES (sem firebase para evitar erro estrutural)
-window.login = function(){
-    document.getElementById("login").style.display="none";
-    document.getElementById("conteudo").style.display="block";
-};
+    <div class="card grafico-card" id="cardGraficoCliente">
+      <h3>Faturamento x Cliente</h3>
+      <canvas id="graficoCliente"></canvas>
+    </div>
 
-// CONVERSÃO
-function num(v){
-    if(!v) return 0;
-    return parseFloat(v.toString().replace(/\./g,'').replace(',','.')) || 0;
-}
+    <div class="card grafico-card" id="cardGraficoManutencao">
+      <h3>Manutenção x Cliente</h3>
+      <canvas id="graficoManutencao"></canvas>
+    </div>
 
-// UPLOAD
-document.getElementById("upload").addEventListener("change", e=>{
-    const file = e.target.files[0];
-    const reader = new FileReader();
+    <div class="card grafico-card" id="cardGraficoDeficit">
+      <h3>Déficit x Cliente</h3>
+      <canvas id="graficoDeficit"></canvas>
+    </div>
+  </div>
 
-    reader.onload = function(ev){
-        const data = new Uint8Array(ev.target.result);
-        const wb = XLSX.read(data,{type:'array'});
-        const sh = wb.Sheets[wb.SheetNames[0]];
-        const json = XLSX.utils.sheet_to_json(sh,{header:1});
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-app.js";
+    import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-auth.js";
 
-        dadosGlobais = [];
-
-        for(let i=1;i<json.length;i++){
-            let l=json[i];
-            if(!l) continue;
-
-            dadosGlobais.push({
-                filial:l[0],
-                patrimonio:l[1],
-                cliente:l[2],
-                equipamento:l[3],
-                faturamento:num(l[4]),
-                manutencao:num(l[5]),
-                resultado:num(l[6])
-            });
-        }
-
-        preencherFiltros();
-        aplicar();
-        document.querySelector(".filtros-container").style.display="grid";
-        document.getElementById("btnLimpar").style.display="block";
+    const firebaseConfig = {
+      apiKey: "AIzaSyAAF5FLl8xawkivYCcjQGJyb2jo1_A1V7g",
+      authDomain: "tractorbel-8ceb8.firebaseapp.com",
+      projectId: "tractorbel-8ceb8",
+      storageBucket: "tractorbel-8ceb8.firebasestorage.app",
+      messagingSenderId: "720471893475",
+      appId: "1:720471893475:web:e6eb1d64cae5f7aa27ecd6"
     };
 
-    reader.readAsArrayBuffer(file);
-});
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
 
-// PREENCHER FILTROS
-function preencherFiltros(){
-    fill("filtroFilial","filial");
-    fill("filtroPatrimonio","patrimonio");
-    fill("filtroCliente","cliente");
-    fill("filtroEquipamento","equipamento");
-}
+    let dadosGlobais = [];
+    let graficos = [];
+    let choicesInstances = {};
 
-function fill(id,key){
-    const el=document.getElementById(id);
-    el.innerHTML="";
-    [...new Set(dadosGlobais.map(d=>d[key]))].forEach(v=>{
-        const opt=document.createElement("option");
-        opt.value=v;
-        opt.textContent=v;
-        el.appendChild(opt);
+    const mesInicio = document.getElementById("mesInicio");
+    const mesFim = document.getElementById("mesFim");
+    const upload = document.getElementById("upload");
+    const btnLimpar = document.getElementById("btnLimpar");
+    const statusCarga = document.getElementById("statusCarga");
+
+    const filtrosIds = [
+      "filtroFilial",
+      "filtroPatrimonio",
+      "filtroSerie",
+      "filtroEquipamento",
+      "filtroCliente",
+      "filtroMarca",
+      "filtroModelo",
+      "filtroAno"
+    ];
+
+    const mapaFiltros = {
+      filtroFilial: "filial",
+      filtroPatrimonio: "patrimonio",
+      filtroSerie: "serie",
+      filtroEquipamento: "equipamento",
+      filtroCliente: "cliente",
+      filtroMarca: "marca",
+      filtroModelo: "modelo",
+      filtroAno: "ano"
+    };
+
+    function mostrarConteudo(user) {
+      const login = document.getElementById("login");
+      const conteudo = document.getElementById("conteudo");
+
+      if (!login || !conteudo) return;
+
+      if (user) {
+        login.style.display = "none";
+        conteudo.style.display = "block";
+      } else {
+        login.style.display = "flex";
+        conteudo.style.display = "none";
+      }
+    }
+
+    window.login = function () {
+      const email = document.getElementById("email").value.trim();
+      const senha = document.getElementById("senha").value;
+
+      signInWithEmailAndPassword(auth, email, senha)
+        .then(() => mostrarConteudo(true))
+        .catch(() => alert("Usuário ou senha incorretos"));
+    };
+
+    window.logout = function () {
+      signOut(auth);
+    };
+
+    onAuthStateChanged(auth, (user) => mostrarConteudo(user));
+
+    function converterNumero(valor) {
+      if (valor === null || valor === undefined || valor === "") return 0;
+      if (typeof valor === "number") return valor;
+
+      const texto = String(valor).trim();
+      if (!texto) return 0;
+
+      return parseFloat(texto.replace(/\./g, "").replace(",", ".")) || 0;
+    }
+
+    function excelDateToJSDate(serial) {
+      return new Date((serial - 25569) * 86400 * 1000);
+    }
+
+    function normalizarTexto(valor) {
+      return valor === null || valor === undefined ? "" : String(valor).trim();
+    }
+
+    function formatarMoeda(valor) {
+      return valor.toLocaleString("pt-BR", {
+        style: "currency",
+        currency: "BRL"
+      });
+    }
+
+    function destruirGraficos() {
+      graficos.forEach((g) => g.destroy());
+      graficos = [];
+    }
+
+    function esconderTodosGraficos() {
+      document.querySelectorAll(".grafico-card").forEach((card) => {
+        card.style.display = "none";
+      });
+    }
+
+    function getMultiValues(id) {
+      const el = document.getElementById(id);
+      if (!el) return [];
+      return Array.from(el.selectedOptions).map((o) => o.value).filter(Boolean);
+    }
+
+    function existeFiltroAtivo() {
+      return filtrosIds.some((id) => getMultiValues(id).length > 0) || !!mesInicio.value || !!mesFim.value;
+    }
+
+    function preencherSelect(id, valores) {
+      const el = document.getElementById(id);
+      if (!el) return;
+
+      const selecionadosAtuais = getMultiValues(id);
+
+      el.innerHTML = "";
+      valores.forEach((valor) => {
+        const option = document.createElement("option");
+        option.value = valor;
+        option.textContent = valor;
+        option.selected = selecionadosAtuais.includes(valor);
+        el.appendChild(option);
+      });
+
+      if (choicesInstances[id]) {
+        choicesInstances[id].destroy();
+      }
+
+      choicesInstances[id] = new Choices(el, {
+        removeItemButton: true,
+        searchEnabled: true,
+        shouldSort: false,
+        placeholder: true,
+        placeholderValue: "Selecione",
+        itemSelectText: "",
+        noResultsText: "Nenhum resultado",
+        noChoicesText: "Sem opções"
+      });
+
+      el.addEventListener("change", gerarRelatorio);
+    }
+
+    function atualizarFiltros() {
+      const filtrosContainer = document.querySelector(".filtros-container");
+      const cards = document.querySelector(".cards");
+
+      filtrosContainer.style.display = "grid";
+      cards.style.display = "grid";
+
+      const fontes = {
+        filtroFilial: [...new Set(dadosGlobais.map((d) => d.filial).filter(Boolean))].sort(),
+        filtroPatrimonio: [...new Set(dadosGlobais.map((d) => d.patrimonio).filter(Boolean))].sort(),
+        filtroSerie: [...new Set(dadosGlobais.map((d) => d.serie).filter(Boolean))].sort(),
+        filtroEquipamento: [...new Set(dadosGlobais.map((d) => d.equipamento).filter(Boolean))].sort(),
+        filtroCliente: [...new Set(dadosGlobais.map((d) => d.cliente).filter(Boolean))].sort(),
+        filtroMarca: [...new Set(dadosGlobais.map((d) => d.marca).filter(Boolean))].sort(),
+        filtroModelo: [...new Set(dadosGlobais.map((d) => d.modelo).filter(Boolean))].sort(),
+        filtroAno: [...new Set(dadosGlobais.map((d) => d.ano).filter(Boolean))].sort()
+      };
+
+      Object.entries(fontes).forEach(([id, valores]) => preencherSelect(id, valores));
+    }
+
+    function selecionarFiltro(id, valor) {
+      const el = document.getElementById(id);
+      if (!el) return;
+
+      Array.from(el.options).forEach((o) => {
+        o.selected = o.value === valor;
+      });
+
+      if (choicesInstances[id]) {
+        choicesInstances[id].removeActiveItems();
+        choicesInstances[id].setChoiceByValue(valor);
+      }
+    }
+
+    function limparFiltros() {
+      filtrosIds.forEach((id) => {
+        const el = document.getElementById(id);
+        if (!el) return;
+
+        Array.from(el.options).forEach((o) => {
+          o.selected = false;
+        });
+
+        if (choicesInstances[id]) {
+          choicesInstances[id].removeActiveItems();
+        }
+      });
+
+      mesInicio.value = "";
+      mesFim.value = "";
+      gerarRelatorio();
+    }
+
+    function filtrarDados() {
+      let dados = [...dadosGlobais];
+
+      const inicio = mesInicio.value ? new Date(mesInicio.value + "-01T00:00:00") : null;
+      const fim = mesFim.value ? new Date(mesFim.value + "-01T00:00:00") : null;
+
+      if (inicio) {
+        dados = dados.filter((d) => d.data >= inicio);
+      }
+
+      if (fim) {
+        const ultimoDia = new Date(fim.getFullYear(), fim.getMonth() + 1, 0, 23, 59, 59, 999);
+        dados = dados.filter((d) => d.data <= ultimoDia);
+      }
+
+      filtrosIds.forEach((id) => {
+        const valores = getMultiValues(id);
+        if (!valores.length) return;
+
+        const campo = mapaFiltros[id];
+        dados = dados.filter((d) => valores.includes(String(d[campo])));
+      });
+
+      return dados;
+    }
+
+    function calcularTotais(dados) {
+      let fat = 0;
+      let man = 0;
+      let fin = 0;
+      let imp = 0;
+      let tx = 0;
+      let res = 0;
+      let mau = 0;
+
+      dados.forEach((d) => {
+        fat += d.faturamento;
+        man += d.manutencao;
+        fin += d.financiamento;
+        imp += d.impostos;
+        tx += d.tx;
+        res += d.resultado;
+        mau += d.mau;
+      });
+
+      document.getElementById("cardFat").innerText = formatarMoeda(fat);
+      document.getElementById("cardMan").innerText = formatarMoeda(man);
+      document.getElementById("cardRes").innerText = formatarMoeda(res);
+      document.getElementById("cardFin").innerText = formatarMoeda(fin);
+      document.getElementById("cardImp").innerText = formatarMoeda(imp);
+      document.getElementById("cardTx").innerText = formatarMoeda(tx);
+      document.getElementById("cardMau").innerText = formatarMoeda(mau);
+    }
+
+    function exibirOuOcultarGrafico(cardId, dadosObj) {
+      const card = document.getElementById(cardId);
+      const temValor = Object.keys(dadosObj).length > 0;
+      card.style.display = temValor ? "block" : "none";
+      return temValor;
+    }
+
+    function criarGraficoBarra(canvasId, labels, valores, cor, onClick, horizontal = false, tooltipOriginal = null) {
+      const chart = new Chart(document.getElementById(canvasId), {
+        type: "bar",
+        data: {
+          labels,
+          datasets: [{
+            data: valores,
+            backgroundColor: cor
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          indexAxis: horizontal ? "y" : "x",
+          scales: {
+            y: horizontal ? { beginAtZero: true } : {
+              beginAtZero: true,
+              ticks: {
+                callback: (v) => formatarMoeda(v)
+              }
+            },
+            x: horizontal ? {
+              beginAtZero: true,
+              ticks: {
+                callback: (v) => formatarMoeda(v)
+              }
+            } : {}
+          },
+          plugins: {
+            legend: { display: false },
+            tooltip: {
+              callbacks: {
+                label: (ctx) => {
+                  if (tooltipOriginal) {
+                    return formatarMoeda(tooltipOriginal[ctx.dataIndex]);
+                  }
+                  return formatarMoeda(ctx.raw);
+                }
+              }
+            }
+          },
+          onClick: (evt, elements) => {
+            if (elements.length > 0 && typeof onClick === "function") {
+              onClick(elements[0].index);
+            }
+          }
+        }
+      });
+
+      graficos.push(chart);
+    }
+
+    function gerarGraficos(dados) {
+      destruirGraficos();
+      esconderTodosGraficos();
+
+      const patrimonioSelecionado = getMultiValues("filtroPatrimonio");
+      const serieSelecionada = getMultiValues("filtroSerie");
+      const ocultarGraficoEquip = patrimonioSelecionado.length === 1 || serieSelecionada.length === 1;
+
+      const fatEquip = {};
+      const fatCliente = {};
+      const manCliente = {};
+      const deficitCliente = {};
+
+      dados.forEach((d) => {
+        if (d.equipamento) {
+          fatEquip[d.equipamento] = (fatEquip[d.equipamento] || 0) + d.faturamento;
+        }
+
+        if (d.cliente) {
+          fatCliente[d.cliente] = (fatCliente[d.cliente] || 0) + d.faturamento;
+          manCliente[d.cliente] = (manCliente[d.cliente] || 0) + d.manutencao;
+
+          if (d.resultado < 0) {
+            deficitCliente[d.cliente] = (deficitCliente[d.cliente] || 0) + d.resultado;
+          }
+        }
+      });
+
+      const filtrarPositivos = (obj) =>
+        Object.fromEntries(Object.entries(obj).filter(([, v]) => v > 0));
+
+      const fatEquipFiltrado = filtrarPositivos(fatEquip);
+      const fatClienteFiltrado = filtrarPositivos(fatCliente);
+      const manClienteFiltrado = filtrarPositivos(manCliente);
+      const deficitClienteFiltrado = Object.fromEntries(
+        Object.entries(deficitCliente).filter(([, v]) => v < 0)
+      );
+
+      if (!ocultarGraficoEquip && exibirOuOcultarGrafico("cardGraficoEquipamento", fatEquipFiltrado)) {
+        const labels = Object.keys(fatEquipFiltrado);
+        criarGraficoBarra(
+          "graficoEquipamento",
+          labels,
+          Object.values(fatEquipFiltrado),
+          "#1e88e5",
+          (idx) => {
+            selecionarFiltro("filtroEquipamento", labels[idx]);
+            gerarRelatorio();
+          }
+        );
+      }
+
+      if (exibirOuOcultarGrafico("cardGraficoCliente", fatClienteFiltrado)) {
+        const labels = Object.keys(fatClienteFiltrado);
+        criarGraficoBarra(
+          "graficoCliente",
+          labels,
+          Object.values(fatClienteFiltrado),
+          "#2e7d32",
+          (idx) => {
+            selecionarFiltro("filtroCliente", labels[idx]);
+            gerarRelatorio();
+          }
+        );
+      }
+
+      if (exibirOuOcultarGrafico("cardGraficoManutencao", manClienteFiltrado)) {
+        const labels = Object.keys(manClienteFiltrado);
+        criarGraficoBarra(
+          "graficoManutencao",
+          labels,
+          Object.values(manClienteFiltrado),
+          "#fb8c00",
+          (idx) => {
+            selecionarFiltro("filtroCliente", labels[idx]);
+            gerarRelatorio();
+          }
+        );
+      }
+
+      if (exibirOuOcultarGrafico("cardGraficoDeficit", deficitClienteFiltrado)) {
+        const labels = Object.keys(deficitClienteFiltrado);
+        const valoresOriginais = Object.values(deficitClienteFiltrado);
+        const valoresAbsolutos = valoresOriginais.map((v) => Math.abs(v));
+
+        criarGraficoBarra(
+          "graficoDeficit",
+          labels,
+          valoresAbsolutos,
+          "#e53935",
+          (idx) => {
+            selecionarFiltro("filtroCliente", labels[idx]);
+            gerarRelatorio();
+          },
+          true,
+          valoresOriginais
+        );
+      }
+
+      const mesInicioVal = mesInicio.value;
+      const mesFimVal = mesFim.value;
+      const mostrarGraficoMes =
+        (patrimonioSelecionado.length === 1 || serieSelecionada.length === 1) &&
+        mesInicioVal &&
+        mesFimVal;
+
+      if (mostrarGraficoMes) {
+        const dtIni = new Date(mesInicioVal + "-01T00:00:00");
+        const dtFim = new Date(mesFimVal + "-01T00:00:00");
+        const mesesNoPeriodo =
+          (dtFim.getFullYear() - dtIni.getFullYear()) * 12 +
+          (dtFim.getMonth() - dtIni.getMonth()) + 1;
+
+        if (mesesNoPeriodo > 1) {
+          const faturamentoMes = {};
+
+          dados.forEach((d) => {
+            const key = `${d.data.getFullYear()}-${String(d.data.getMonth() + 1).padStart(2, "0")}`;
+            faturamentoMes[key] = (faturamentoMes[key] || 0) + d.faturamento;
+          });
+
+          const fatMesFiltrado = filtrarPositivos(faturamentoMes);
+
+          if (exibirOuOcultarGrafico("cardGraficoMes", fatMesFiltrado)) {
+            criarGraficoBarra(
+              "graficoMes",
+              Object.keys(fatMesFiltrado),
+              Object.values(fatMesFiltrado),
+              "#8e24aa"
+            );
+          }
+        }
+      }
+    }
+
+    function gerarRelatorio() {
+      if (!dadosGlobais.length) return;
+
+      const dadosFiltrados = filtrarDados();
+      calcularTotais(dadosFiltrados);
+      gerarGraficos(dadosFiltrados);
+      btnLimpar.style.display = existeFiltroAtivo() ? "inline-block" : "none";
+    }
+
+    function sugerirPeriodoInicial() {
+      if (!dadosGlobais.length) return;
+
+      const datas = dadosGlobais.map((d) => d.data).filter(Boolean).sort((a, b) => a - b);
+      if (!datas.length) return;
+
+      const min = datas[0];
+      const max = datas[datas.length - 1];
+
+      mesInicio.value = `${min.getFullYear()}-${String(min.getMonth() + 1).padStart(2, "0")}`;
+      mesFim.value = `${max.getFullYear()}-${String(max.getMonth() + 1).padStart(2, "0")}`;
+    }
+
+    function carregarDados(file) {
+      if (!file) return;
+
+      btnLimpar.style.display = "none";
+      statusCarga.innerText = "Carregando planilha...";
+
+      const reader = new FileReader();
+
+      reader.onload = function (e) {
+        try {
+          const data = new Uint8Array(e.target.result);
+          const workbook = XLSX.read(data, { type: "array" });
+          const sheet = workbook.Sheets[workbook.SheetNames[0]];
+          const json = XLSX.utils.sheet_to_json(sheet, { header: 1, defval: "" });
+
+          dadosGlobais = [];
+
+          for (let i = 1; i < json.length; i++) {
+            const l = json[i];
+            if (!l || l.length === 0) continue;
+
+            let dataLinha = l[15];
+            if (!dataLinha) continue;
+
+            if (typeof dataLinha === "number") {
+              dataLinha = excelDateToJSDate(dataLinha);
+            } else {
+              dataLinha = new Date(dataLinha);
+            }
+
+            if (isNaN(dataLinha)) continue;
+            dataLinha.setHours(0, 0, 0, 0);
+
+            dadosGlobais.push({
+              filial: normalizarTexto(l[0]),
+              patrimonio: normalizarTexto(l[1]),
+              serie: normalizarTexto(l[2]),
+              equipamento: normalizarTexto(l[3]),
+              marca: normalizarTexto(l[4]),
+              modelo: normalizarTexto(l[5]),
+              ano: normalizarTexto(l[6]),
+              faturamento: converterNumero(l[7]),
+              manutencao: converterNumero(l[8]),
+              financiamento: converterNumero(l[9]),
+              impostos: converterNumero(l[10]),
+              tx: converterNumero(l[11]),
+              resultado: converterNumero(l[12]),
+              mau: converterNumero(l[13]),
+              cliente: normalizarTexto(l[14]),
+              data: dataLinha
+            });
+          }
+
+          if (!dadosGlobais.length) {
+            statusCarga.innerText = "Nenhum dado válido encontrado.";
+            return;
+          }
+
+          mesInicio.disabled = false;
+          mesFim.disabled = false;
+
+          atualizarFiltros();
+          sugerirPeriodoInicial();
+          gerarRelatorio();
+
+          statusCarga.innerText = "Dados carregados com sucesso.";
+
+          setTimeout(() => {
+            statusCarga.innerText = "";
+          }, 2000);
+        } catch (error) {
+          console.error(error);
+          statusCarga.innerText = "Erro ao carregar planilha.";
+        }
+      };
+
+      reader.readAsArrayBuffer(file);
+    }
+
+    mesInicio.addEventListener("change", gerarRelatorio);
+    mesFim.addEventListener("change", gerarRelatorio);
+    btnLimpar.addEventListener("click", limparFiltros);
+
+    upload.addEventListener("change", (e) => {
+      const file = e.target.files?.[0];
+      if (file) carregarDados(file);
     });
-}
-
-// PEGAR MULTI
-function get(id){
-    return [...document.getElementById(id).selectedOptions].map(o=>o.value);
-}
-
-// FILTRAR
-function filtrar(){
-    return dadosGlobais.filter(d=>{
-        const f=get("filtroFilial");
-        const p=get("filtroPatrimonio");
-        const c=get("filtroCliente");
-        const e=get("filtroEquipamento");
-
-        return (f.length?f.includes(d.filial):true) &&
-               (p.length?p.includes(d.patrimonio):true) &&
-               (c.length?c.includes(d.cliente):true) &&
-               (e.length?e.includes(d.equipamento):true);
-    });
-}
-
-// APLICAR
-function aplicar(){
-    const dados=filtrar();
-
-    let fat=0,man=0,res=0;
-
-    dados.forEach(d=>{
-        fat+=d.faturamento;
-        man+=d.manutencao;
-        res+=d.resultado;
-    });
-
-    document.getElementById("cardFat").innerText=fat.toLocaleString('pt-BR',{style:'currency',currency:'BRL'});
-    document.getElementById("cardMan").innerText=man.toLocaleString('pt-BR',{style:'currency',currency:'BRL'});
-    document.getElementById("cardRes").innerText=res.toLocaleString('pt-BR',{style:'currency',currency:'BRL'});
-
-    gerarGraficos(dados);
-}
-
-// GRÁFICOS
-function gerarGraficos(dados){
-    graficos.forEach(g=>g.destroy());
-    graficos=[];
-
-    const fatEq={}, fatCli={};
-
-    dados.forEach(d=>{
-        fatEq[d.equipamento]=(fatEq[d.equipamento]||0)+d.faturamento;
-        fatCli[d.cliente]=(fatCli[d.cliente]||0)+d.faturamento;
-    });
-
-    graficos.push(new Chart(document.getElementById("graficoEquipamento"),{
-        type:'bar',
-        data:{labels:Object.keys(fatEq),datasets:[{data:Object.values(fatEq)}]}
-    }));
-
-    graficos.push(new Chart(document.getElementById("graficoCliente"),{
-        type:'bar',
-        data:{labels:Object.keys(fatCli),datasets:[{data:Object.values(fatCli)}]}
-    }));
-}
-
-// EVENTOS FILTRO
-document.addEventListener("change",e=>{
-    if(e.target.tagName==="SELECT") aplicar();
-});
-
-// LIMPAR
-document.getElementById("btnLimpar").onclick=function(){
-    document.querySelectorAll("select").forEach(s=>s.selectedIndex=-1);
-    aplicar();
-};
-
-</script>
+  </script>
 </body>
 </html>
