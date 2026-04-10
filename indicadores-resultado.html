@@ -431,140 +431,48 @@
       });
     }
 
-function getMultiValues(id) {
-  const el = document.getElementById(id);
-  if (!el) return [];
-  return Array.from(el.selectedOptions).map((o) => o.value).filter(Boolean);
-}
-
+    function getMultiValues(id) {
+      const el = document.getElementById(id);
+      if (!el) return [];
+      return Array.from(el.selectedOptions).map((o) => o.value).filter(Boolean);
+    }
 
     function existeFiltroAtivo() {
       return filtrosIds.some((id) => getMultiValues(id).length > 0) || !!mesInicio.value || !!mesFim.value;
     }
 
     function preencherSelect(id, valores) {
-  const el = document.getElementById(id);
-  if (!el) return;
+      const el = document.getElementById(id);
+      if (!el) return;
 
-  const selecionadosAtuais = getMultiValues(id);
+      const selecionadosAtuais = getMultiValues(id);
 
-  el.innerHTML = "";
+      el.innerHTML = "";
+      valores.forEach((valor) => {
+        const option = document.createElement("option");
+        option.value = valor;
+        option.textContent = valor;
+        option.selected = selecionadosAtuais.includes(valor);
+        el.appendChild(option);
+      });
 
-  valores.forEach((valor) => {
-    const option = document.createElement("option");
-    option.value = valor;
-    option.textContent = valor;
-    option.selected = selecionadosAtuais.includes(valor);
-    el.appendChild(option);
-  });
+      if (choicesInstances[id]) {
+        choicesInstances[id].destroy();
+      }
 
-  if (choicesInstances[id]) {
-    choicesInstances[id].destroy();
-  }
+      choicesInstances[id] = new Choices(el, {
+        removeItemButton: true,
+        searchEnabled: true,
+        shouldSort: false,
+        placeholder: true,
+        placeholderValue: "Selecione",
+        itemSelectText: "",
+        noResultsText: "Nenhum resultado",
+        noChoicesText: "Sem opções"
+      });
 
-  choicesInstances[id] = new Choices(el, {
-    removeItemButton: true,
-    searchEnabled: true,
-    shouldSort: false,
-    placeholder: true,
-    placeholderValue: "Selecione",
-    itemSelectText: "",
-    noResultsText: "Nenhum resultado",
-    noChoicesText: "Sem opções"
-  });
-
-  selecionadosAtuais.forEach((valor) => {
-    try {
-      choicesInstances[id].setChoiceByValue(valor);
-    } catch (_) {}
-  });
-
-  el.removeEventListener("change", gerarRelatorio);
-  el.addEventListener("change", gerarRelatorio);
-}
-
-function filtrarDados(excluirFiltroId = null) {
-  let dados = [...dadosGlobais];
-
-  const inicio = mesInicio.value ? new Date(mesInicio.value + "-01T00:00:00") : null;
-  const fim = mesFim.value ? new Date(mesFim.value + "-01T00:00:00") : null;
-
-  if (inicio) {
-    dados = dados.filter((d) => d.data >= inicio);
-  }
-
-  if (fim) {
-    const ultimoDia = new Date(fim.getFullYear(), fim.getMonth() + 1, 0, 23, 59, 59, 999);
-    dados = dados.filter((d) => d.data <= ultimoDia);
-  }
-
-  filtrosIds.forEach((id) => {
-    if (id === excluirFiltroId) return;
-
-    const valores = getMultiValues(id);
-    if (!valores.length) return;
-
-    const campo = mapaFiltros[id];
-    dados = dados.filter((d) => valores.includes(String(d[campo])));
-  });
-
-  return dados;
-}
-
-function atualizarFiltrosDinamicamente() {
-  filtrosIds.forEach((id) => {
-    const dadosBase = filtrarDados(id);
-    const campo = mapaFiltros[id];
-
-    const valoresDisponiveis = [
-      ...new Set(
-        dadosBase
-          .map((d) => String(d[campo] ?? "").trim())
-          .filter(Boolean)
-      )
-    ].sort();
-
-    const selecionados = getMultiValues(id);
-    const uniaoValores = [...new Set([...selecionados, ...valoresDisponiveis])].sort();
-
-    preencherSelect(id, uniaoValores);
-  });
-}
-
-function atualizarFiltros() {
-  document.querySelector(".filtros-container").style.display = "grid";
-  document.querySelector(".cards").style.display = "grid";
-  atualizarFiltrosDinamicamente();
-}
-
-function limparFiltros() {
-  filtrosIds.forEach((id) => {
-    const el = document.getElementById(id);
-    if (!el) return;
-
-    Array.from(el.options).forEach((o) => {
-      o.selected = false;
-    });
-
-    if (choicesInstances[id]) {
-      choicesInstances[id].removeActiveItems();
+      el.addEventListener("change", gerarRelatorio);
     }
-  });
-
-  atualizarFiltrosDinamicamente();
-  gerarRelatorio();
-}
-
-function gerarRelatorio() {
-  if (!dadosGlobais.length) return;
-
-  atualizarFiltrosDinamicamente();
-
-  const dadosFiltrados = filtrarDados();
-  calcularTotais(dadosFiltrados);
-  gerarGraficos(dadosFiltrados);
-  btnLimpar.style.display = existeFiltroAtivo() ? "inline-block" : "none";
-}
 
     function atualizarFiltros() {
       const filtrosContainer = document.querySelector(".filtros-container");
