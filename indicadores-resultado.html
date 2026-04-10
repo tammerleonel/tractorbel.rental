@@ -814,7 +814,7 @@
         mesInicioVal &&
         mesFimVal;
 
-      if (mostrarGraficoMes) {
+            if (mostrarGraficoMes) {
         const dtIni = new Date(mesInicioVal + "-01T00:00:00");
         const dtFim = new Date(mesFimVal + "-01T00:00:00");
 
@@ -832,8 +832,9 @@
 
           const labelsMes = Object.keys(faturamentoMes).sort();
           const valoresMes = labelsMes.map((mes) => faturamentoMes[mes]);
+          const temValorMes = valoresMes.some((valor) => valor !== 0);
 
-          if (labelsMes.length > 0) {
+          if (labelsMes.length > 0 && temValorMes) {
             document.getElementById("cardGraficoMes").style.display = "block";
             criarGraficoBarra(
               "graficoMes",
@@ -860,7 +861,7 @@
         mesInicioVal &&
         mesFimVal;
 
-      if (mostrarGraficoClienteMes) {
+            if (mostrarGraficoClienteMes) {
         const dtIniCliente = new Date(mesInicioVal + "-01T00:00:00");
         const dtFimCliente = new Date(mesFimVal + "-01T00:00:00");
 
@@ -878,8 +879,9 @@
 
           const labelsClienteMes = Object.keys(faturamentoClienteMes).sort();
           const valoresClienteMes = labelsClienteMes.map((mes) => faturamentoClienteMes[mes]);
+          const temValorClienteMes = valoresClienteMes.some((valor) => valor !== 0);
 
-          if (labelsClienteMes.length > 0) {
+          if (labelsClienteMes.length > 0 && temValorClienteMes) {
             document.getElementById("cardGraficoClienteMes").style.display = "block";
 
             criarGraficoBarra(
@@ -902,8 +904,10 @@
         document.getElementById("cardGraficoClienteMes").style.display = "none";
       }
 
-    }
+        document.getElementById("cardGraficoClienteMes").style.display = "none";
+      }
 
+    
     function gerarRelatorio() {
       if (!dadosGlobais.length) return;
       atualizarFiltrosDinamicamente();
