@@ -592,27 +592,30 @@
       gerarRelatorio();
     }
 
-    function calcularTotais(dados) {
-      let fat = 0, man = 0, fin = 0, imp = 0, tx = 0, res = 0, mau = 0;
+function calcularTotais(dados) {
+  const totais = {
+    cardFat: dados.reduce((s, d) => s + d.faturamento, 0),
+    cardFin: dados.reduce((s, d) => s + d.financiamento, 0),
+    cardImp: dados.reduce((s, d) => s + d.impostos, 0),
+    cardMan: dados.reduce((s, d) => s + d.manutencao, 0),
+    cardTx: dados.reduce((s, d) => s + d.tx, 0),
+    cardRes: dados.reduce((s, d) => s + d.resultado, 0),
+    cardMau: dados.reduce((s, d) => s + d.mau, 0)
+  };
 
-      dados.forEach((d) => {
-        fat += d.faturamento;
-        man += d.manutencao;
-        fin += d.financiamento;
-        imp += d.impostos;
-        tx += d.tx;
-        res += d.resultado;
-        mau += d.mau;
-      });
+  Object.entries(totais).forEach(([id, valor]) => {
+    const elemento = document.getElementById(id);
+    if (!elemento) return;
 
-      document.getElementById("cardFat").innerText = formatarMoeda(fat);
-      document.getElementById("cardMan").innerText = formatarMoeda(man);
-      document.getElementById("cardRes").innerText = formatarMoeda(res);
-      document.getElementById("cardFin").innerText = formatarMoeda(fin);
-      document.getElementById("cardImp").innerText = formatarMoeda(imp);
-      document.getElementById("cardTx").innerText = formatarMoeda(tx);
-      document.getElementById("cardMau").innerText = formatarMoeda(mau);
+    const card = elemento.closest(".card");
+    elemento.innerText = formatarMoeda(valor);
+
+    if (card) {
+      card.style.display = valor === 0 ? "none" : "";
     }
+  });
+}
+
 
     function exibirOuOcultarGrafico(cardId, dadosObj) {
       const card = document.getElementById(cardId);
