@@ -331,7 +331,7 @@
     </div>
 
     <div class="card grafico-card" id="cardGraficoMes">
-      <h3>Faturamento x Mês</h3>
+      <h3>Relatório Financeiro Mês</h3>
       <canvas id="graficoMes"></canvas>
     </div>
 
@@ -592,30 +592,29 @@
       gerarRelatorio();
     }
 
-function calcularTotais(dados) {
-  const totais = {
-    cardFat: dados.reduce((s, d) => s + d.faturamento, 0),
-    cardFin: dados.reduce((s, d) => s + d.financiamento, 0),
-    cardImp: dados.reduce((s, d) => s + d.impostos, 0),
-    cardMan: dados.reduce((s, d) => s + d.manutencao, 0),
-    cardTx: dados.reduce((s, d) => s + d.tx, 0),
-    cardRes: dados.reduce((s, d) => s + d.resultado, 0),
-    cardMau: dados.reduce((s, d) => s + d.mau, 0)
-  };
+    function calcularTotais(dados) {
+      const totais = {
+        cardFat: dados.reduce((s, d) => s + d.faturamento, 0),
+        cardFin: dados.reduce((s, d) => s + d.financiamento, 0),
+        cardImp: dados.reduce((s, d) => s + d.impostos, 0),
+        cardMan: dados.reduce((s, d) => s + d.manutencao, 0),
+        cardTx: dados.reduce((s, d) => s + d.tx, 0),
+        cardRes: dados.reduce((s, d) => s + d.resultado, 0),
+        cardMau: dados.reduce((s, d) => s + d.mau, 0)
+      };
 
-  Object.entries(totais).forEach(([id, valor]) => {
-    const elemento = document.getElementById(id);
-    if (!elemento) return;
+      Object.entries(totais).forEach(([id, valor]) => {
+        const elemento = document.getElementById(id);
+        if (!elemento) return;
 
-    const card = elemento.closest(".card");
-    elemento.innerText = formatarMoeda(valor);
+        const card = elemento.closest(".card");
+        elemento.innerText = formatarMoeda(valor);
 
-    if (card) {
-      card.style.display = valor === 0 ? "none" : "";
+        if (card) {
+          card.style.display = valor === 0 ? "none" : "";
+        }
+      });
     }
-  });
-}
-
 
     function exibirOuOcultarGrafico(cardId, dadosObj) {
       const card = document.getElementById(cardId);
@@ -624,12 +623,16 @@ function calcularTotais(dados) {
       return temValor;
     }
 
-    function criarGraficoBarra(canvasId, labels, valores, cor, onClick, horizontal = false, tooltipOriginal = null) {
+    function criarGraficoBarra(canvasId, labels, valores, cor, onClick, horizontal = false, tooltipOriginal = null, datasetLabel = "") {
       const chart = new Chart(document.getElementById(canvasId), {
         type: "bar",
         data: {
           labels,
-          datasets: [{ data: valores, backgroundColor: cor }]
+          datasets: [{
+            label: datasetLabel,
+            data: valores,
+            backgroundColor: cor
+          }]
         },
         options: {
           responsive: true,
@@ -646,12 +649,15 @@ function calcularTotais(dados) {
             } : {}
           },
           plugins: {
-            legend: { display: false },
+            legend: { display: !!datasetLabel },
             tooltip: {
               callbacks: {
-                label: (ctx) => tooltipOriginal
-                  ? formatarMoeda(tooltipOriginal[ctx.dataIndex])
-                  : formatarMoeda(ctx.raw)
+                label: (ctx) => {
+                  const valor = tooltipOriginal ? tooltipOriginal[ctx.dataIndex] : ctx.raw;
+                  return datasetLabel
+                    ? `${datasetLabel}: ${formatarMoeda(valor)}`
+                    : formatarMoeda(valor);
+                }
               }
             }
           },
@@ -674,7 +680,10 @@ function calcularTotais(dados) {
       const serieSelecionada = getMultiValues("filtroSerie");
       const ocultarGraficoEquip = patrimonioSelecionado.length === 1 || serieSelecionada.length === 1;
 
-      const fatEquip = {}, fatCliente = {}, manCliente = {}, deficitCliente = {};
+      const fatEquip = {};
+      const fatCliente = {};
+      const manCliente = {};
+      const deficitCliente = {};
 
       dados.forEach((d) => {
         if (d.equipamento) {
@@ -741,6 +750,7 @@ function calcularTotais(dados) {
       if (mostrarGraficoMes) {
         const dtIni = new Date(mesInicioVal + "-01T00:00:00");
         const dtFim = new Date(mesFimVal + "-01T00:00:00");
+
         const mesesNoPeriodo =
           (dtFim.getFullYear() - dtIni.getFullYear()) * 12 +
           (dtFim.getMonth() - dtIni.getMonth()) + 1;
@@ -749,16 +759,33 @@ function calcularTotais(dados) {
           const faturamentoMes = {};
 
           dados.forEach((d) => {
-            const key = `${d.data.getFullYear()}-${String(d.data.getMonth() + 1).padStart(2, "0")}`;
-            faturamentoMes[key] = (faturamentoMes[key] || 0) + d.faturamento;
+            const chaveMes = `${d.data.getFullYear()}-${String(d.data.getMonth() + 1).padStart(2, "0")}`;
+            faturamentoMes[chaveMes] = (faturamentoMes[chaveMes] || 0) + d.faturamento;
           });
 
-          const fatMesFiltrado = filtrarPositivos(faturamentoMes);
+          const labelsMes = Object.keys(faturamentoMes).sort();
+          const valoresMes = labelsMes.map((mes) => faturamentoMes[mes]);
 
-          if (exibirOuOcultarGrafico("cardGraficoMes", fatMesFiltrado)) {
-            criarGraficoBarra("graficoMes", Object.keys(fatMesFiltrado), Object.values(fatMesFiltrado), "#8e24aa");
+          if (labelsMes.length > 0) {
+            document.getElementById("cardGraficoMes").style.display = "block";
+            criarGraficoBarra(
+              "graficoMes",
+              labelsMes,
+              valoresMes,
+              "#8e24aa",
+              null,
+              false,
+              null,
+              "Faturamento"
+            );
+          } else {
+            document.getElementById("cardGraficoMes").style.display = "none";
           }
+        } else {
+          document.getElementById("cardGraficoMes").style.display = "none";
         }
+      } else {
+        document.getElementById("cardGraficoMes").style.display = "none";
       }
     }
 
