@@ -477,7 +477,7 @@ function gerarGraficos(dados){
     const filtrarZero = obj=>{
         const res = {};
         Object.keys(obj).forEach(k=>{
-            if(obj[k] !== 0 && !isNaN(obj[k])) res[k] = obj[k];
+            if(obj[k] > 0) res[k] = obj[k];
         });
         return res;
     }
@@ -491,13 +491,13 @@ function gerarGraficos(dados){
 
     // Equipamento
     if(exibirOuOcultarGrafico("graficoEquipamento", fatEquipFiltrado)) {
-        new Chart(document.getElementById("graficoEquipamento"),{
+       graficos.push(new Chart(document.getElementById("graficoEquipamento"),{
             type:'bar',
             data:{labels:Object.keys(fatEquipFiltrado),datasets:[{data:Object.values(fatEquipFiltrado),backgroundColor:'blue'}]},
             options:{scales:{y:{beginAtZero:true}},plugins:{legend:{display:false}},onClick:(evt, e)=>{
                 if(e.length>0){const idx=e[0].index; selecionarFiltro("filtroEquipamento",Object.keys(fatEquipFiltrado)[idx]); gerarRelatorio();}
             }}
-        });
+        }));
     }
 
     // Cliente
