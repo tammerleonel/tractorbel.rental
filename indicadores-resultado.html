@@ -786,17 +786,21 @@
     }
 
     function sugerirPeriodoInicial() {
-      if (!dadosGlobais.length) return;
+     if (!dadosGlobais.length) return;
 
-      const datas = dadosGlobais.map((d) => d.data).filter(Boolean).sort((a, b) => a - b);
-      if (!datas.length) return;
+    const datas = dadosGlobais
+    .map((d) => d.data)
+    .filter(Boolean)
+    .sort((a, b) => a - b);
 
-      const min = datas[0];
-      const max = datas[datas.length - 1];
+        if (!datas.length) return;
 
-      mesInicio.value = `${min.getFullYear()}-${String(min.getMonth() + 1).padStart(2, "0")}`;
-      mesFim.value = `${max.getFullYear()}-${String(max.getMonth() + 1).padStart(2, "0")}`;
-    }
+        const ultimaData = datas[datas.length - 1];
+        const ultimoMesAno = `${ultimaData.getFullYear()}-${String(ultimaData.getMonth() + 1).padStart(2, "0")}`;
+
+  mesInicio.value = ultimoMesAno;
+  mesFim.value = ultimoMesAno;
+}
 
     function carregarDados(file) {
       if (!file) return;
