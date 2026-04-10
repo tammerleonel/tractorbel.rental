@@ -500,7 +500,7 @@ function gerarGraficos(dados){
 
     // Cliente
     if(exibirOuOcultarGrafico("graficoCliente", fatClienteFiltrado)) {
-        graficos.push(new Chart(document.getElementById("graficoManutencao"),{
+        graficos.push(new Chart(document.getElementById("graficoCliente"),{
             type:'bar',
             data:{labels:Object.keys(fatClienteFiltrado),datasets:[{data:Object.values(fatClienteFiltrado),backgroundColor:'green'}]},
             options:{scales:{y:{beginAtZero:true}},plugins:{legend:{display:false}},onClick:(evt, e)=>{
