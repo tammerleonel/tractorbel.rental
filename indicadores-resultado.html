@@ -397,6 +397,11 @@
       <canvas id="graficoMes"></canvas>
     </div>
 
+    <div class="card grafico-card" id="cardGraficoClienteMes">
+     <h3>Faturamento do Cliente x Mês</h3>
+     <canvas id="graficoClienteMes"></canvas>
+    </div>
+
     <div class="card grafico-card" id="cardGraficoEquipamento">
       <h3>Faturamento x Equipamento</h3>
       <canvas id="graficoEquipamento"></canvas>
@@ -849,6 +854,54 @@
       } else {
         document.getElementById("cardGraficoMes").style.display = "none";
       }
+            const clienteSelecionado = getMultiValues("filtroCliente");
+      const mostrarGraficoClienteMes =
+        clienteSelecionado.length === 1 &&
+        mesInicioVal &&
+        mesFimVal;
+
+      if (mostrarGraficoClienteMes) {
+        const dtIniCliente = new Date(mesInicioVal + "-01T00:00:00");
+        const dtFimCliente = new Date(mesFimVal + "-01T00:00:00");
+
+        const mesesNoPeriodoCliente =
+          (dtFimCliente.getFullYear() - dtIniCliente.getFullYear()) * 12 +
+          (dtFimCliente.getMonth() - dtIniCliente.getMonth()) + 1;
+
+        if (mesesNoPeriodoCliente > 1) {
+          const faturamentoClienteMes = {};
+
+          dados.forEach((d) => {
+            const chaveMes = `${d.data.getFullYear()}-${String(d.data.getMonth() + 1).padStart(2, "0")}`;
+            faturamentoClienteMes[chaveMes] = (faturamentoClienteMes[chaveMes] || 0) + d.faturamento;
+          });
+
+          const labelsClienteMes = Object.keys(faturamentoClienteMes).sort();
+          const valoresClienteMes = labelsClienteMes.map((mes) => faturamentoClienteMes[mes]);
+
+          if (labelsClienteMes.length > 0) {
+            document.getElementById("cardGraficoClienteMes").style.display = "block";
+
+            criarGraficoBarra(
+              "graficoClienteMes",
+              labelsClienteMes,
+              valoresClienteMes,
+              "#1565c0",
+              null,
+              false,
+              null,
+              "Faturamento"
+            );
+          } else {
+            document.getElementById("cardGraficoClienteMes").style.display = "none";
+          }
+        } else {
+          document.getElementById("cardGraficoClienteMes").style.display = "none";
+        }
+      } else {
+        document.getElementById("cardGraficoClienteMes").style.display = "none";
+      }
+
     }
 
     function gerarRelatorio() {
