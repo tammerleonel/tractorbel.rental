@@ -7,10 +7,12 @@
 
   <script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/choices.js/public/assets/styles/choices.min.css" />
-  <script src="https://cdn.jsdelivr.net/npm/choices.js/public/assets/scripts/choices.min.js"></script>
 
   <style>
+    * {
+      box-sizing: border-box;
+    }
+
     body {
       font-family: Arial, sans-serif;
       margin: 20px;
@@ -46,26 +48,49 @@
       align-items: start;
     }
 
-    .filtros-container > div {
+    .filtro-box {
       display: flex;
       flex-direction: column;
-      min-height: 160px;
+      height: 190px;
       border: 1px solid #e0e0e0;
       border-radius: 8px;
       padding: 8px;
       background: #fff;
       min-width: 0;
+      overflow: hidden;
     }
 
-    .filtros-container label {
+    .filtro-box label {
       font-size: 13px;
       font-weight: 600;
       margin-bottom: 6px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
 
-    .filtros-container select {
+    .filtro-box select {
       width: 100%;
-      font-size: 13px;
+      flex: 1;
+      min-height: 0;
+      border: 1px solid #cfcfcf;
+      border-radius: 6px;
+      padding: 4px;
+      font-size: 12px;
+      background: #fff;
+      overflow: auto;
+    }
+
+    .filtro-box select option {
+      padding: 4px 6px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .filtro-box select option:checked {
+      background: #2e7d32;
+      color: #fff;
     }
 
     .btn-google {
@@ -135,36 +160,6 @@
       margin-top: 4px;
     }
 
-    .choices {
-      width: 100%;
-    }
-
-    .choices__item--selectable.is-highlighted {
-      background-color: #e8f5e9 !important;
-      color: #1b5e20 !important;
-    }
-
-    .choices__item--choice.is-selected {
-      background-color: #2e7d32 !important;
-      border-color: #2e7d32 !important;
-      color: #fff !important;
-    }
-
-    .choices__list--multiple .choices__item {
-      background-color: #2e7d32 !important;
-      border: 1px solid #2e7d32 !important;
-      color: #fff !important;
-      font-size: 12px;
-    }
-
-    .choices__list--multiple .choices__item .choices__button {
-      border-left: 1px solid rgba(255, 255, 255, 0.4);
-    }
-
-    .choices__inner {
-      min-height: 38px !important;
-    }
-
     canvas {
       max-height: 280px;
     }
@@ -182,6 +177,12 @@
 
     .grafico-card {
       display: none;
+    }
+
+    .hint-filtro {
+      font-size: 11px;
+      color: #666;
+      margin-top: 4px;
     }
 
     @media (max-width: 1200px) {
@@ -237,37 +238,52 @@
     </div>
 
     <div class="filtros-container">
-      <div>
+      <div class="filtro-box">
         <label>Filial</label>
-        <select multiple class="multi" id="filtroFilial"></select>
+        <select multiple size="8" id="filtroFilial"></select>
+        <div class="hint-filtro">Use Ctrl para múltipla seleção</div>
       </div>
-      <div>
+
+      <div class="filtro-box">
         <label>Patrimônio</label>
-        <select multiple class="multi" id="filtroPatrimonio"></select>
+        <select multiple size="8" id="filtroPatrimonio"></select>
+        <div class="hint-filtro">Use Ctrl para múltipla seleção</div>
       </div>
-      <div>
+
+      <div class="filtro-box">
         <label>Série</label>
-        <select multiple class="multi" id="filtroSerie"></select>
+        <select multiple size="8" id="filtroSerie"></select>
+        <div class="hint-filtro">Use Ctrl para múltipla seleção</div>
       </div>
-      <div>
+
+      <div class="filtro-box">
         <label>Equipamento</label>
-        <select multiple class="multi" id="filtroEquipamento"></select>
+        <select multiple size="8" id="filtroEquipamento"></select>
+        <div class="hint-filtro">Use Ctrl para múltipla seleção</div>
       </div>
-      <div>
+
+      <div class="filtro-box">
         <label>Cliente</label>
-        <select multiple class="multi" id="filtroCliente"></select>
+        <select multiple size="8" id="filtroCliente"></select>
+        <div class="hint-filtro">Use Ctrl para múltipla seleção</div>
       </div>
-      <div>
+
+      <div class="filtro-box">
         <label>Marca</label>
-        <select multiple class="multi" id="filtroMarca"></select>
+        <select multiple size="8" id="filtroMarca"></select>
+        <div class="hint-filtro">Use Ctrl para múltipla seleção</div>
       </div>
-      <div>
+
+      <div class="filtro-box">
         <label>Modelo</label>
-        <select multiple class="multi" id="filtroModelo"></select>
+        <select multiple size="8" id="filtroModelo"></select>
+        <div class="hint-filtro">Use Ctrl para múltipla seleção</div>
       </div>
-      <div>
+
+      <div class="filtro-box">
         <label>Ano</label>
-        <select multiple class="multi" id="filtroAno"></select>
+        <select multiple size="8" id="filtroAno"></select>
+        <div class="hint-filtro">Use Ctrl para múltipla seleção</div>
       </div>
     </div>
 
@@ -313,9 +329,7 @@
 
   <script>
     let dadosGlobais = [];
-    let dadosFiltradosAtuais = [];
     let graficos = [];
-    let choicesInstances = {};
     let atualizandoFiltros = false;
 
     const mesInicio = document.getElementById("mesInicio");
@@ -390,13 +404,9 @@
       return filtrosIds.some((id) => getMultiValues(id).length > 0);
     }
 
-    function preencherSelect(id, valores, valoresSelecionados = []) {
+    function preencherSelect(id, valores, selecionados = []) {
       const el = document.getElementById(id);
       if (!el) return;
-
-      if (choicesInstances[id]) {
-        choicesInstances[id].destroy();
-      }
 
       el.innerHTML = "";
 
@@ -404,24 +414,8 @@
         const option = document.createElement("option");
         option.value = valor;
         option.textContent = valor;
-        option.selected = valoresSelecionados.includes(valor);
+        option.selected = selecionados.includes(valor);
         el.appendChild(option);
-      });
-
-      choicesInstances[id] = new Choices(el, {
-        removeItemButton: true,
-        searchEnabled: true,
-        shouldSort: false,
-        placeholder: true,
-        placeholderValue: "Selecione",
-        itemSelectText: "",
-        noResultsText: "Nenhum resultado",
-        noChoicesText: "Sem opções"
-      });
-
-      el.addEventListener("change", () => {
-        if (atualizandoFiltros) return;
-        gerarRelatorio();
       });
     }
 
@@ -495,6 +489,7 @@
       filtrosIds.forEach((id) => {
         const el = document.getElementById(id);
         if (!el) return;
+
         Array.from(el.options).forEach((o) => {
           o.selected = false;
         });
@@ -732,11 +727,10 @@
 
     function gerarRelatorio() {
       if (!dadosGlobais.length) return;
-      dadosFiltradosAtuais = filtrarDados();
-      atualizarFiltrosDinamicamente();
-      dadosFiltradosAtuais = filtrarDados();
-      calcularTotais(dadosFiltradosAtuais);
-      gerarGraficos(dadosFiltradosAtuais);
+      if (!atualizandoFiltros) atualizarFiltrosDinamicamente();
+      const dadosFiltrados = filtrarDados();
+      calcularTotais(dadosFiltrados);
+      gerarGraficos(dadosFiltrados);
       btnLimpar.style.display = existeFiltroAtivo() ? "inline-block" : "none";
     }
 
@@ -834,6 +828,13 @@
 
       reader.readAsArrayBuffer(file);
     }
+
+    filtrosIds.forEach((id) => {
+      document.getElementById(id).addEventListener("change", () => {
+        if (atualizandoFiltros) return;
+        gerarRelatorio();
+      });
+    });
 
     mesInicio.addEventListener("change", gerarRelatorio);
     mesFim.addEventListener("change", gerarRelatorio);
