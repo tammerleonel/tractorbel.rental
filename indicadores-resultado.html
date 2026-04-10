@@ -331,7 +331,7 @@
     </div>
 
     <div class="card grafico-card" id="cardGraficoMes">
-      <h3>Faturamento x Mês</h3>
+      <h3>Relatório Financeiro Mês</h3>
       <canvas id="graficoMes"></canvas>
     </div>
 
@@ -670,69 +670,11 @@ function calcularTotais(dados) {
       destruirGraficos();
       esconderTodosGraficos();
 
-      const patrimonioSelecionado = getMultiValues("filtroPatrimonio");
+          const patrimonioSelecionado = getMultiValues("filtroPatrimonio");
       const serieSelecionada = getMultiValues("filtroSerie");
-      const ocultarGraficoEquip = patrimonioSelecionado.length === 1 || serieSelecionada.length === 1;
-
-      const fatEquip = {}, fatCliente = {}, manCliente = {}, deficitCliente = {};
-
-      dados.forEach((d) => {
-        if (d.equipamento) {
-          fatEquip[d.equipamento] = (fatEquip[d.equipamento] || 0) + d.faturamento;
-        }
-
-        if (d.cliente) {
-          fatCliente[d.cliente] = (fatCliente[d.cliente] || 0) + d.faturamento;
-          manCliente[d.cliente] = (manCliente[d.cliente] || 0) + d.manutencao;
-          if (d.resultado < 0) {
-            deficitCliente[d.cliente] = (deficitCliente[d.cliente] || 0) + d.resultado;
-          }
-        }
-      });
-
-      const filtrarPositivos = (obj) =>
-        Object.fromEntries(Object.entries(obj).filter(([, v]) => v > 0));
-
-      const fatEquipFiltrado = filtrarPositivos(fatEquip);
-      const fatClienteFiltrado = filtrarPositivos(fatCliente);
-      const manClienteFiltrado = filtrarPositivos(manCliente);
-      const deficitClienteFiltrado = Object.fromEntries(
-        Object.entries(deficitCliente).filter(([, v]) => v < 0)
-      );
-
-      if (!ocultarGraficoEquip && exibirOuOcultarGrafico("cardGraficoEquipamento", fatEquipFiltrado)) {
-        const labels = Object.keys(fatEquipFiltrado);
-        criarGraficoBarra("graficoEquipamento", labels, Object.values(fatEquipFiltrado), "#1e88e5", (idx) => {
-          marcarFiltroPorGrafico("filtroEquipamento", labels[idx]);
-        });
-      }
-
-      if (exibirOuOcultarGrafico("cardGraficoCliente", fatClienteFiltrado)) {
-        const labels = Object.keys(fatClienteFiltrado);
-        criarGraficoBarra("graficoCliente", labels, Object.values(fatClienteFiltrado), "#2e7d32", (idx) => {
-          marcarFiltroPorGrafico("filtroCliente", labels[idx]);
-        });
-      }
-
-      if (exibirOuOcultarGrafico("cardGraficoManutencao", manClienteFiltrado)) {
-        const labels = Object.keys(manClienteFiltrado);
-        criarGraficoBarra("graficoManutencao", labels, Object.values(manClienteFiltrado), "#fb8c00", (idx) => {
-          marcarFiltroPorGrafico("filtroCliente", labels[idx]);
-        });
-      }
-
-      if (exibirOuOcultarGrafico("cardGraficoDeficit", deficitClienteFiltrado)) {
-        const labels = Object.keys(deficitClienteFiltrado);
-        const valoresOriginais = Object.values(deficitClienteFiltrado);
-        const valoresAbsolutos = valoresOriginais.map((v) => Math.abs(v));
-
-        criarGraficoBarra("graficoDeficit", labels, valoresAbsolutos, "#e53935", (idx) => {
-          marcarFiltroPorGrafico("filtroCliente", labels[idx]);
-        }, true, valoresOriginais);
-      }
-
       const mesInicioVal = mesInicio.value;
       const mesFimVal = mesFim.value;
+
       const mostrarGraficoMes =
         (patrimonioSelecionado.length === 1 || serieSelecionada.length === 1) &&
         mesInicioVal &&
@@ -741,6 +683,7 @@ function calcularTotais(dados) {
       if (mostrarGraficoMes) {
         const dtIni = new Date(mesInicioVal + "-01T00:00:00");
         const dtFim = new Date(mesFimVal + "-01T00:00:00");
+
         const mesesNoPeriodo =
           (dtFim.getFullYear() - dtIni.getFullYear()) * 12 +
           (dtFim.getMonth() - dtIni.getMonth()) + 1;
@@ -749,16 +692,59 @@ function calcularTotais(dados) {
           const faturamentoMes = {};
 
           dados.forEach((d) => {
-            const key = `${d.data.getFullYear()}-${String(d.data.getMonth() + 1).padStart(2, "0")}`;
-            faturamentoMes[key] = (faturamentoMes[key] || 0) + d.faturamento;
+            const chaveMes = `${d.data.getFullYear()}-${String(d.data.getMonth() + 1).padStart(2, "0")}`;
+            faturamentoMes[chaveMes] = (faturamentoMes[chaveMes] || 0) + d.faturamento;
           });
 
-          const fatMesFiltrado = filtrarPositivos(faturamentoMes);
+          const labelsMes = Object.keys(faturamentoMes).sort();
+          const valoresMes = labelsMes.map((mes) => faturamentoMes[mes]);
 
-          if (exibirOuOcultarGrafico("cardGraficoMes", fatMesFiltrado)) {
-            criarGraficoBarra("graficoMes", Object.keys(fatMesFiltrado), Object.values(fatMesFiltrado), "#8e24aa");
+          if (labelsMes.length > 0) {
+            document.getElementById("cardGraficoMes").style.display = "block";
+
+            const graficoMes = new Chart(document.getElementById("graficoMes"), {
+              type: "bar",
+              data: {
+                labels: labelsMes,
+                datasets: [{
+                  label: "Faturamento",
+                  data: valoresMes,
+                  backgroundColor: "#8e24aa"
+                }]
+              },
+              options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                  y: {
+                    beginAtZero: true,
+                    ticks: {
+                      callback: (v) => formatarMoeda(v)
+                    }
+                  }
+                },
+                plugins: {
+                  legend: {
+                    display: true
+                  },
+                  tooltip: {
+                    callbacks: {
+                      label: (ctx) => `${ctx.dataset.label}: ${formatarMoeda(ctx.raw)}`
+                    }
+                  }
+                }
+              }
+            });
+
+            graficos.push(graficoMes);
+          } else {
+            document.getElementById("cardGraficoMes").style.display = "none";
           }
         }
+      }
+    
+      else {
+        document.getElementById("cardGraficoMes").style.display = "none";
       }
     }
 
