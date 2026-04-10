@@ -7,7 +7,6 @@
 
   <script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/choices.js/public/assets/styles/choices.min.css" />
   <script src="https://cdn.jsdelivr.net/npm/choices.js/public/assets/scripts/choices.min.js"></script>
 
@@ -23,29 +22,12 @@
       margin-bottom: 16px;
     }
 
-    #login,
     #conteudo {
       background: #fff;
       border-radius: 12px;
       padding: 16px;
       box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
-    }
-
-    #conteudo {
-      display: none;
-    }
-
-    #login {
-      max-width: 420px;
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-    }
-
-    #login input {
-      padding: 10px;
-      border: 1px solid #ccc;
-      border-radius: 8px;
+      display: block;
     }
 
     .topo-controles {
@@ -58,9 +40,10 @@
 
     .filtros-container {
       display: none;
-      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      grid-template-columns: 0.8fr 0.9fr 0.8fr 1.2fr 1.3fr 0.8fr 0.9fr 0.7fr;
       gap: 12px;
       margin-bottom: 10px;
+      align-items: start;
     }
 
     .filtros-container > div {
@@ -71,6 +54,7 @@
       border-radius: 8px;
       padding: 8px;
       background: #fff;
+      min-width: 0;
     }
 
     .filtros-container label {
@@ -106,11 +90,6 @@
 
     .btn-google:active {
       transform: scale(0.98);
-    }
-
-    input[type="file"] + label.btn-google:hover {
-      background-color: #34a853;
-      color: white;
     }
 
     label.btn-google {
@@ -156,6 +135,10 @@
       margin-top: 4px;
     }
 
+    .choices {
+      width: 100%;
+    }
+
     .choices__item--selectable.is-highlighted {
       background-color: #e8f5e9 !important;
       color: #1b5e20 !important;
@@ -171,6 +154,7 @@
       background-color: #2e7d32 !important;
       border: 1px solid #2e7d32 !important;
       color: #fff !important;
+      font-size: 12px;
     }
 
     .choices__list--multiple .choices__item .choices__button {
@@ -200,6 +184,12 @@
       display: none;
     }
 
+    @media (max-width: 1200px) {
+      .filtros-container {
+        grid-template-columns: repeat(4, minmax(160px, 1fr));
+      }
+    }
+
     @media (max-width: 768px) {
       body {
         margin: 12px;
@@ -208,17 +198,21 @@
       .cards {
         position: static;
       }
+
+      .filtros-container {
+        grid-template-columns: repeat(2, minmax(140px, 1fr));
+      }
+    }
+
+    @media (max-width: 520px) {
+      .filtros-container {
+        grid-template-columns: 1fr;
+      }
     }
   </style>
 </head>
 <body>
   <h2>Relatório Financeiro Rental</h2>
-
-  <div id="login">
-    <input type="email" id="email" placeholder="Email" />
-    <input type="password" id="senha" placeholder="Senha" />
-    <button class="btn-google" onclick="login()">Login</button>
-  </div>
 
   <div id="conteudo">
     <div class="topo-controles">
@@ -317,25 +311,12 @@
     </div>
   </div>
 
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-app.js";
-    import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-auth.js";
-
-    const firebaseConfig = {
-      apiKey: "AIzaSyAAF5FLl8xawkivYCcjQGJyb2jo1_A1V7g",
-      authDomain: "tractorbel-8ceb8.firebaseapp.com",
-      projectId: "tractorbel-8ceb8",
-      storageBucket: "tractorbel-8ceb8.firebasestorage.app",
-      messagingSenderId: "720471893475",
-      appId: "1:720471893475:web:e6eb1d64cae5f7aa27ecd6"
-    };
-
-    const app = initializeApp(firebaseConfig);
-    const auth = getAuth(app);
-
+  <script>
     let dadosGlobais = [];
+    let dadosFiltradosAtuais = [];
     let graficos = [];
     let choicesInstances = {};
+    let atualizandoFiltros = false;
 
     const mesInicio = document.getElementById("mesInicio");
     const mesFim = document.getElementById("mesFim");
@@ -365,43 +346,11 @@
       filtroAno: "ano"
     };
 
-    function mostrarConteudo(user) {
-      const login = document.getElementById("login");
-      const conteudo = document.getElementById("conteudo");
-
-      if (!login || !conteudo) return;
-
-      if (user) {
-        login.style.display = "none";
-        conteudo.style.display = "block";
-      } else {
-        login.style.display = "flex";
-        conteudo.style.display = "none";
-      }
-    }
-
-    window.login = function () {
-      const email = document.getElementById("email").value.trim();
-      const senha = document.getElementById("senha").value;
-
-      signInWithEmailAndPassword(auth, email, senha)
-        .then(() => mostrarConteudo(true))
-        .catch(() => alert("Usuário ou senha incorretos"));
-    };
-
-    window.logout = function () {
-      signOut(auth);
-    };
-
-    onAuthStateChanged(auth, (user) => mostrarConteudo(user));
-
     function converterNumero(valor) {
       if (valor === null || valor === undefined || valor === "") return 0;
       if (typeof valor === "number") return valor;
-
       const texto = String(valor).trim();
       if (!texto) return 0;
-
       return parseFloat(texto.replace(/\./g, "").replace(",", ".")) || 0;
     }
 
@@ -438,27 +387,26 @@
     }
 
     function existeFiltroAtivo() {
-      return filtrosIds.some((id) => getMultiValues(id).length > 0) || !!mesInicio.value || !!mesFim.value;
+      return filtrosIds.some((id) => getMultiValues(id).length > 0);
     }
 
-    function preencherSelect(id, valores) {
+    function preencherSelect(id, valores, valoresSelecionados = []) {
       const el = document.getElementById(id);
       if (!el) return;
-
-      const selecionadosAtuais = getMultiValues(id);
-
-      el.innerHTML = "";
-      valores.forEach((valor) => {
-        const option = document.createElement("option");
-        option.value = valor;
-        option.textContent = valor;
-        option.selected = selecionadosAtuais.includes(valor);
-        el.appendChild(option);
-      });
 
       if (choicesInstances[id]) {
         choicesInstances[id].destroy();
       }
+
+      el.innerHTML = "";
+
+      valores.forEach((valor) => {
+        const option = document.createElement("option");
+        option.value = valor;
+        option.textContent = valor;
+        option.selected = valoresSelecionados.includes(valor);
+        el.appendChild(option);
+      });
 
       choicesInstances[id] = new Choices(el, {
         removeItemButton: true,
@@ -471,62 +419,13 @@
         noChoicesText: "Sem opções"
       });
 
-      el.addEventListener("change", gerarRelatorio);
-    }
-
-    function atualizarFiltros() {
-      const filtrosContainer = document.querySelector(".filtros-container");
-      const cards = document.querySelector(".cards");
-
-      filtrosContainer.style.display = "grid";
-      cards.style.display = "grid";
-
-      const fontes = {
-        filtroFilial: [...new Set(dadosGlobais.map((d) => d.filial).filter(Boolean))].sort(),
-        filtroPatrimonio: [...new Set(dadosGlobais.map((d) => d.patrimonio).filter(Boolean))].sort(),
-        filtroSerie: [...new Set(dadosGlobais.map((d) => d.serie).filter(Boolean))].sort(),
-        filtroEquipamento: [...new Set(dadosGlobais.map((d) => d.equipamento).filter(Boolean))].sort(),
-        filtroCliente: [...new Set(dadosGlobais.map((d) => d.cliente).filter(Boolean))].sort(),
-        filtroMarca: [...new Set(dadosGlobais.map((d) => d.marca).filter(Boolean))].sort(),
-        filtroModelo: [...new Set(dadosGlobais.map((d) => d.modelo).filter(Boolean))].sort(),
-        filtroAno: [...new Set(dadosGlobais.map((d) => d.ano).filter(Boolean))].sort()
-      };
-
-      Object.entries(fontes).forEach(([id, valores]) => preencherSelect(id, valores));
-    }
-
-    function selecionarFiltro(id, valor) {
-      const el = document.getElementById(id);
-      if (!el) return;
-
-      Array.from(el.options).forEach((o) => {
-        o.selected = o.value === valor;
+      el.addEventListener("change", () => {
+        if (atualizandoFiltros) return;
+        gerarRelatorio();
       });
-
-      if (choicesInstances[id]) {
-        choicesInstances[id].removeActiveItems();
-        choicesInstances[id].setChoiceByValue(valor);
-      }
     }
 
-    function limparFiltros() {
-      filtrosIds.forEach((id) => {
-        const el = document.getElementById(id);
-        if (!el) return;
-
-        Array.from(el.options).forEach((o) => {
-          o.selected = false;
-        });
-
-        if (choicesInstances[id]) {
-          choicesInstances[id].removeActiveItems();
-        }
-      });
-
-      gerarRelatorio();
-    }
-
-    function filtrarDados() {
+    function filtrarDados(excluirFiltroId = null) {
       let dados = [...dadosGlobais];
 
       const inicio = mesInicio.value ? new Date(mesInicio.value + "-01T00:00:00") : null;
@@ -542,14 +441,67 @@
       }
 
       filtrosIds.forEach((id) => {
+        if (id === excluirFiltroId) return;
         const valores = getMultiValues(id);
         if (!valores.length) return;
-
         const campo = mapaFiltros[id];
         dados = dados.filter((d) => valores.includes(String(d[campo])));
       });
 
       return dados;
+    }
+
+    function atualizarFiltrosDinamicamente() {
+      atualizandoFiltros = true;
+
+      filtrosIds.forEach((id) => {
+        const dadosBase = filtrarDados(id);
+        const campo = mapaFiltros[id];
+        const selecionados = getMultiValues(id);
+
+        const valoresDisponiveis = [
+          ...new Set(
+            dadosBase
+              .map((d) => String(d[campo] ?? "").trim())
+              .filter(Boolean)
+          )
+        ].sort();
+
+        const listaFinal = [...new Set([...selecionados, ...valoresDisponiveis])].sort();
+        preencherSelect(id, listaFinal, selecionados);
+      });
+
+      atualizandoFiltros = false;
+    }
+
+    function atualizarFiltros() {
+      document.querySelector(".filtros-container").style.display = "grid";
+      document.querySelector(".cards").style.display = "grid";
+      atualizarFiltrosDinamicamente();
+    }
+
+    function selecionarFiltro(id, valor) {
+      const el = document.getElementById(id);
+      if (!el) return;
+
+      Array.from(el.options).forEach((o) => {
+        o.selected = o.value === valor;
+      });
+
+      atualizarFiltrosDinamicamente();
+    }
+
+    function limparFiltros() {
+      filtrosIds.forEach((id) => {
+        const el = document.getElementById(id);
+        if (!el) return;
+        Array.from(el.options).forEach((o) => {
+          o.selected = false;
+        });
+      });
+
+      atualizarFiltrosDinamicamente();
+      gerarRelatorio();
     }
 
     function calcularTotais(dados) {
@@ -602,18 +554,22 @@
           maintainAspectRatio: false,
           indexAxis: horizontal ? "y" : "x",
           scales: {
-            y: horizontal ? { beginAtZero: true } : {
-              beginAtZero: true,
-              ticks: {
-                callback: (v) => formatarMoeda(v)
-              }
-            },
-            x: horizontal ? {
-              beginAtZero: true,
-              ticks: {
-                callback: (v) => formatarMoeda(v)
-              }
-            } : {}
+            y: horizontal
+              ? { beginAtZero: true }
+              : {
+                  beginAtZero: true,
+                  ticks: {
+                    callback: (v) => formatarMoeda(v)
+                  }
+                },
+            x: horizontal
+              ? {
+                  beginAtZero: true,
+                  ticks: {
+                    callback: (v) => formatarMoeda(v)
+                  }
+                }
+              : {}
           },
           plugins: {
             legend: { display: false },
@@ -776,29 +732,30 @@
 
     function gerarRelatorio() {
       if (!dadosGlobais.length) return;
-
-      const dadosFiltrados = filtrarDados();
-      calcularTotais(dadosFiltrados);
-      gerarGraficos(dadosFiltrados);
+      dadosFiltradosAtuais = filtrarDados();
+      atualizarFiltrosDinamicamente();
+      dadosFiltradosAtuais = filtrarDados();
+      calcularTotais(dadosFiltradosAtuais);
+      gerarGraficos(dadosFiltradosAtuais);
       btnLimpar.style.display = existeFiltroAtivo() ? "inline-block" : "none";
     }
 
     function sugerirPeriodoInicial() {
-     if (!dadosGlobais.length) return;
+      if (!dadosGlobais.length) return;
 
-    const datas = dadosGlobais
-    .map((d) => d.data)
-    .filter(Boolean)
-    .sort((a, b) => a - b);
+      const datas = dadosGlobais
+        .map((d) => d.data)
+        .filter(Boolean)
+        .sort((a, b) => a - b);
 
-        if (!datas.length) return;
+      if (!datas.length) return;
 
-        const ultimaData = datas[datas.length - 1];
-        const ultimoMesAno = `${ultimaData.getFullYear()}-${String(ultimaData.getMonth() + 1).padStart(2, "0")}`;
+      const ultimaData = datas[datas.length - 1];
+      const ultimoMesAno = `${ultimaData.getFullYear()}-${String(ultimaData.getMonth() + 1).padStart(2, "0")}`;
 
-  mesInicio.value = ultimoMesAno;
-  mesFim.value = ultimoMesAno;
-}
+      mesInicio.value = ultimoMesAno;
+      mesFim.value = ultimoMesAno;
+    }
 
     function carregarDados(file) {
       if (!file) return;
@@ -861,12 +818,11 @@
           mesInicio.disabled = false;
           mesFim.disabled = false;
 
-          atualizarFiltros();
           sugerirPeriodoInicial();
+          atualizarFiltros();
           gerarRelatorio();
 
           statusCarga.innerText = "Dados carregados com sucesso.";
-
           setTimeout(() => {
             statusCarga.innerText = "";
           }, 2000);
