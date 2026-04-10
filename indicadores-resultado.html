@@ -118,10 +118,6 @@
       white-space: nowrap;
     }
 
-    .filtro-item.selecionado {
-      background: #e8f5e9;
-    }
-
     .filtro-vazio {
       font-size: 12px;
       color: #777;
@@ -331,7 +327,7 @@
     </div>
 
     <div class="card grafico-card" id="cardGraficoMes">
-      <h3>Relatório Financeiro Mês</h3>
+      <h3>Faturamento x Mês</h3>
       <canvas id="graficoMes"></canvas>
     </div>
 
@@ -360,7 +356,6 @@
     let dadosGlobais = [];
     let graficos = [];
     let atualizandoFiltros = false;
-    const scrollFiltros = {};
 
     const mesInicio = document.getElementById("mesInicio");
     const mesFim = document.getElementById("mesFim");
@@ -437,22 +432,6 @@
       return busca ? busca.value.trim().toLowerCase() : "";
     }
 
-    function salvarScrollFiltros() {
-      filtrosIds.forEach((id) => {
-        const el = document.getElementById(id);
-        if (el) scrollFiltros[id] = el.scrollTop;
-      });
-    }
-
-    function restaurarScrollFiltros() {
-      filtrosIds.forEach((id) => {
-        const el = document.getElementById(id);
-        if (el && typeof scrollFiltros[id] === "number") {
-          el.scrollTop = scrollFiltros[id];
-        }
-      });
-    }
-
     function preencherFiltroLista(id, valores, selecionados = []) {
       const container = document.getElementById(id);
       if (!container) return;
@@ -462,25 +441,20 @@
         ? valores.filter(v => v.toLowerCase().includes(busca))
         : valores;
 
-      const ordenados = [
-        ...filtrados.filter(v => selecionados.includes(v)),
-        ...filtrados.filter(v => !selecionados.includes(v))
-      ];
-
       container.innerHTML = "";
 
-      if (!ordenados.length) {
+      if (!filtrados.length) {
         container.innerHTML = `<div class="filtro-vazio">Nenhum item</div>`;
         return;
       }
 
       const fragment = document.createDocumentFragment();
 
-      ordenados.forEach((valor, index) => {
-        const itemId = `${id}_${index}_${valor.replace(/\s+/g, "_").replace(/[^\w-]/g, "")}`;
+      filtrados.forEach((valor, index) => {
+        const itemId = `${id}_${index}_${valor.replace(/\s+/g, "_")}`;
 
         const label = document.createElement("label");
-        label.className = "filtro-item" + (selecionados.includes(valor) ? " selecionado" : "");
+        label.className = "filtro-item";
         label.setAttribute("for", itemId);
 
         const checkbox = document.createElement("input");
@@ -532,7 +506,6 @@
     }
 
     function atualizarFiltrosDinamicamente() {
-      salvarScrollFiltros();
       atualizandoFiltros = true;
 
       filtrosIds.forEach((id) => {
@@ -546,16 +519,13 @@
               .map((d) => String(d[campo] ?? "").trim())
               .filter(Boolean)
           )
-        ].sort((a, b) => a.localeCompare(b, "pt-BR", { numeric: true, sensitivity: "base" }));
+        ].sort();
 
-        const listaFinal = [...new Set([...selecionados, ...valoresDisponiveis])]
-          .sort((a, b) => a.localeCompare(b, "pt-BR", { numeric: true, sensitivity: "base" }));
-
+        const listaFinal = [...new Set([...selecionados, ...valoresDisponiveis])].sort();
         preencherFiltroLista(id, listaFinal, selecionados);
       });
 
       atualizandoFiltros = false;
-      restaurarScrollFiltros();
     }
 
     function atualizarFiltros() {
@@ -564,21 +534,16 @@
       atualizarFiltrosDinamicamente();
     }
 
-    function marcarFiltroPorGrafico(id, valor) {
-      const selecionados = new Set(getMultiValues(id));
-      selecionados.add(valor);
-      aplicarSelecaoFiltro(id, [...selecionados]);
-    }
-
-    function aplicarSelecaoFiltro(id, valores) {
+    function selecionarFiltro(id, valor) {
       const container = document.getElementById(id);
       if (!container) return;
 
-      container.querySelectorAll('input[type="checkbox"]').forEach(check => {
-        check.checked = valores.includes(check.value);
+      const checks = container.querySelectorAll('input[type="checkbox"]');
+      checks.forEach(check => {
+        check.checked = check.value === valor;
       });
 
-      gerarRelatorio();
+      atualizarFiltrosDinamicamente();
     }
 
     function limparFiltros() {
@@ -592,30 +557,27 @@
       gerarRelatorio();
     }
 
-function calcularTotais(dados) {
-  const totais = {
-    cardFat: dados.reduce((s, d) => s + d.faturamento, 0),
-    cardFin: dados.reduce((s, d) => s + d.financiamento, 0),
-    cardImp: dados.reduce((s, d) => s + d.impostos, 0),
-    cardMan: dados.reduce((s, d) => s + d.manutencao, 0),
-    cardTx: dados.reduce((s, d) => s + d.tx, 0),
-    cardRes: dados.reduce((s, d) => s + d.resultado, 0),
-    cardMau: dados.reduce((s, d) => s + d.mau, 0)
-  };
+    function calcularTotais(dados) {
+      let fat = 0, man = 0, fin = 0, imp = 0, tx = 0, res = 0, mau = 0;
 
-  Object.entries(totais).forEach(([id, valor]) => {
-    const elemento = document.getElementById(id);
-    if (!elemento) return;
+      dados.forEach((d) => {
+        fat += d.faturamento;
+        man += d.manutencao;
+        fin += d.financiamento;
+        imp += d.impostos;
+        tx += d.tx;
+        res += d.resultado;
+        mau += d.mau;
+      });
 
-    const card = elemento.closest(".card");
-    elemento.innerText = formatarMoeda(valor);
-
-    if (card) {
-      card.style.display = valor === 0 ? "none" : "";
+      document.getElementById("cardFat").innerText = formatarMoeda(fat);
+      document.getElementById("cardMan").innerText = formatarMoeda(man);
+      document.getElementById("cardRes").innerText = formatarMoeda(res);
+      document.getElementById("cardFin").innerText = formatarMoeda(fin);
+      document.getElementById("cardImp").innerText = formatarMoeda(imp);
+      document.getElementById("cardTx").innerText = formatarMoeda(tx);
+      document.getElementById("cardMau").innerText = formatarMoeda(mau);
     }
-  });
-}
-
 
     function exibirOuOcultarGrafico(cardId, dadosObj) {
       const card = document.getElementById(cardId);
@@ -670,11 +632,73 @@ function calcularTotais(dados) {
       destruirGraficos();
       esconderTodosGraficos();
 
-          const patrimonioSelecionado = getMultiValues("filtroPatrimonio");
+      const patrimonioSelecionado = getMultiValues("filtroPatrimonio");
       const serieSelecionada = getMultiValues("filtroSerie");
+      const ocultarGraficoEquip = patrimonioSelecionado.length === 1 || serieSelecionada.length === 1;
+
+      const fatEquip = {}, fatCliente = {}, manCliente = {}, deficitCliente = {};
+
+      dados.forEach((d) => {
+        if (d.equipamento) {
+          fatEquip[d.equipamento] = (fatEquip[d.equipamento] || 0) + d.faturamento;
+        }
+
+        if (d.cliente) {
+          fatCliente[d.cliente] = (fatCliente[d.cliente] || 0) + d.faturamento;
+          manCliente[d.cliente] = (manCliente[d.cliente] || 0) + d.manutencao;
+          if (d.resultado < 0) {
+            deficitCliente[d.cliente] = (deficitCliente[d.cliente] || 0) + d.resultado;
+          }
+        }
+      });
+
+      const filtrarPositivos = (obj) =>
+        Object.fromEntries(Object.entries(obj).filter(([, v]) => v > 0));
+
+      const fatEquipFiltrado = filtrarPositivos(fatEquip);
+      const fatClienteFiltrado = filtrarPositivos(fatCliente);
+      const manClienteFiltrado = filtrarPositivos(manCliente);
+      const deficitClienteFiltrado = Object.fromEntries(
+        Object.entries(deficitCliente).filter(([, v]) => v < 0)
+      );
+
+      if (!ocultarGraficoEquip && exibirOuOcultarGrafico("cardGraficoEquipamento", fatEquipFiltrado)) {
+        const labels = Object.keys(fatEquipFiltrado);
+        criarGraficoBarra("graficoEquipamento", labels, Object.values(fatEquipFiltrado), "#1e88e5", (idx) => {
+          selecionarFiltro("filtroEquipamento", labels[idx]);
+          gerarRelatorio();
+        });
+      }
+
+      if (exibirOuOcultarGrafico("cardGraficoCliente", fatClienteFiltrado)) {
+        const labels = Object.keys(fatClienteFiltrado);
+        criarGraficoBarra("graficoCliente", labels, Object.values(fatClienteFiltrado), "#2e7d32", (idx) => {
+          selecionarFiltro("filtroCliente", labels[idx]);
+          gerarRelatorio();
+        });
+      }
+
+      if (exibirOuOcultarGrafico("cardGraficoManutencao", manClienteFiltrado)) {
+        const labels = Object.keys(manClienteFiltrado);
+        criarGraficoBarra("graficoManutencao", labels, Object.values(manClienteFiltrado), "#fb8c00", (idx) => {
+          selecionarFiltro("filtroCliente", labels[idx]);
+          gerarRelatorio();
+        });
+      }
+
+      if (exibirOuOcultarGrafico("cardGraficoDeficit", deficitClienteFiltrado)) {
+        const labels = Object.keys(deficitClienteFiltrado);
+        const valoresOriginais = Object.values(deficitClienteFiltrado);
+        const valoresAbsolutos = valoresOriginais.map((v) => Math.abs(v));
+
+        criarGraficoBarra("graficoDeficit", labels, valoresAbsolutos, "#e53935", (idx) => {
+          selecionarFiltro("filtroCliente", labels[idx]);
+          gerarRelatorio();
+        }, true, valoresOriginais);
+      }
+
       const mesInicioVal = mesInicio.value;
       const mesFimVal = mesFim.value;
-
       const mostrarGraficoMes =
         (patrimonioSelecionado.length === 1 || serieSelecionada.length === 1) &&
         mesInicioVal &&
@@ -683,7 +707,6 @@ function calcularTotais(dados) {
       if (mostrarGraficoMes) {
         const dtIni = new Date(mesInicioVal + "-01T00:00:00");
         const dtFim = new Date(mesFimVal + "-01T00:00:00");
-
         const mesesNoPeriodo =
           (dtFim.getFullYear() - dtIni.getFullYear()) * 12 +
           (dtFim.getMonth() - dtIni.getMonth()) + 1;
@@ -692,59 +715,16 @@ function calcularTotais(dados) {
           const faturamentoMes = {};
 
           dados.forEach((d) => {
-            const chaveMes = `${d.data.getFullYear()}-${String(d.data.getMonth() + 1).padStart(2, "0")}`;
-            faturamentoMes[chaveMes] = (faturamentoMes[chaveMes] || 0) + d.faturamento;
+            const key = `${d.data.getFullYear()}-${String(d.data.getMonth() + 1).padStart(2, "0")}`;
+            faturamentoMes[key] = (faturamentoMes[key] || 0) + d.faturamento;
           });
 
-          const labelsMes = Object.keys(faturamentoMes).sort();
-          const valoresMes = labelsMes.map((mes) => faturamentoMes[mes]);
+          const fatMesFiltrado = filtrarPositivos(faturamentoMes);
 
-          if (labelsMes.length > 0) {
-            document.getElementById("cardGraficoMes").style.display = "block";
-
-            const graficoMes = new Chart(document.getElementById("graficoMes"), {
-              type: "bar",
-              data: {
-                labels: labelsMes,
-                datasets: [{
-                  label: "Faturamento",
-                  data: valoresMes,
-                  backgroundColor: "#8e24aa"
-                }]
-              },
-              options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                scales: {
-                  y: {
-                    beginAtZero: true,
-                    ticks: {
-                      callback: (v) => formatarMoeda(v)
-                    }
-                  }
-                },
-                plugins: {
-                  legend: {
-                    display: true
-                  },
-                  tooltip: {
-                    callbacks: {
-                      label: (ctx) => `${ctx.dataset.label}: ${formatarMoeda(ctx.raw)}`
-                    }
-                  }
-                }
-              }
-            });
-
-            graficos.push(graficoMes);
-          } else {
-            document.getElementById("cardGraficoMes").style.display = "none";
+          if (exibirOuOcultarGrafico("cardGraficoMes", fatMesFiltrado)) {
+            criarGraficoBarra("graficoMes", Object.keys(fatMesFiltrado), Object.values(fatMesFiltrado), "#8e24aa");
           }
         }
-      }
-    
-      else {
-        document.getElementById("cardGraficoMes").style.display = "none";
       }
     }
 
