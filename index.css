@@ -193,3 +193,291 @@ h1 {
     text-align: center;
   }
 }
+
+/* DAQUI PRA BAIXO ESTILIZAÇÃO DA PÁGINA DE INDICADORES FINANCEIROS */
+ {
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: Arial, sans-serif;
+      margin: 20px;
+      background: #f5f7f9;
+      color: #222;
+    }
+
+    h2 {
+      margin-bottom: 16px;
+    }
+
+    #conteudo {
+      background: #fff;
+      border-radius: 12px;
+      padding: 16px;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+      display: block;
+    }
+
+    .topo-controles {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 10px;
+      align-items: end;
+      margin-bottom: 14px;
+    }
+
+    .filtros-container {
+      display: none;
+      grid-template-columns: 0.8fr 0.9fr 0.8fr 1.2fr 1.3fr 0.8fr 0.9fr 0.7fr;
+      gap: 12px;
+      margin-bottom: 10px;
+      align-items: start;
+    }
+
+    .filtro-box {
+      display: flex;
+      flex-direction: column;
+      height: 220px;
+      border: 1px solid #e0e0e0;
+      border-radius: 8px;
+      padding: 8px;
+      background: #fff;
+      min-width: 0;
+      overflow: hidden;
+    }
+
+    .filtro-box label.titulo-filtro {
+      font-size: 13px;
+      font-weight: 600;
+      margin-bottom: 6px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .filtro-busca {
+      width: 100%;
+      padding: 6px 8px;
+      border: 1px solid #cfcfcf;
+      border-radius: 6px;
+      font-size: 12px;
+      margin-bottom: 6px;
+      flex-shrink: 0;
+    }
+
+    .filtro-lista {
+      flex: 1;
+      overflow-y: auto;
+      overflow-x: hidden;
+      border: 1px solid #d8d8d8;
+      border-radius: 6px;
+      padding: 4px;
+      background: #fff;
+    }
+
+    .filtro-item {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 6px;
+      border-radius: 4px;
+      font-size: 12px;
+      cursor: pointer;
+      min-width: 0;
+    }
+
+    .filtro-item:hover {
+      background: #f1f8f2;
+    }
+
+    .filtro-item input {
+      margin: 0;
+      flex-shrink: 0;
+      accent-color: #2e7d32;
+    }
+
+    .filtro-item span {
+      display: block;
+      min-width: 0;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .filtro-item.selecionado {
+      background: #e8f5e9;
+    }
+
+    .filtro-vazio {
+      font-size: 12px;
+      color: #777;
+      padding: 6px;
+    }
+
+    .btn-google {
+      display: inline-block;
+      padding: 10px 20px;
+      border: 2px solid #34a853;
+      border-radius: 24px;
+      background-color: white;
+      color: #34a853;
+      font-weight: 600;
+      font-size: 0.9em;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.15);
+      text-align: center;
+    }
+
+    .btn-google:hover {
+      background-color: #34a853;
+      color: white;
+    }
+
+    .btn-google:active {
+      transform: scale(0.98);
+    }
+
+    label.btn-google {
+      display: inline-block;
+      cursor: pointer;
+    }
+
+    .cards {
+      display: none;
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      gap: 10px;
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      background: #f5f7f9;
+      padding-bottom: 8px;
+      margin-bottom: 14px;
+    }
+
+    .card {
+      background: #ffffff;
+      border-radius: 10px;
+      padding: 12px;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+      border-left: 6px solid #2e7d32;
+      margin-bottom: 12px;
+    }
+
+    .card h3,
+    .card h4 {
+      margin: 0 0 8px 0;
+    }
+
+    .card h4 {
+      font-size: 13px;
+      color: #555;
+    }
+
+    .card .total {
+      font-size: 18px;
+      font-weight: bold;
+      color: #2e7d32;
+      margin-top: 4px;
+    }
+
+    canvas {
+      max-height: 280px;
+    }
+
+    #acoes-filtros {
+      text-align: right;
+      margin: 10px 0 16px;
+    }
+
+    #statusCarga {
+      font-size: 14px;
+      font-weight: 600;
+      color: #2e7d32;
+    }
+
+    .grafico-card {
+      display: none;
+    }
+
+    @media (max-width: 1200px) {
+      .filtros-container {
+        grid-template-columns: repeat(4, minmax(160px, 1fr));
+      }
+    }
+
+    @media (max-width: 768px) {
+      body {
+        margin: 12px;
+      }
+
+      .cards {
+        position: static;
+      }
+
+      .filtros-container {
+        grid-template-columns: repeat(2, minmax(140px, 1fr));
+      }
+    }
+
+    @media (max-width: 520px) {
+      .filtros-container {
+        grid-template-columns: 1fr;
+      }
+    }
+.logo-topo {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 18px;
+}
+
+.logo-topo img {
+  width: 220px;
+  height: 70px;
+  object-fit: cover;
+  object-position: center;
+  border-radius: 10px;
+  display: block;
+}
+
+.campo-periodo {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.campo-periodo label {
+  font-size: 13px;
+  font-weight: 700;
+  color: #2e7d32;
+}
+
+.campo-periodo input[type="month"] {
+  width: 100%;
+  height: 42px;
+  padding: 8px 12px;
+  border: 1px solid #cfd8dc;
+  border-radius: 10px;
+  background: linear-gradient(180deg, #ffffff 0%, #f7faf8 100%);
+  color: #1f2937;
+  font-size: 14px;
+  font-weight: 600;
+  outline: none;
+  transition: all 0.2s ease;
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.04);
+}
+
+.campo-periodo input[type="month"]:hover {
+  border-color: #81c784;
+}
+
+.campo-periodo input[type="month"]:focus {
+  border-color: #34a853;
+  box-shadow: 0 0 0 3px rgba(52, 168, 83, 0.15);
+}
+
+.campo-periodo input[type="month"]:disabled {
+  background: #f1f5f3;
+  color: #8a8a8a;
+  cursor: not-allowed;
+}
