@@ -500,7 +500,7 @@ function gerarGraficos(dados){
 
     // Cliente
     if(exibirOuOcultarGrafico("graficoCliente", fatClienteFiltrado)) {
-        graficos.push(new Chart(document.getElementById("graficoCliente"),{
+        graficos.push(new Chart(document.getElementById("graficoManutencao"),{
             type:'bar',
             data:{labels:Object.keys(fatClienteFiltrado),datasets:[{data:Object.values(fatClienteFiltrado),backgroundColor:'green'}]},
             options:{scales:{y:{beginAtZero:true}},plugins:{legend:{display:false}},onClick:(evt, e)=>{
@@ -511,7 +511,7 @@ function gerarGraficos(dados){
 
     // Manutenção
     if(exibirOuOcultarGrafico("graficoManutencao", manClienteFiltrado)) {
-        graficos.push(new Chart(document.getElementById("graficoCliente"),{
+        graficos.push(new Chart(document.getElementById("graficoManutencao"),{
             type:'bar',
             data:{labels:Object.keys(manClienteFiltrado),datasets:[{data:Object.values(manClienteFiltrado),backgroundColor:'orange'}]},
             options:{scales:{y:{beginAtZero:true}},plugins:{legend:{display:false}},onClick:(evt, e)=>{
@@ -522,7 +522,7 @@ function gerarGraficos(dados){
 
     // Déficit
     if(exibirOuOcultarGrafico("graficoDeficit", deficitClienteFiltrado)) {
-        graficos.push(new Chart(graficoDeficit,{
+        graficos.push(new Chart(document.getElementById("graficoDeficit"),{
             type:'bar',
             data:{labels:Object.keys(deficitClienteFiltrado),datasets:[{data:Object.values(deficitClienteFiltrado).map(v=>Math.abs(v)),backgroundColor:'red'}]},
             options:{
