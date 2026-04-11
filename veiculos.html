@@ -5,6 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>KPI Veiculos - Tractorbel Rental</title>
     <link rel="stylesheet" href="index.css">
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
 </head>
 <body>
     <nav class="navbar">
@@ -32,18 +35,82 @@
                     Grafico gerado a partir da planilha <strong>Placas.xlsx</strong>, aba
                     <strong>DimPlacas</strong>, com leitura das colunas A e H no Google Drive.
                 </p>
+
                 <figure class="veiculos-chart">
-                    <img src="png/grafico-veiculos.png" alt="Grafico de veiculos">
-                    <figcaption>Imagem atual publicada pelo processo de geracao do projeto.</figcaption>
+                    <canvas id="graficoVeiculos"></canvas>
+                    <figcaption>Gráfico dinâmico carregado da planilha.</figcaption>
                 </figure>
+
             </section>
         </main>
     </div>
 
-    <script>
-    function toggleMenu() {
-        document.getElementById("menu").classList.toggle("active");
+<script>
+
+function toggleMenu() {
+    document.getElementById("menu").classList.toggle("active");
+}
+
+// ID da sua planilha
+const fileId = "1XopZiZbSuJ7tLB5JkrnEk83UiYKSsNbt";
+
+// link download
+const url = `https://drive.google.com/uc?export=download&id=${fileId}`;
+
+fetch(url)
+.then(res => res.arrayBuffer())
+.then(data => {
+
+    const workbook = XLSX.read(data, { type: "array" });
+
+    const sheet = workbook.Sheets["DimPlacas"];
+
+    const rows = XLSX.utils.sheet_to_json(sheet, { header: 1 });
+
+    const placas = [];
+    const valores = [];
+
+    for (let i = 1; i < rows.length; i++) {
+
+        const placa = rows[i][0]; // coluna A
+        const valor = rows[i][7]; // coluna H
+
+        if (placa && valor) {
+            placas.push(placa);
+            valores.push(Number(valor));
+        }
     }
-    </script>
+
+    new Chart(document.getElementById("graficoVeiculos"), {
+        type: "bar",
+        data: {
+            labels: placas,
+            datasets: [{
+                label: "Mensalidade",
+                data: valores
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins:{
+                legend:{display:false},
+                title:{
+                    display:true,
+                    text:"Valor x Placas"
+                }
+            },
+            scales:{
+                y:{
+                    beginAtZero:true
+                }
+            }
+        }
+    });
+
+})
+.catch(err => console.error("Erro ao carregar planilha:", err));
+
+</script>
+
 </body>
 </html>
