@@ -41,10 +41,9 @@ canvas{
 </div>
 
 <script>
-const sheetID = "1XopZiZbSuJ7tLB5JkrnEk83UiYKSsNbt";
-const aba = "1859894269";
 
-const url = `https://docs.google.com/spreadsheets/d/${sheetID}/gviz/tq?tqx=out:json&gid=${aba}`;
+// LINK DA SUA PLANILHA (já configurado)
+const url = "https://docs.google.com/spreadsheets/d/1XopZiZbSuJ7tLB5JkrnEk83UiYKSsNbt/gviz/tq?tqx=out:json&gid=1859894269";
 
 fetch(url)
 .then(res => res.text())
@@ -57,8 +56,8 @@ fetch(url)
     const valores = [];
 
     rows.forEach(r => {
-        const placa = r.c[0]?.v;
-        const valor = r.c[7]?.v;
+        const placa = r.c[0]?.v; // coluna A
+        const valor = r.c[7]?.v; // coluna H
 
         if(placa && valor){
             placas.push(placa);
@@ -88,11 +87,17 @@ function criarGrafico(labels,data){
                     display:true,
                     text:"Valor x Placas"
                 }
+            },
+            scales:{
+                y:{
+                    beginAtZero:true
+                }
             }
         }
     });
 
 }
+
 </script>
 
 </body>
