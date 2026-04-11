@@ -6,6 +6,7 @@
 <title>Valor x Placas</title>
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
 
 <style>
 body{
@@ -15,7 +16,7 @@ body{
 }
 
 .container{
-    max-width:1000px;
+    max-width:1100px;
     margin:auto;
     background:white;
     padding:20px;
@@ -42,45 +43,53 @@ canvas{
 
 <script>
 
-// LINK DA SUA PLANILHA (já configurado)
-const url = "https://docs.google.com/spreadsheets/d/1XopZiZbSuJ7tLB5JkrnEk83UiYKSsNbt/gviz/tq?tqx=out:json&gid=1859894269";
+// COLE AQUI O ID DO ARQUIVO XLSX
+const fileId = "COLE_O_ID_DO_XLSX_AQUI";
+
+// LINK DIRETO GOOGLE DRIVE DOWNLOAD
+const url = `https://drive.google.com/uc?export=download&id=${fileId}`;
 
 fetch(url)
-.then(res => res.text())
-.then(text => {
+.then(response => response.arrayBuffer())
+.then(data => {
 
-    const json = JSON.parse(text.substr(47).slice(0, -2));
-    const rows = json.table.rows;
+    const workbook = XLSX.read(data, { type: "array" });
+
+    // primeira aba
+    const sheetName = workbook.SheetNames[0];
+    const sheet = workbook.Sheets[sheetName];
+
+    const rows = XLSX.utils.sheet_to_json(sheet, { header: 1 });
 
     const placas = [];
     const valores = [];
 
-    rows.forEach(r => {
-        const placa = r.c[0]?.v; // coluna A
-        const valor = r.c[7]?.v; // coluna H
+    // começa na linha 2 (ignora cabeçalho)
+    for (let i = 1; i < rows.length; i++) {
 
-        if(placa && valor){
+        const placa = rows[i][0]; // coluna A
+        const valor = rows[i][7]; // coluna H
+
+        if (placa && valor) {
             placas.push(placa);
-            valores.push(valor);
+            valores.push(Number(valor));
         }
-    });
+    }
 
-    criarGrafico(placas,valores);
-});
+    console.log("Placas:", placas);
+    console.log("Valores:", valores);
 
-function criarGrafico(labels,data){
-
-    new Chart(document.getElementById("grafico"),{
-        type:"bar",
-        data:{
-            labels:labels,
-            datasets:[{
-                label:"Mensalidade",
-                data:data
+    new Chart(document.getElementById("grafico"), {
+        type: "bar",
+        data: {
+            labels: placas,
+            datasets: [{
+                label: "Mensalidade",
+                data: valores
             }]
         },
-        options:{
-            responsive:true,
+        options: {
+            responsive: true,
             plugins:{
                 legend:{display:false},
                 title:{
@@ -96,7 +105,10 @@ function criarGrafico(labels,data){
         }
     });
 
-}
+})
+.catch(error => {
+    console.error("Erro ao carregar XLSX:", error);
+});
 
 </script>
 
