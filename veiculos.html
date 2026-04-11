@@ -1,7 +1,49 @@
-GOOGLE_SERVICE_ACCOUNT_FILE=./service-account.json
-GOOGLE_DRIVE_FOLDER_ID=1fObPc028c35Qwluj1DFeU23BLp1UE9Fq
-EXCEL_FILE_NAME=Placas.xlsx
-EXCEL_SHEET_NAME=DimPlacas
-CHART_X_COLUMN=A
-CHART_Y_COLUMN=H
-OUTPUT_FILE=saida/grafico.png
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KPI Veiculos - Tractorbel Rental</title>
+    <link rel="stylesheet" href="index.css">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="menu-toggle" onclick="toggleMenu()">Menu</div>
+        <ul id="menu">
+            <li><a href="index.html">INICIO</a></li>
+            <li><a href="documentos.html">DOCUMENTACAO</a></li>
+            <li><a href="indicadores.html">KPI TEC.</a></li>
+            <li><a href="indicadores-resultado.html">KPI FINAN.</a></li>
+            <li><a href="veiculos.html">KPI VEICULOS</a></li>
+        </ul>
+    </nav>
+
+    <div class="container">
+        <header>
+            <div class="center">
+                <img src="png/logo.png" alt="Logo Tractorbel">
+            </div>
+            <h1>KPI Veiculos</h1>
+        </header>
+
+        <main class="veiculos-page">
+            <section class="veiculos-card">
+                <p class="veiculos-lead">
+                    Grafico gerado a partir da planilha <strong>Placas.xlsx</strong>, aba
+                    <strong>DimPlacas</strong>, com leitura das colunas A e H no Google Drive.
+                </p>
+                <figure class="veiculos-chart">
+                    <img src="png/grafico-veiculos.png" alt="Grafico de veiculos">
+                    <figcaption>Imagem atual publicada pelo processo de geracao do projeto.</figcaption>
+                </figure>
+            </section>
+        </main>
+    </div>
+
+    <script>
+    function toggleMenu() {
+        document.getElementById("menu").classList.toggle("active");
+    }
+    </script>
+</body>
+</html>

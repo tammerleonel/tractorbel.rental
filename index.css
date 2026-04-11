@@ -323,3 +323,46 @@ canvas{
 .cards .card .total {
     color: white;
 }
+
+.veiculos-page {
+    display: flex;
+    justify-content: center;
+    padding-bottom: 40px;
+}
+
+.veiculos-card {
+    width: min(1100px, 100%);
+    background: white;
+    border-radius: 18px;
+    padding: 24px;
+    box-shadow: 0 10px 35px rgba(0, 0, 0, 0.08);
+}
+
+.veiculos-lead {
+    margin: 0 0 20px 0;
+    font-size: 16px;
+    line-height: 1.6;
+    text-align: center;
+}
+
+.veiculos-chart {
+    margin: 0;
+    text-align: center;
+}
+
+.veiculos-chart img {
+    width: 100%;
+    max-width: 1000px;
+    height: auto;
+    display: block;
+    margin: 0 auto;
+    border-radius: 14px;
+    border: 1px solid #d1d5db;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+}
+
+.veiculos-chart figcaption {
+    margin-top: 12px;
+    font-size: 14px;
+    color: #4b5563;
+}
