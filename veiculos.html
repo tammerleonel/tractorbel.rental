@@ -81,7 +81,9 @@ fetch(url)
         }
     }
 
-    new Chart(document.getElementById("graficoVeiculos"), {
+    const ctx = document.getElementById("graficoVeiculos").getContext("2d");
+
+new Chart(ctx, {    
         type: "bar",
         data: {
             labels: placas,
