@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Valor x Placas</title>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<style>
+body{
+    font-family: Arial, sans-serif;
+    background:#f5f5f5;
+    padding:20px;
+}
+
+.container{
+    max-width:1000px;
+    margin:auto;
+    background:white;
+    padding:20px;
+    border-radius:10px;
+    box-shadow:0 2px 10px rgba(0,0,0,0.1);
+}
+
+h2{
+    text-align:center;
+}
+
+canvas{
+    margin-top:20px;
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+<h2>Valor x Placas</h2>
+<canvas id="grafico"></canvas>
+</div>
+
+<script>
+const sheetID = "1XopZiZbSuJ7tLB5JkrnEk83UiYKSsNbt";
+const aba = "1859894269";
+
+const url = `https://docs.google.com/spreadsheets/d/${sheetID}/gviz/tq?tqx=out:json&gid=${aba}`;
+
+fetch(url)
+.then(res => res.text())
+.then(text => {
+
+    const json = JSON.parse(text.substr(47).slice(0, -2));
+    const rows = json.table.rows;
+
+    const placas = [];
+    const valores = [];
+
+    rows.forEach(r => {
+        const placa = r.c[0]?.v;
+        const valor = r.c[7]?.v;
+
+        if(placa && valor){
+            placas.push(placa);
+            valores.push(valor);
+        }
+    });
+
+    criarGrafico(placas,valores);
+});
+
+function criarGrafico(labels,data){
+
+    new Chart(document.getElementById("grafico"),{
+        type:"bar",
+        data:{
+            labels:labels,
+            datasets:[{
+                label:"Mensalidade",
+                data:data
+            }]
+        },
+        options:{
+            responsive:true,
+            plugins:{
+                legend:{display:false},
+                title:{
+                    display:true,
+                    text:"Valor x Placas"
+                }
+            }
+        }
+    });
+
+}
+</script>
+
+</body>
+</html>
